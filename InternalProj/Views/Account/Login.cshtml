@@ -1,0 +1,176 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    body {
+        background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .login-box {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .login-title {
+        font-size: 26px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 25px;
+        color: #2c3e50;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .form-control {
+        height: 42px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        background-color: #1d3557;
+        border: none;
+        width: 100%;
+        padding: 10px;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #457b9d;
+        }
+
+    .forgot-link {
+        font-size: 13px;
+        display: block;
+        margin-top: 10px;
+        text-align: right;
+        color: #1d3557;
+    }
+
+    .alert {
+        font-size: 14px;
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 36px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .position-relative {
+        position: relative;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-box">
+        <h3 class="login-title">Login</h3>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div id="success" class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        <form asp-action="Login" method="post" onsubmit="return validateForm()">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" id="username" class="form-control" required />
+                <span id="usernameError" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3 position-relative">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control" required />
+                <i class="fa-solid fa-eye password-toggle" onclick="togglePassword()"></i>
+                <span id="passwordError" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+
+            <a asp-action="ForgotPassword" class="forgot-link">Forgot Password?</a>
+        </form>
+    </div>
+</div>
+
+<script>
+    setTimeout(() => {
+        const msg = document.getElementById("success");
+        if (msg) {
+            msg.classList.remove("show");
+            msg.classList.add("fade");
+            setTimeout(() => msg.remove(), 500);
+        }
+    }, 3000);
+
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.querySelector('.password-toggle');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    function validateForm() {
+        let valid = true;
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const usernameError = document.getElementById('usernameError');
+        const passwordError = document.getElementById('passwordError');
+
+        usernameError.textContent = '';
+        passwordError.textContent = '';
+
+        if (username.value.trim().length < 3) {
+            usernameError.textContent = 'Username must be at least 3 characters';
+            valid = false;
+        }
+
+        if (password.value.trim().length < 6) {
+            passwordError.textContent = 'Password must be at least 6 characters';
+            valid = false;
+        }
+
+        return valid;
+    }
+</script>

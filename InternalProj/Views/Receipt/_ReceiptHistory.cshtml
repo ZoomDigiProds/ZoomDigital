@@ -1,0 +1,40 @@
+﻿@model InternalProj.ViewModel.ReceiptHistoryViewModel
+
+<h3 class="mb-4">Payment History</h3>
+<h5>Customer: <strong>@Model.CustomerName</strong> | Studio: <strong>@Model.StudioName</strong></h5>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Receipt No</th>
+            <th>Date</th>
+            <th>Mode</th>
+            <th>WorkOrder No</th>
+            <th>Net Amount</th>
+            <th>Paid</th>
+            <th>Remaining Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var receipt in Model.Receipts)
+        {
+            <tr>
+                <td>@receipt.ReceiptId</td>
+                <td>@receipt.ReceiptDate.ToString("dd-MM-yyyy")</td>
+                <td>@(receipt.ModeOfPayment?.ModeType ?? "N/A")</td>
+                <td>@(receipt.WorkOrder?.WorkOrderNo ?? "N/A")</td>
+                <td>₹ @receipt.NetAmount.ToString("0.00")</td>
+                <td>₹ @receipt.CurrentAmount.ToString("0.00")</td>
+                <td>₹ @(receipt.WorkOrder?.Balance?.ToString("0.00") ?? "0.00")</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4"><strong>Total</strong></td>
+            <td><strong>₹ @Model.Receipts.Sum(r => r.NetAmount).ToString("0.00")</strong></td>
+            <td><strong>₹ @Model.Receipts.Sum(r => r.CurrentAmount).ToString("0.00")</strong></td>
+            <td></td>
+        </tr>
+    </tfoot>
+</table>

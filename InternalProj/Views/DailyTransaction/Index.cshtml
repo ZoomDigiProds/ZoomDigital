@@ -1,0 +1,22 @@
+﻿@model List<InternalProj.ViewModel.DailyTransactionSummaryViewModel>
+@{
+    ViewData["Title"] = "Daily Transactions";
+}
+
+
+
+<div id="dailyTransactionContainer">
+    @await Html.PartialAsync("_DailyTransactionTablePartial", Model)
+</div>
+
+@section Scripts {
+    <script>
+        function refreshDailyTransactions() {
+            $.get('@Url.Action("RefreshTable", "DailyTransaction")', function (html) {
+                $('#dailyTransactionContainer').html(html);
+            });
+        }
+
+        setInterval(refreshDailyTransactions, 5000);
+    </script>
+}

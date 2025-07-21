@@ -1,0 +1,32 @@
+﻿@model IEnumerable<InternalProj.ViewModel.WorkOrderSummaryViewModel>
+
+<table class="table table-bordered table-striped table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>Work Order No</th>
+            <th>Studio Name</th>
+            <th class="text-end">Advance</th>
+            <th class="text-end">SubTotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.WorkOrderNo</td>
+                    <td>@item.StudioName</td>
+                    <td class="text-end">@item.Advance.ToString("N2")</td>
+                    <td class="text-end">@item.SubTotal.ToString("N2")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4" class="text-center">No work orders found.</td>
+            </tr>
+        }
+    </tbody>
+</table>

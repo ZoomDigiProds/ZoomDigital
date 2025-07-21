@@ -1,0 +1,29 @@
+﻿body {
+    
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight:bold;
+}
+
+.form-control {
+    font-size: 13px;
+}
+
+.form-select {
+    font-size: 13px;
+}
+
+.form-select,
+.table th,
+.table td,
+.qty-input,
+.rate-input,
+.gtotal-input {
+    font-size: 13px !important;
+}
+input {
+    font-size: 14px !important;
+    width: 100px;
+}

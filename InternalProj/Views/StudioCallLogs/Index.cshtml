@@ -1,0 +1,122 @@
+﻿@model IEnumerable<InternalProj.Models.StudioCallLog>
+
+@{
+
+    ViewData["Title"] = "Call Logs";
+
+    var today = DateTime.Today;
+
+}
+
+<h1>Call Logs</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-secondary">Create New</a>
+</p>
+
+<table class="table table-bordered" id="callLogTable">
+    <thead class="thead-dark">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().StudioName)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Phone)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Region)</th>
+            <th>@Html.DisplayNameFor(model => model.First().CallTime)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Description)</th>
+            <th>Updated Call Day</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+
+        {
+
+            bool isToday = item.UpdatedCallTime?.Date == today;
+
+            <tr data-callid="@item.CallId" class="@(isToday ? "table-success" : "")">
+                <td class="studio-cell" style="cursor: pointer;">
+
+                    @Html.DisplayFor(modelItem => item.StudioName)
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.Region)</td>
+                <td>@item.CallTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@item.UpdatedCallTime?.ToLocalTime().ToString("yyyy-MM-dd")</td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="pagination-container mt-4">
+    <nav>
+        <ul class="pagination justify-content-center">
+
+            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+
+            {
+                <li class="page-item @(i == (int)ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                </li>
+
+            }
+        </ul>
+    </nav>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+
+            $('#callLogTable').on('dblclick', '.studio-cell', function () {
+
+                const callId = $(this).closest('tr').data('callid');
+
+                if (callId) {
+
+                    window.location.href = '/StudioCallLogs/Edit/' + callId;
+
+                }
+
+            });
+
+        });
+    </script>
+
+}
+
+<style>
+
+    .table-success {
+
+        background-color: #d4edda !important;
+
+    }
+
+    .pagination-container {
+
+        text-align: center;
+
+    }
+
+    .pagination .page-item.active .page-link {
+
+        background-color: #6c757d;
+
+        border-color: #6c757d;
+
+        color: white;
+
+    }
+
+    .pagination .page-link {
+
+        color: #6c757d;
+
+    }
+</style>
+

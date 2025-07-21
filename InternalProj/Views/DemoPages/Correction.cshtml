@@ -1,0 +1,11 @@
+﻿@{
+    var current = "correction";
+    var depts = (Context.Session.GetString("UserDepartments") ?? "")
+                .ToLower()
+                .Split(',', StringSplitOptions.TrimEntries);
+}
+
+@if (depts.Contains(current))
+{
+    <p>You are from @current department.</p>
+}

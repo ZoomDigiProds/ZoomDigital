@@ -1,0 +1,24 @@
+﻿body {
+}
+
+
+/* invoice.css */
+
+.workorder-option {
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+    .workorder-option:hover {
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+    .workorder-option.active {
+        background-color: #d0ebff;
+        border: 2px solid #339af0;
+        font-weight: 600;
+    }
+
+/*.form-control{
+    width: 400px;
+}*/

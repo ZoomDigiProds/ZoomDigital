@@ -1,0 +1,279 @@
+﻿@model InternalProj.ViewModel.InvoiceViewModel
+
+
+@if (ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice")
+{
+    <link rel="stylesheet" href="~/css/invoice.css" />
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/invoice.css" asp-append-version="true" />
+}
+
+
+ 
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<h1 class="text-center">Invoice</h1>
+ 
+<form asp-controller="Invoice" asp-action="CreateInvoice" method="post">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Bill No</label>
+                    <input class="form-control" value="@Model.Invoice.InvoiceId" readonly />
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label required-label">Bill Date</label>
+                    <input class="form-control" value="@Model.Invoice.BillDate.ToString("dd-MM-yyyy")" readonly />
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label required-label">Customer</label>
+                    <select id="customerDropdown" asp-for="Invoice.CustomerId" class="form-select">
+                        <option value="">-- Select Customer --</option>
+                        @foreach (var c in Model.Customers)
+                        {
+                            <option value="@c.Id">@c.StudioName</option>
+                        }
+                    </select>
+                </div> 
+                <div class="col-md-6 mb-4">
+                    <label class="form-label required-label">Studio</label>
+                    <input id="studioField" class="form-control" readonly />
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label required-label">Customer Name</label>
+                    <input id="customerNameField" class="form-control" readonly />
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label required-label">Address</label>
+                    <input id="addressField" class="form-control" readonly />
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label>Mobile</label>
+                    <input id="mobileField" class="form-control" readonly />
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label required-label">Order No</label>
+                    <input id="orderNoField" class="form-control" />
+                    <input type="hidden" asp-for="Invoice.WorkOrderId" />
+                </div>
+            </div>
+        </div>
+
+
+        <input type="hidden" asp-for="Invoice.InvoiceId" />
+        <input type="hidden" asp-for="Invoice.WorkOrderId" />
+        <input type="hidden" asp-for="Invoice.BillDate" />
+
+        <div class="col-md-4">
+            <div class="border p-2 mb-3">
+                <strong>Outstanding:</strong> ₹<span id="outstandingAmount">0.00</span>
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox" id="multiWorkOrderCheck" class="form-check-input" />
+                <label class="form-check-label" for="multiWorkOrderCheck">Multi WorkOrder</label>
+            </div>
+            <div id="workOrderListBox" class="border p-2" style="height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <hr />
+
+    <h5>Work Details</h5>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Sl.No</th>
+                <th>Particulars</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>GTotal</th>
+            </tr>
+        </thead>
+        <tbody id="workDetailsBody"></tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label>Advance</label>
+                <input id="advanceField" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label>Balance</label>
+                <input id="balanceField" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label>SubTotal</label>
+                <input id="subTotalField" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label>Discount</label>
+                <input asp-for="Invoice.Discount" class="form-control" value="@Model.Invoice.Discount" />
+                
+            </div>
+            <div class="mb-3">
+                <label class="required-label">Mode of Payment</label>
+                <select asp-for="Invoice.ModeId" class="form-select">
+                    
+                    <option value="">-- Select Payment Mode --</option>
+                    @foreach (var mode in Model.PaymentModes)
+                    {
+                        <option value="@mode.ModeId">@mode.ModeType</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label>Tax</label>
+                <input asp-for="Invoice.Tax" class="form-control" value="@Model.Invoice.Tax" />                
+            </div>
+            <div class="mb-3">
+                <label>Cess</label>
+                <input asp-for="Invoice.Cess" class="form-control" value="@Model.Invoice.Cess" />
+            </div>
+            <div class="mb-3">
+                <label>Commission</label>
+                <input asp-for="Invoice.Commission" class="form-control" value="@Model.Invoice.Commission" />
+            </div>
+            <div class="mb-3">
+                <label>Net Amount</label>
+                <input type="text" asp-for="Invoice.NetAmount" id="netAmountField" class="form-control" readonly value="@Model.Invoice.NetAmount.GetValueOrDefault().ToString("N2")" />
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function calculateNetAmount() {
+            const balance = parseFloat($('#balanceField').val()) || 0;
+            const discountPct = parseFloat($('input[name="Invoice.Discount"]').val()) || 0;
+            const taxPct = parseFloat($('input[name="Invoice.Tax"]').val()) || 0;
+            const cessPct = parseFloat($('input[name="Invoice.Cess"]').val()) || 0;
+            const commissionPct = parseFloat($('input[name="Invoice.Commission"]').val()) || 0;
+
+            const discountAmt = (discountPct / 100) * balance;
+            const taxAmt = (taxPct / 100) * balance;
+            const cessAmt = (cessPct / 100) * balance;
+            const commissionAmt = (commissionPct / 100) * balance;
+
+            const netAmount = (balance - discountAmt) + taxAmt + cessAmt + commissionAmt;
+
+            $('input[name="Invoice.NetAmount"]').val(netAmount.toFixed(2));
+        }
+
+        // Trigger net amount calculation on relevant input change
+        $(document).on('input', 'input[name="Invoice.Discount"], input[name="Invoice.Tax"], input[name="Invoice.Cess"], input[name="Invoice.Commission"]', calculateNetAmount);
+
+        $(document).on('click', '.workorder-option', function () {
+            $('.workorder-option').removeClass('active');
+            $(this).addClass('active');
+
+            const orderId = $(this).data('id');
+            const orderNo = $(this).data('no');
+
+            $('#orderNoField').val(orderNo); 
+            $('input[name="Invoice.WorkOrderId"]').val(orderId);
+
+            fetch(`/Invoice/GetWorkOrderDetails?workOrderId=${orderId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const body = $('#workDetailsBody').empty();
+                    let subTotal = 0;
+                    data.forEach((d, i) => {
+                        body.append(`<tr>
+                            <td>${i + 1}</td>
+                            <td>${d.particulars}</td>
+                            <td>${d.qty}</td>
+                            <td>${d.rate.toFixed(2)}</td>
+                            <td>${d.gTotal.toFixed(2)}</td>
+                        </tr>`);
+                        subTotal += d.gTotal;
+                    });
+                    $('#subTotalField').val(subTotal.toFixed(2));
+                });
+
+            fetch(`/Invoice/GetFinancials?workOrderId=${orderId}`)
+                .then(res => res.json())
+                .then(data => {
+                    $('#advanceField').val(data.advance.toFixed(2));
+                    $('#balanceField').val(data.balance.toFixed(2));
+                    calculateNetAmount();
+                });
+        });
+
+        let latestWorkOrders = [];
+        let allWorkOrders = [];
+
+        $('#customerDropdown').on('change', function () {
+            const customerId = $(this).val();
+            if (!customerId) return;
+
+            fetch(`/Invoice/GetCustomerDetails?customerId=${customerId}`)
+                .then(res => res.json())
+                .then(data => {
+                    $('#studioField').val(data.studio);
+                    $('#customerNameField').val(data.customerName);
+                    $('#addressField').val(data.address);
+                    $('#mobileField').val(data.mobile);
+                    $('#outstandingAmount').text(data.outstanding.toFixed(2));
+
+                    latestWorkOrders = data.latestWorkOrders;
+                    allWorkOrders = data.allWorkOrders;
+
+                    renderWorkOrders(); // initially show only latest
+                });
+        });
+
+        $('#multiWorkOrderCheck').on('change', function () {
+            renderWorkOrders(); // re-render based on checkbox
+        });
+
+        function renderWorkOrders() {
+            const container = $('#workOrderListBox').empty();
+            const toRender = $('#multiWorkOrderCheck').is(':checked') ? allWorkOrders : latestWorkOrders;
+
+            if (toRender.length === 0) {
+                container.append(`<div class='text-muted'>No WorkOrders available</div>`);
+                return;
+            }
+
+            toRender.forEach(wo => {
+                container.append(`<div class='workorder-option btn btn-light w-100 mb-1' data-id='${wo.workOrderId}' data-no='${wo.workOrderNo}'>${wo.workOrderNo}</div>`);
+            });
+        }
+
+
+        $('form').on('submit', function () {
+            const workOrderId = $('input[name="Invoice.WorkOrderId"]').val();
+            if (!workOrderId || parseInt(workOrderId) <= 0) {
+                alert('Please select a Work Order.');
+                return false;
+            }
+        });
+
+    </script>
+}

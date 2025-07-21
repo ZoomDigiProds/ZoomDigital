@@ -1,0 +1,335 @@
+﻿@model InternalProj.ViewModel.CustomerRegViewModel
+
+@{
+    ViewData["Title"] = "Customer Registration";
+}
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Customer.css" asp-append-version="true" />
+}
+
+@* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" /> *@
+
+<div class="container d-flex justify-content-center align-items-center  page-bottom-spacing">
+    <div class="card shadow p-4 w-100">
+        <h3 class="text-center">Customer Registration</h3>
+
+        @* @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success text-center" id="success">
+                @TempData["SuccessMessage"]
+            </div>
+        } *@
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger text-center" id="error">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <script>
+            // setTimeout(() => {
+            //     $('#success').fadeOut('slow');
+            // }, 5000);
+
+            setTimeout(() => {
+                $('#error').fadeOut('slow');
+            }, 5000);
+        </script>
+
+        <div class="custom-form-wrapper">
+            <form asp-action="Create" method="post" class="custom-form">
+                <div class="row">
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">First Name</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Last Name</label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Studio</label>
+                        <input asp-for="Studio" class="form-control" />
+                        <span asp-validation-for="Studio" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label">Discount</label>
+                        <input type="number" name="Discount" class="form-control" required min="0" max="100" step="0.01" />
+                        <span asp-validation-for="Discount" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Address 1</label>
+                        <input asp-for="Address1" class="form-control" />
+                        <span asp-validation-for="Address1" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label">Address 2</label>
+                        <input asp-for="Address2" class="form-control" />
+                        <span asp-validation-for="Address2" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">State</label>
+                        <select id="StateId" name="StateId" class="form-select" required>
+                            <option value="">-- Select State --</option>
+                            @foreach (var state in Model.StateMasterRegs)
+                            {
+                                <option value="@state.Id">@state.Name</option>
+                            }
+                        </select>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#addStateModal">Add State</a>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Region</label>
+                        <select id="RegionId" name="RegionId" class="form-select" required>
+                            <option value="">-- Select Region --</option>
+                            @foreach (var region in Model.RegionMasterRegs)
+                            {
+                                <option value="@region.Id">@region.Name</option>
+                            }
+                        </select>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#addRegionModal">Add Region</a>
+
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Phone 1</label>
+                        <input type="text" name="Phone1" class="form-control" required pattern="^\+?[0-9]{7,15}$" />
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label">Phone 2</label>
+                        <input type="text" name="Phone2" class="form-control" pattern="^\+?[0-9]{7,15}$" />
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label">WhatsApp</label>
+                        <input type="text" name="Whatsapp" class="form-control" pattern="^\+?[0-9]{7,15}$" />
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Email</label>
+                        <input type="email" name="Email" class="form-control" />
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Phone Type</label>
+                        <select name="PhoneTypeId" class="form-select" required>
+                            <option value="">-- Select Phone Type --</option>
+                            @foreach (var type in Model.PhoneTypes)
+                            {
+                                <option value="@type.PhoneTypeId">@type.PhoneTypeName</option>
+                            }
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Customer Category</label>
+                        <select name="CategoryId" class="form-select" required>
+                            <option value="">-- Select Category --</option>
+                            @foreach (var category in Model.CustomerCategories)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Branch</label>
+                        <select name="BranchId" class="form-select" required>
+                            <option value="">-- Select Branch --</option>
+                            @foreach (var branch in Model.Branches)
+                            {
+                                <option value="@branch.BranchId">@branch.BranchName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Rate Type</label>
+                        <select name="RateTypeId" class="form-select" required>
+                            <option value="">-- Select RateType --</option>
+                            @foreach (var type in Model.RateTypes)
+                            {
+                                <option value="@type.RateTypeId">@type.RateTypeName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label class="form-label required-label">Staff</label>
+                        <select name="StaffId" class="form-select" required>
+                            <option value="">-- Select Staff --</option>
+                            @foreach (var staff in Model.StaffRegs)
+                            {
+                                <option value="@staff.StaffId">
+                                    @staff.FirstName @staff.LastName
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <br />
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addStateModal" tabindex="-1" aria-labelledby="addStateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addStateForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New State</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">State Name</label>
+                        <input type="text" id="newStateName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Active</label>
+                        <select id="newStateActive" class="form-select">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add State</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="addRegionModal" tabindex="-1" aria-labelledby="addRegionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addRegionForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Region</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Region Name</label>
+                        <input type="text" id="newRegionName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">State</label>
+                        <select id="newRegionStateId" class="form-select" required>
+                            <option value="">-- Select State --</option>
+                            @foreach (var state in Model.StateMasterRegs)
+                            {
+                                <option value="@state.Id">@state.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Active</label>
+                        <select id="newRegionActive" class="form-select">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Region</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        document.getElementById('StateId').addEventListener('change', function () {
+            var stateId = this.value;
+
+            fetch('/CustomerReg/GetRegionsByState?stateId=' + stateId)
+                .then(response => response.json())
+                .then(data => {
+                    var regionSelect = document.getElementById('RegionId');
+                    regionSelect.innerHTML = '<option value="">-- Select Region --</option>';
+                    data.forEach(region => {
+                        var option = document.createElement('option');
+                        option.value = region.id;
+                        option.text = region.name;
+                        regionSelect.appendChild(option);
+                    });
+                });
+        });
+
+
+        document.getElementById('addStateForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('newStateName').value;
+            const active = document.getElementById('newStateActive').value;
+
+            fetch('/State/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Name: name, Active: active })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const stateSelect = document.getElementById('StateId');
+                        const option = document.createElement('option');
+                        option.value = data.id;
+                        option.text = data.name;
+                        option.selected = true;
+                        stateSelect.appendChild(option);
+                        bootstrap.Modal.getInstance(document.getElementById('addStateModal')).hide();
+                    }
+                });
+        });
+
+        document.getElementById('addRegionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('newRegionName').value;
+            const stateId = document.getElementById('newRegionStateId').value;
+            const active = document.getElementById('newRegionActive').value;
+
+            fetch('/Region/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Name: name, StateId: stateId, Active: active })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const regionSelect = document.getElementById('RegionId');
+                        const option = document.createElement('option');
+                        option.value = data.id;
+                        option.text = data.name;
+                        option.selected = true;
+                        regionSelect.appendChild(option);
+                        bootstrap.Modal.getInstance(document.getElementById('addRegionModal')).hide();
+                    }
+                });
+        });
+    </script>
+}

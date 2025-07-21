@@ -1,0 +1,456 @@
+﻿@model InternalProj.Models.StaffRegViewModel
+
+@{
+    ViewData["Title"] = "Staff Registration";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Flatpickr CSS -->
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+
+<style>
+    body {
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .form-control {
+        font-size: 13px;
+    }
+
+    .form-select {
+        font-size: 13px;
+    }
+
+    .form-select,
+    .table th,
+    .table td,
+    .qty-input,
+    .rate-input,
+    .gtotal-input {
+        font-size: 13px !important;
+    }
+
+    input {
+        font-size: 14px !important;
+    }
+
+    /* Container for form, centered with some spacing */
+    .form-container {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 25px 30px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+    }
+
+    /* Title center */
+    .form-title {
+        text-align: center;
+        font-weight: 600;
+        font-size: 20px;
+        margin-bottom: 25px;
+    }
+
+    /* Four column grid for fields */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px 20px;
+    }
+
+    /* Make multi-checkbox dropdown fit nicely */
+    .multi-checkbox-dropdown {
+        position: relative;
+        user-select: none;
+        width: 100%;
+    }
+
+        .multi-checkbox-dropdown .selected-items {
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            height: 34px;
+            line-height: 34px;
+            padding: 0 10px;
+            cursor: pointer;
+            background-color: #fff;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 13px;
+        }
+
+        .multi-checkbox-dropdown .checkbox-list {
+            position: absolute;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            z-index: 10;
+            display: none;
+            font-size: 13px;
+        }
+
+        .multi-checkbox-dropdown.open .checkbox-list {
+            display: block;
+        }
+
+        .multi-checkbox-dropdown label {
+            display: block;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+            .multi-checkbox-dropdown label:hover {
+                background-color: #f8f9fa;
+            }
+
+    .validation-error {
+        font-size: 12px;
+        margin-top: 3px;
+        color: red;
+        display: none;
+    }
+
+    /* Button center */
+    .form-buttons {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .btn-submit {
+        background-color: #3c096c;
+        color: white;
+        font-weight: 600;
+        padding: 8px 28px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="container">
+    <div class="form-container">
+        <div class="form-title">Staff Registration</div>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success text-center" id="success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger text-center" id="error">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <script>
+            setTimeout(() => {
+                $('#success').fadeOut('slow');
+            }, 5000);
+        </script>
+
+        <script>
+            setTimeout(() => {
+                $('#error').fadeOut('slow');
+            }, 5000);
+        </script>
+
+        <form id="staffForm" asp-action="Create" method="post" novalidate>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">First Name *</label>
+                    <input type="text" name="FirstName" class="form-control" required />
+                    <div class="validation-error">First Name is required</div>
+                </div>
+                <div>
+                    <label class="form-label">Last Name *</label>
+                    <input type="text" name="LastName" class="form-control" required />
+                    <div class="validation-error">Last Name is required</div>
+                </div>
+                <div>
+                    <label class="form-label">Address 1 *</label>
+                    <input type="text" name="Address1" class="form-control" required />
+                    <div class="validation-error">Address 1 is required</div>
+                </div>
+                <div>
+                    <label class="form-label">Address 2</label>
+                    <input type="text" name="Address2" class="form-control" />
+                </div>
+
+                <div>
+                    <label class="form-label">DOB *</label>
+                    <input type="text" id="DOB" name="DOB" class="form-control" placeholder="yyyy-MM-dd" required pattern="^\d{4}-\d{2}-\d{2}$" />
+                    <div class="validation-error">Valid DOB (yyyy-MM-dd) required and must be 18+ years</div>
+                </div>
+                <div>
+                    <label class="form-label">DOJ *</label>
+                    <input type="text" id="DOJ" name="DOJ" class="form-control" placeholder="yyyy-MM-dd" required pattern="^\d{4}-\d{2}-\d{2}$" />
+                    <div class="validation-error">Valid DOJ (yyyy-MM-dd) is required</div>
+                </div>
+                <div>
+                    <label class="form-label">Phone 1 *</label>
+                    <input type="text" name="Phone1" class="form-control" required pattern="^\+?[0-9]{10}$" />
+                    <div class="validation-error">Valid Phone 1 is required</div>
+                </div>
+                <div>
+                    <label class="form-label">Phone 2</label>
+                    <input type="text" name="Phone2" class="form-control" pattern="^\+?[0-9]{10}$" />
+                    <div class="validation-error">Invalid Phone 2 format</div>
+                </div>
+
+                <div>
+                    <label class="form-label">WhatsApp</label>
+                    <input type="text" name="Whatsapp" class="form-control" pattern="^\+?[0-9]{10}$" />
+                    <div class="validation-error">Invalid WhatsApp format</div>
+                </div>
+                @* <div> *@
+                @*     <label class="form-label">Email *</label> *@
+                @*     <input type="email" name="Email" class="form-control" required /> *@
+                @*     <div class="validation-error">Valid Email is required</div> *@
+                @* </div> *@
+                <div>
+                    <label class="form-label">Email *</label>
+                    <input type="email" name="Email" class="form-control"
+                    @* pattern="^[a-zA-Z0-9._%+-]+[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" *@
+                           title="Enter a valid email address"
+                           required />
+                    <div class="validation-error">Valid Email is required</div>
+                </div>
+
+                <div>
+                    <label class="form-label">Phone Type *</label>
+                    <select name="PhoneTypeId" class="form-select" required>
+                        <option value="">-- Select Phone Type --</option>
+                        @foreach (var type in Model.PhoneTypes)
+                        {
+                            <option value="@type.PhoneTypeId">@type.PhoneTypeName</option>
+                        }
+                    </select>
+                    <div class="validation-error">Phone Type is required</div>
+                </div>
+                <div>
+                    <label class="form-label">Branch *</label>
+                    <select id="BranchId" name="BranchId" class="form-select" required>
+                        <option value="">-- Select Branch --</option>
+                        @foreach (var branch in Model.Branches)
+                        {
+                            <option value="@branch.BranchId">@branch.BranchName</option>
+                        }
+                    </select>
+                    <div class="validation-error">Branch is required</div>
+                </div>
+
+                <div>
+                    <label class="form-label">Designation *</label>
+                    <div class="multi-checkbox-dropdown" id="designationDropdown">
+                        <div class="selected-items" tabindex="0">Select Designation(s)</div>
+                        <div class="checkbox-list">
+                            @foreach (var designation in Model.Designations)
+                            {
+                                var isChecked = Model.SelectedDesignationIds != null && Model.SelectedDesignationIds.Contains(designation.DesignationId);
+                                <label>
+                                    <input type="checkbox" name="SelectedDesignationIds" value="@designation.DesignationId" @(isChecked ? "checked" : "") />
+                                    @designation.Name
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="validation-error">At least one Designation is required</div>
+                </div>
+
+                <input type="hidden" name="Active" value="Y" />
+
+                <div>
+                    <label class="form-label">Department *</label>
+                    <div class="multi-checkbox-dropdown" id="departmentDropdown">
+                        <div class="selected-items" tabindex="0">Select Department(s)</div>
+                        <div class="checkbox-list">
+                            @foreach (var department in Model.Departments)
+                            {
+                                var isChecked = Model.SelectedDeptIds != null && Model.SelectedDeptIds.Contains(department.DeptId);
+                                <label>
+                                    <input type="checkbox" name="SelectedDeptIds" value="@department.DeptId" @(isChecked ? "checked" : "") />
+                                    @department.Name
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div class="validation-error">At least one Department is required</div>
+                </div>
+
+                @* <div> *@
+                @*     <label class="form-label">Category *</label> *@
+                @*     <select id="CategoryId" name="CategoryId" class="form-select" required> *@
+                @*         <option value="">-- Select Category --</option> *@
+                @*         @foreach (var category in Model.CustomerCategories) *@
+                @*         { *@
+                @*             <option value="@category.CategoryId">@category.CategoryName</option> *@
+                @*         } *@
+                @*     </select> *@
+                @*     <div class="validation-error">Category is required</div> *@
+                @* </div> *@
+
+                @* <div> *@
+                @*     <label class="form-label">Remarks</label> *@
+                @*     <textarea name="Remarks" class="form-control" rows="2"></textarea> *@
+                @* </div> *@
+
+                @* <div> *@
+                @*     <label class="form-label">Username *</label> *@
+                @*     <input type="text" name="UserName" class="form-control" required /> *@
+                @*     <div class="validation-error">Username is required</div> *@
+                @* </div> *@
+                <div>
+                    <label class="form-label">Username *</label>
+                    <input type="text" name="UserName" class="form-control"
+                           pattern="^[a-zA-Z0-9_]{4,20}$"
+                           title="Username must be 4-20 characters and contain only letters, numbers, and underscores"
+                           required />
+                    <div class="validation-error">Valid Username is required (no #,$ etc)</div>
+                </div>
+
+
+                <div>
+                    <label class="form-label">Password *</label>
+                    <input type="password" name="Password" class="form-control" required />
+                    <div class="validation-error">Password is required</div>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn-submit">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        function yearsAgo(years) {
+            const d = new Date();
+            d.setFullYear(d.getFullYear() - years);
+            return d;
+        }
+
+        flatpickr("#DOB", {
+            dateFormat: "Y-m-d",
+            maxDate: yearsAgo(18),
+            allowInput: true,
+            altInput: true,
+            altFormat: "F j, Y",
+            defaultDate: null,
+            disableMobile: "true"
+        });
+
+        flatpickr("#DOJ", {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            allowInput: true,
+            altInput: true,
+            altFormat: "F j, Y",
+            defaultDate: null,
+            disableMobile: "true"
+        });
+
+        function setupMultiCheckboxDropdown(dropdownId, errorSelector) {
+            const dropdown = document.getElementById(dropdownId);
+            const selectedItemsDiv = dropdown.querySelector('.selected-items');
+            const checkboxList = dropdown.querySelector('.checkbox-list');
+            const checkboxes = checkboxList.querySelectorAll('input[type=checkbox]');
+            const errorDiv = dropdown.parentElement.querySelector(errorSelector);
+
+            selectedItemsDiv.addEventListener('click', () => {
+                dropdown.classList.toggle('open');
+            });
+            selectedItemsDiv.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    dropdown.classList.toggle('open');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('open');
+                }
+            });
+
+            function updateSelectedText() {
+                const selected = [];
+                checkboxes.forEach(cb => {
+                    if (cb.checked) selected.push(cb.parentElement.textContent.trim());
+                });
+                selectedItemsDiv.textContent = selected.length ? selected.join(', ') : (dropdownId === "departmentDropdown" ? "Select Department(s)" : "Select Designation(s)");
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    updateSelectedText();
+                });
+            });
+
+            updateSelectedText();
+        }
+
+        setupMultiCheckboxDropdown('departmentDropdown', '.validation-error');
+        setupMultiCheckboxDropdown('designationDropdown', '.validation-error');
+
+        document.getElementById('staffForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            let form = this;
+            let isValid = true;
+            form.querySelectorAll('.validation-error').forEach(div => div.style.display = 'none');
+
+            form.querySelectorAll('input:not([name="SelectedDeptIds"]):not([name="SelectedDesignationIds"]), select, textarea').forEach(input => {
+                if (input.hasAttribute('required') && !input.value.trim()) {
+                    showError(input, true);
+                    isValid = false;
+                } else if (input.hasAttribute('pattern') && input.value.trim()) {
+                    let pattern = new RegExp(input.getAttribute('pattern'));
+                    if (!pattern.test(input.value.trim())) {
+                        showError(input, true);
+                        isValid = false;
+                    } else {
+                        showError(input, false);
+                    }
+                } else {
+                    showError(input, false);
+                }
+            });
+
+            const deptCheckboxes = document.querySelectorAll('input[name="SelectedDeptIds"]:checked');
+            if (deptCheckboxes.length === 0) {
+                document.querySelector('#departmentDropdown').parentElement.querySelector('.validation-error').style.display = 'block';
+                isValid = false;
+            }
+
+            const desigCheckboxes = document.querySelectorAll('input[name="SelectedDesignationIds"]:checked');
+            if (desigCheckboxes.length === 0) {
+                document.querySelector('#designationDropdown').parentElement.querySelector('.validation-error').style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) form.submit();
+
+            function showError(input, show) {
+                let errorDiv = input.parentElement.querySelector('.validation-error');
+                if (errorDiv) errorDiv.style.display = show ? 'block' : 'none';
+            }
+        });
+    </script>
+}

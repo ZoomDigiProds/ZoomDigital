@@ -1,0 +1,207 @@
+﻿@{
+    var username = Context.Session.GetString("UserName");
+    // var isFirstLogin = Context.Session.GetString("IsFirstLogin") == "true";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var isLoginPage = controller == "Account" && action == "Login";
+    var isAccessDeniedPage = controller == "Account" && action == "AccessDenied";
+    var isResetPasswordPage = controller == "Account" && action == "ResetPassword";
+    var isFirstLogin = Context.Session.GetString("IsFirstLogin") == "true";
+    var isAllowedPage = !isLoginPage && !isAccessDeniedPage && !string.IsNullOrEmpty(username) && (!isFirstLogin || isResetPasswordPage);
+    var departments = (Context.Session.GetString("UserDepartments") ?? "").ToLower()
+                      .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+    var isAdmin = departments.Contains("admin");
+
+    var menuItems = new[]
+    {
+        new { Name = "Front Office", Controller = "DemoPages", Action = "FrontOffice", AllowedDepts = new[] { "front office" } },
+        new { Name = "Accounts", Controller = "DemoPages", Action = "Accounts", AllowedDepts = new[] { "accounts" } },
+        new { Name = "Correction", Controller = "DemoPages", Action = "Correction", AllowedDepts = new[] { "correction" } },
+        new { Name = "Copying", Controller = "DemoPages", Action = "Copying", AllowedDepts = new[] { "copying" } },
+        new { Name = "Cropping", Controller = "DemoPages", Action = "Cropping", AllowedDepts = new[] { "cropping" } },
+        new { Name = "PDF", Controller = "DemoPages", Action = "PDF", AllowedDepts = new[] { "pdf" } },
+        new { Name = "Printing", Controller = "DemoPages", Action = "Printing", AllowedDepts = new[] { "printing" } },
+        new { Name = "Cover Page", Controller = "DemoPages", Action = "CoverPage", AllowedDepts = new[] { "cover page" } },
+        new { Name = "Making", Controller = "DemoPages", Action = "Making", AllowedDepts = new[] { "making" } },
+        new { Name = "Embossing", Controller = "DemoPages", Action = "Embossing", AllowedDepts = new[] { "embossing" } },
+        new { Name = "Deliver", Controller = "DemoPages", Action = "Deliver", AllowedDepts = new[] { "deliver" } }
+    };
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @RenderSection("Styles", required: false)
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Zoom Digital Press Image Processing</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/LayoutPage.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Invoice.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/InternalProj.styles.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        .nav-link.active {
+            font-weight: bold;
+            color: #ffc107 !important;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+            .profile-section img {
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+            }
+
+        .custom-navbar {
+            background-color: #4a0357;
+        }
+    </style>
+</head>
+<body>
+    @if (isAllowedPage)
+    {
+        <header>
+            <div class="bg-white border-bottom px-3 d-flex align-items-center">
+                <a asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/Logo.png" alt="Logo" style="height: 70px;" />
+                </a>
+            </div>
+
+            <nav class="navbar navbar-expand-sm navbar-dark custom-navbar sticky-top">
+                <div class="container-fluid d-flex justify-content-between align-items-center">
+                    <div style="width: 100px;"></div>
+
+                    <div class="collapse navbar-collapse justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link @(controller == "Dashboard" && action == "Index" ? "active" : "")"
+                                   asp-area="" asp-controller="Dashboard" asp-action="Index">Home</a>
+                            </li>
+                            @if (isAdmin)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "Receipt" && action == "Index" ? "active" : "")"
+                                    asp-area="" asp-controller="Receipt" asp-action="Create">Receipt</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "CustomerReg" ? "active" : "")"
+                                    asp-area="" asp-controller="CustomerReg" asp-action="Create">Customer Registration</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "StaffReg" ? "active" : "")"
+                                    asp-area="" asp-controller="StaffReg" asp-action="Index">Staff Registration</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "WorkOrder" ? "active" : "")"
+                                    asp-area="" asp-controller="WorkOrder" asp-action="Create">Work Order</a>
+                                </li>                            
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "ViewWork" ? "active" : "")"
+                                    asp-area="" asp-controller="ViewWork" asp-action="Index">Reports</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "StudioCallLogs" ? "active" : "")"
+                                    asp-area="" asp-controller="StudioCallLogs" asp-action="Index">CallLogs</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "DailyTransaction" ? "active" : "")"
+                                    asp-area="" asp-controller="DailyTransaction" asp-action="Index">DailyTransaction</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "Invoice" ? "active" : "")"
+                                   asp-area="" asp-controller="Invoice" asp-action="CreateInvoice">Invoice</a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link @(controller == "Home" && action == "Privacy" ? "active" : "")"
+                                   asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            </li>
+
+                            @if (menuItems.Any(item => isAdmin || item.AllowedDepts.Any(dep => departments.Contains(dep))))
+                            @* @if (menuItems.Any(item => item.AllowedDepts.Any(dep => departments.Contains(dep)))) *@
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle @(menuItems.Any(item => controller == item.Controller && action == item.Action) ? "active" : "")"
+                                       href="#" id="departmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Departments
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="departmentsDropdown">
+                                        @foreach (var item in menuItems)
+                                        {
+                                            if (isAdmin || item.AllowedDepts.Any(dep => departments.Contains(dep)))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item @(controller == item.Controller && action == item.Action ? "active" : "")"
+                                                       asp-area="" asp-controller="@item.Controller" asp-action="@item.Action">@item.Name</a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
+                            }
+
+                            @if (!string.IsNullOrEmpty(username))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "Account" && action == "Logout" ? "active" : "")"
+                                       asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(controller == "Account" && action == "Login" ? "active" : "")"
+                                       asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="profile-section me-2">
+                        @if (!string.IsNullOrEmpty(username))
+                        {
+                            <span>@username</span>
+                            <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="Profile" />
+                        }
+                        else
+                        {
+                            <span>Guest</span>
+                        }
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    @if (isAllowedPage)
+    {
+        <footer class="footer text-muted">
+            <div class="container">
+                &copy; 2025 - Zoom Digital Press Image Processing - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</body>
+</html>

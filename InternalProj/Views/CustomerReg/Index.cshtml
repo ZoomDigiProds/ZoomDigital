@@ -1,0 +1,54 @@
+﻿@model InternalProj.ViewModel.CustomerRegViewModel
+@{
+    ViewData["Title"] = "Customer List";
+}
+
+<h2>Customer Registrations</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Studio Name</th>
+            <th>Discount</th>
+            <th>Category</th>
+            <th>Branch</th>
+            <th>Rate Type</th>
+            <th>Staff</th>
+            @* <th>Address</th> *@
+            <th>Contacts</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in Model.CustomerRegs)
+        {
+            <tr>
+                <td>@customer.FirstName @customer.LastName</td>
+                <td>@customer.StudioName</td>
+                <td>@customer.Discount?.ToString("0.##")</td>
+                <td>@customer.CustomerCategory?.CategoryName</td>
+                <td>@customer.Branch?.BranchName</td>
+                <td>@customer.RateTypeMaster?.RateTypeName</td>
+                <td>@customer.StaffReg?.FirstName @customer.StaffReg?.LastName</td>
+
+                <td>
+                    @if (customer.Contacts != null && customer.Contacts.Any())
+                    {
+                        <ul>
+                            @foreach (var contact in customer.Contacts)
+                            {
+                                <li>
+                                    @contact.PhoneType?.PhoneTypeName: @contact.Phone1
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <em>No Contacts</em>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

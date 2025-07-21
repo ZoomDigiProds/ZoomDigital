@@ -1,0 +1,897 @@
+﻿@model InternalProj.ViewModel.WorkOrderViewModel
+@{
+    ViewData["Title"] = "Create Work Order";
+}
+
+@{
+    var now = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/WorkOrder.css" asp-append-version="true" />
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container d-flex justify-content-center align-items-center  page-bottom-spacing">
+  <div class="card shadow p-4 w-100">
+    <h3 class="text-center">Work Order</h3>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success text-center">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger text-center">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        
+        <div class="custom-form-wrapper">
+            <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label asp-for="WorkOrder.WorkOrderNo" class="form-label required-label">Order No</label>
+                    <input asp-for="WorkOrder.WorkOrderNo" id="workOrderNo" class="form-control" required readonly/>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="WorkOrder.CustomerId" class="form-label required-label">Studio</label>
+                    <select asp-for="WorkOrder.CustomerId" id="studioDropdown" class="form-select select-customer" style="width: 100%" required>
+                        <option value="">-- Select Studio --</option>
+                        @foreach (var customer in Model.Customers)
+                        {
+                            <option value="@customer.Id">@customer.StudioName</option>
+                        }
+                    </select>
+                </div>
+                    @* <input type="hidden" asp-for="WorkOrder.StudioName" id="hiddenStudioName" /> *@
+
+                <div class="col-md-3">
+                    <label class="form-label">Name</label>
+                    <input asp-for="WorkOrder.Name" class="form-control" id="customerFullName" readonly />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Mobile</label>
+                    <input asp-for="WorkOrder.Mobile" class="form-control" id="mobileNumber" readonly />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label asp-for="WorkOrder.NoOfSheets" class="form-label required-label">No Of Sheets</label>
+                    <input asp-for="WorkOrder.NoOfSheets" type="number" class="form-control" min="1" max="100" required />
+                </div>
+
+                @* <div class="col-md-3">
+                    <label asp-for="WorkOrder.NoOfCopies" class="form-label">No of Copies</label>
+                    <input asp-for="WorkOrder.NoOfCopies" class="form-control" value="1" />
+                </div> *@
+
+                @* <div class="col-md-3">
+                    <label asp-for="WorkOrder.Wdate" class="form-label required-label">Order Date and Time</label>
+                    <input asp-for="WorkOrder.Wdate" type="datetime-local" class="form-control" value="@now" min="@now" />
+                    <span asp-validation-for="WorkOrder.Wdate" class="text-danger"></span>
+                </div> *@
+
+                <div class="col-md-3">
+                    <label asp-for="WorkOrder.Ddate" class="form-label required-label">Delivery Date and Time</label>
+                    <input asp-for="WorkOrder.Ddate" type="datetime-local" class="form-control" min="@now" />
+                    <span asp-validation-for="WorkOrder.Ddate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="WorkOrder.MachineId" class="form-label required-label">Machine</label>
+                    <select asp-for="WorkOrder.MachineId" class="form-select" asp-items="@(new SelectList(Model.Machines, "MachineId", "MachineName"))" required></select>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="WorkOrder.OrderViaId" class="form-label required-label">Order Via</label>
+                    <select asp-for="WorkOrder.OrderViaId" class="form-select" asp-items="@(new SelectList(Model.OrderVias, "OrderViaId", "OrderViaCategory"))" required></select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label asp-for="WorkOrder.WorkTypeId" class="form-label required-label">Work Type</label>
+                    <select id="workTypeDropdown" asp-for="WorkOrder.WorkTypeId" class="form-select" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))" required></select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="WorkOrder.DeliveryTypeId" class="form-label required-label">Delivery Type</label>
+                    <select asp-for="WorkOrder.DeliveryTypeId" class="form-select" asp-items="@(new SelectList(Model.DeliveryMasters, "DeliveryId", "DeliveryName"))" required></select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="WorkOrder.DeliveryModeId" class="form-label required-label">Delivery Mode</label>
+                    <select asp-for="WorkOrder.DeliveryModeId" class="form-select" asp-items="@(new SelectList(Model.DeliveryModes, "Id", "Name"))" required></select>
+                </div>
+            </div>
+
+            <input type="hidden" asp-for="WorkOrder.Active" value="Y" />
+            <input type="hidden" name="WorkDetailsList[0].Active" value="Y" />
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="WorkOrder.Description" class="form-label">Description</label>
+                    <input asp-for="WorkOrder.Description" class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="WorkOrder.Remarks" class="form-label">Remarks</label>
+                    <input asp-for="WorkOrder.Remarks" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="mb-3 col-md-4">
+                    <label class="form-label required-label">Staff</label>
+                    <select asp-for="WorkOrder.StaffId" class="form-select" required>
+                        @foreach (var staff in Model.StaffRegs)
+                        {
+                            <option value="@staff.StaffId">@staff.FirstName @staff.LastName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="WorkOrder.BranchId" class="form-label required-label">Branch</label>
+                    <select asp-for="WorkOrder.BranchId" class="form-select" asp-items="@(new SelectList(Model.Branches, "BranchId", "BranchName"))" required></select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="WorkOrder.AlbumSizeId" class="form-label required-label">Size</label>
+                    <select asp-for="WorkOrder.AlbumSizeId" class="form-select select-size" asp-items="@(new SelectList(Model.Albums, "SizeId", "Size"))" id="SizeDropdown" style="width: 100%" required>
+                        <option value="">--Select Size--</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr />
+
+            <table id="workOrderTable" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th class="form-label">Main Head</th>
+                        <th class="form-label">Subhead</th>
+                        <th class="form-label">Qty</th>
+                        <th class="form-label">Rate</th>
+                        <th class="form-label">GTotal</th>
+                    </tr>
+                </thead>
+                <tbody id="mainHeadBody">
+                    @foreach (var mainHead in Model.MainHeads)
+                    {
+                        <tr class="mainhead-row" data-mainhead-id="@mainHead.MainHeadId" data-mainhead-name="@mainHead.MainHeadName">
+                            <td>@mainHead.MainHeadName</td>
+                        </tr>
+                    }
+                </tbody>
+
+                @* <tfoot id="subtotalFooter"></tfoot> *@
+                    <tfoot id="subtotalFooter">
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Subtotal</td>
+                            <td>
+                                <input type="text" id="subtotalField" name="SubTotal" class="form-control" readonly />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Advance</td>
+                            <td>
+                                <input type="number" id="advanceField" name="Advance" class="form-control" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Balance</td>
+                            <td>
+                                <input type="text" id="balanceField" name="Balance" class="form-control" readonly />
+                            </td>
+                        </tr>
+                    </tfoot>
+
+            </table>
+
+            <span id="sheetsFormValidation" class="text-danger" style="display:none;">All sheets must be assigned before submitting.</span>
+
+            <div class="d-grid">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+<!-- SubHeads Modal -->
+<div class="modal fade" id="subHeadsModal" tabindex="-1" aria-labelledby="subHeadsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subHeadsModalLabel">Select SubHead</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Input -->
+                <input type="text" id="subHeadSearch" class="form-control mb-3" placeholder="Search SubHead...">
+
+                <ul id="subHeadsList" class="list-group">
+                    <!-- SubHeads will be populated here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ChildSubHeads Modal -->
+<div class="modal fade" id="childSubHeadsModal" tabindex="-1" aria-labelledby="childSubHeadsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="childSubHeadsModalLabel">Select Child SubHead</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="childSubHeadsList" class="list-group">
+                    <!-- ChildSubHeads will be populated here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quantity Modal -->
+<div class="modal fade" id="quantityModal" tabindex="-1" role="dialog" aria-labelledby="quantityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quantityModalLabel">Enter Quantity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+            <div class="modal-body">
+                <label for="sheetsInput">Quantity:</label>
+                <input type="number" id="sheetsInput" class="form-control" min="1" max="100" />
+                <span id="sheetsValidation" class="text-danger" style="display:none;"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="saveSheetsBtn" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let selectedMainHeadId = null;
+            let selectedMainHeadName = "";
+            let selectedSubHeadId = null;
+            let selectedSubHeadName = "";
+            let selectedChildSubHead = null;
+            let totalSheets = parseInt(document.querySelector('[name="WorkOrder.NoOfSheets"]').value);
+            let assignedSheets = 0;
+            let editingRow = null;
+            let index = 0;
+
+            const subHeadsModalEl = document.getElementById('subHeadsModal');
+            const childSubHeadsModalEl = document.getElementById('childSubHeadsModal');
+            const quantityModalEl = document.getElementById('quantityModal');
+
+            const subHeadsModal = new bootstrap.Modal(subHeadsModalEl);
+            const childSubHeadsModal = new bootstrap.Modal(childSubHeadsModalEl);
+            const quantityModal = new bootstrap.Modal(quantityModalEl);
+
+            
+            $(document).ready(function () {
+                $('.select-customer').select2({
+                    placeholder: "Search studio...",
+                    allowClear: true
+                });               
+            });
+
+            $(document).ready(function () {
+                $('.select-size').select2({
+                    placeholder: "Search size...",
+                    allowClear: true
+                });
+            });
+
+            $('.select-customer').on('change', function () {
+                var selectedStudio = $(this).val();
+                if (selectedStudio) {
+                    fetch(`http://localhost:5190/WorkOrder/GetCustomerDetailsById?id=${encodeURIComponent(selectedStudio)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            $('#customerFullName').val(data.fullName || '');
+                            $('#mobileNumber').val(data.mobile || '');
+                            //$('#hiddenStudioName').val(data.studioName || '');
+                        })
+                        .catch(error => {
+                            console.error('Error fetching customer details:', error);
+                            $('#customerFullName').val('');
+                            $('#mobileNumber').val('');
+                            //$('#hiddenStudioName').val('');
+                        });
+                } else {
+                    $('#customerFullName').val('');
+                    $('#mobileNumber').val('');
+                    //$('#hiddenStudioName').val('');
+                }
+            });
+
+
+            // Step 1: Double-click on MainHead row
+            document.getElementById('mainHeadBody').addEventListener('dblclick', function (e) {
+                const row = e.target.closest('.mainhead-row');
+                if (row) {
+                    console.log('Double-clicked row:', row);
+                    selectedMainHeadId = row.dataset.mainheadId;
+                    selectedMainHeadName = row.dataset.mainheadName;
+
+                    console.log("Selected Main Head Name:", selectedMainHeadName);
+
+                    fetch(`/WorkOrder/GetSubHeads?mainHeadId=${selectedMainHeadId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const subHeadList = document.getElementById('subHeadsList');
+                            subHeadList.innerHTML = '';
+
+                            if (data.length === 0) {
+                                alert("No SubHeads available for this MainHead.");
+                                return;
+                            }
+
+                            data.forEach(sub => {
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item list-group-item-action';
+                                li.textContent = sub.subHeadName;
+                                li.dataset.subheadId = sub.subHeadId;
+                                li.addEventListener('click', onSubHeadClick);
+                                subHeadList.appendChild(li);
+                            });
+
+                            subHeadsModal.show();
+                        })
+                        .catch(err => {
+                            console.error("Error fetching SubHeads:", err);
+                            showErrorToast("Failed to load SubHeads.");
+                        });
+                }
+            });
+
+            function showErrorToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function onSubHeadClick() {
+                selectedSubHeadId = this.dataset.subheadId;
+                selectedSubHeadName = this.textContent;
+
+                console.log(`Clicked SubHead: ${selectedSubHeadName} [ID: ${selectedSubHeadId}]`);
+                console.log(`Associated MainHead: ${window.selectedMainHeadName}`); 
+
+
+                const sizeDropdown = document.getElementById('SizeDropdown');
+                const sizeId = parseInt(sizeDropdown.value);
+
+                if (!sizeId || isNaN(sizeId)) {
+                    alert("Please select a valid Size before proceeding.");
+                    return;
+                }
+
+                fetch(`/WorkOrder/GetChildSubHeads?subHeadId=${selectedSubHeadId}&sizeId=${sizeId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const childList = document.getElementById('childSubHeadsList');
+                        childList.innerHTML = '';
+
+                        const noOfSheetsInput = document.getElementById("WorkOrder_NoOfSheets");
+                        const noOfSheets = parseInt(noOfSheetsInput?.value || 0);
+
+                        if (!noOfSheets || noOfSheets < 1) {
+                            alert("Please enter a valid 'No Of Sheets' before selecting details.");
+                            return;
+                        }
+
+                        const size = sizeDropdown.options[sizeDropdown.selectedIndex]?.text || '';
+
+                        if (data.length === 0) {
+                            // No child subheads – skip to quantity modal
+                            selectedChildSubHead = {
+                                name: selectedSubHeadName,
+                                rate: 0.00,
+                                size,
+                                sizeId,
+                                childSubHeadId: 0
+                            };
+
+                            if (subHeadsModal) subHeadsModal.hide();
+                            document.getElementById("sheetsInput").value = "";
+                            document.getElementById("sheetsValidation").style.display = "none";
+                            if (quantityModal) quantityModal.show();
+                            return;
+                        }
+
+                        // If child subheads exist
+                        data.forEach(child => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item list-group-item-action';
+                            li.textContent = child.childSubHeadName;
+                            li.dataset.childSubHeadId = child.childSubHeadId;
+                            li.dataset.rate = child.rate;
+                            li.dataset.size = child.size;
+                            li.addEventListener('click', onChildSubHeadClick);
+                            childList.appendChild(li);
+                        });
+
+                        // Hide subheads modal and show child subheads modal
+                        if (subHeadsModal) subHeadsModal.hide();
+                        if (childSubHeadsModal) childSubHeadsModal.show();
+                    })
+                    .catch(err => {
+                        console.error("Error fetching ChildSubHeads:", err);
+                        alert("Failed to load Child SubHeads.");
+                    });
+            }
+
+            function onChildSubHeadClick() {
+                const noOfSheetsInput = document.getElementById("WorkOrder_NoOfSheets");
+                const noOfSheets = parseInt(noOfSheetsInput?.value || 0);
+
+                if (!noOfSheets || noOfSheets < 1) {
+                    alert("Please enter a valid 'No Of Sheets' before selecting details.");
+                    return;
+                }
+
+                const rate = parseFloat(this.dataset.rate);
+                const sizeDropdown = document.getElementById('SizeDropdown');
+                const sizeId = parseInt(sizeDropdown.value);
+                const size = sizeDropdown.options[sizeDropdown.selectedIndex]?.text || '';
+                const name = this.textContent.trim();
+                const childSubHeadId = this.dataset.childSubHeadId;
+                               
+                // Validate rate and size
+                if (isNaN(rate) || rate < 0) {
+                    alert("Rate is missing or invalid.");
+                    return;
+                }
+
+                if (!sizeId || !size) {
+                    alert("Please select a size.");
+                    return;
+                }
+
+                // Set selected object
+                selectedChildSubHead = { name, rate, size, sizeId, childSubHeadId };
+               
+                if (typeof childSubHeadsModal !== 'undefined') childSubHeadsModal.hide();
+
+                document.getElementById("sheetsInput").value = "";
+                document.getElementById("sheetsValidation").style.display = "none";
+
+                if (typeof quantityModal !== 'undefined') quantityModal.show();
+            }
+
+        function fetchWorkOrderNo(workTypeId) {
+                    if (!workTypeId) {
+                        $('#workOrderNo').val('');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: `/WorkOrder/GetNextWorkOrderNo?workTypeId=${workTypeId}`,
+                        method: 'GET',
+                        success: function (data) {
+                            $('#workOrderNo').val(data.workOrderNo);
+                        },
+                        error: function () {
+                            alert('Failed to fetch Work Order No');
+                        }
+                    });
+                }
+
+                $(document).ready(function () {
+                    const selectedWorkTypeId = $('#workTypeDropdown').val();
+                    if (selectedWorkTypeId) {
+                        fetchWorkOrderNo(selectedWorkTypeId); 
+                    }
+
+                    $('#workTypeDropdown').on('change', function () {
+                        const workTypeId = $(this).val();
+                        fetchWorkOrderNo(workTypeId); 
+                    });
+                });
+
+            $(document).ready(function () {
+                $('#workOrderTable').on('input', '.form-control', function () {
+                    var row = $(this).closest('tr');
+
+                    var qty = row.find('input[name*="Qty"]').val();
+                    var rate = row.find('input[name*="Rate"]').val();
+
+                    var gTotal = (qty && rate) ? (parseInt(qty) * parseFloat(rate)) : 0;
+
+                    row.find('input[name*="GTotal"]').val(gTotal.toFixed(2));
+                    updateMainHeadSubtotals();
+                });
+            });
+         
+            function calculateAssignedSheets() {
+                let totalAssigned = 0;
+                document.querySelectorAll("#workOrderTable tbody tr").forEach(row => {
+                    const mainHeadId = parseInt(row.getAttribute('data-mainhead-id') || 0);
+                    if (mainHeadId === 1) {
+                        const qty = parseInt(row.querySelector('input[name$=".Qty"]')?.value || 0);
+                        if (!isNaN(qty)) {
+                            totalAssigned += qty;
+                        }
+                    }
+                });
+                return totalAssigned;
+            }
+
+            document.getElementById('saveSheetsBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const qtyInput = document.getElementById('sheetsInput');
+                const validationMessage = document.getElementById('sheetsValidation');
+                const qty = parseInt(qtyInput.value);
+
+                const totalSheets = parseInt(document.getElementById("WorkOrder_NoOfSheets").value || 0);
+                let currentlyAssigned = calculateAssignedSheets();
+
+                if (editingRow) {
+                    const originalQty = parseInt(editingRow.querySelector('input[name$=".Qty"]')?.value || 0);
+                    currentlyAssigned -= originalQty;
+                }
+
+                let adjustedAssignedSheets = currentlyAssigned;
+
+                const remainingSheets = totalSheets - adjustedAssignedSheets;                                            
+
+                if (parseInt(selectedMainHeadId) === 1) {
+                    if(remainingSheets <= 0){
+                        validationMessage.style.display = 'block';
+                        validationMessage.textContent = 'All sheets are already assigned. You cannot add more.';
+                        return;
+                    }
+                
+
+                    if (isNaN(qty) || qty < 1 || qty > remainingSheets) {
+                        validationMessage.style.display = 'block';
+                        validationMessage.textContent = `Enter valid quantity (1 to ${remainingSheets})`;
+                        return;
+                    }
+                }else {
+                    if (isNaN(qty) || qty < 1){
+                        validationMessage.style.display = 'block';
+                        validationMessage.textContent = 'Enter a valid quantity';
+                        return;
+                    }
+                }
+
+                validationMessage.style.display = 'none';
+                                
+                let finalText = "";
+                let rate = 0;
+
+                if (selectedChildSubHead && selectedChildSubHead.name && selectedChildSubHead.size) {
+                    // When ChildSubHead is selected
+                    finalText = `${selectedSubHeadName} - ${selectedChildSubHead.size} - ${selectedChildSubHead.name}`;
+                    rate = parseFloat(selectedChildSubHead.rate);
+
+                    if (isNaN(rate)) {
+                        alert("Rate is missing or invalid.");
+                        return;
+                    }
+
+                } else {
+                    // When no ChildSubHead is selected
+                    const sizeInput = document.getElementById('SizeDropdown')?.value || "Unknown Size";
+                    finalText = `${selectedSubHeadName} - ${sizeInput}`;
+                    rate = 0; 
+                }
+                // Check if size is missing
+                if (!selectedChildSubHead.size) {
+                    alert("Size is missing in the selected ChildSubHead.");
+                    return;
+                }
+
+                if (isNaN(rate)) {
+                    alert("Rate is missing or invalid.");
+                    return;
+                }
+
+                const gTotal = qty * rate;
+                const tbody = document.querySelector("#workOrderTable tbody");
+
+                if (editingRow) {
+
+                    const mainHeadSpan = editingRow.querySelector('.mainhead-name');
+                    window.selectedMainHeadId = mainHeadSpan.dataset.mainheadId;
+                    window.selectedMainHeadName = mainHeadSpan.textContent;
+
+                    const originalQty = parseInt(editingRow.querySelector('input[name$=".Qty"]')?.value || 0);
+                    adjustedAssignedSheets -= originalQty;
+                    adjustedAssignedSheets += qty;
+
+                    //assignedSheets += qty;
+                    
+                    const mainHeadCell = editingRow.querySelector('.mainhead-name');
+                    mainHeadCell.textContent = window.selectedMainHeadName;
+
+                    const subHeadCell = editingRow.querySelector('.subhead-name');
+                    subHeadCell.textContent = finalText;
+
+                    const qtyInputField = editingRow.querySelector('input[name$=".Qty"]');
+                    const rateInputField = editingRow.querySelector('input[name$=".Rate"]');
+                    const gTotalInputField = editingRow.querySelector('input[name$=".GTotal"]');
+
+                    qtyInputField.value = qty;
+                    rateInputField.value = rate.toFixed(2);
+                    gTotalInputField.value = gTotal.toFixed(2);                    
+
+                    // Ensure hidden fields are updated as well
+                    editingRow.querySelector('input[name$=".MainHeadId"]').value = selectedMainHeadId;
+                    editingRow.querySelector('input[name$=".SubHeadId"]').value = selectedSubHeadId;
+                    editingRow.querySelector('input[name$=".ChildSubHeadId"]').value = selectedChildSubHead.childSubHeadId;
+                    editingRow.querySelector('input[name$=".Qty"]').value = qty;
+                    editingRow.querySelector('input[name$=".Rate"]').value = rate;
+                    editingRow.querySelector('input[name$=".GTotal"]').value = gTotal.toFixed(2);
+                    editingRow.querySelector('input[name$=".SizeId"]').value = selectedChildSubHead.sizeId;
+                    editingRow.querySelector('input[name$=".Details"]').value = finalText;
+
+                    editingRow = null;
+                    updateMainHeadSubtotals();
+
+                } else {
+                    //assignedSheets += qty;
+                    
+                    const newRow = document.createElement("tr");
+                    newRow.setAttribute('data-mainhead-id', selectedMainHeadId);
+                    newRow.setAttribute('data-mainhead-name', selectedMainHeadName);
+                    newRow.innerHTML = `
+                    <td><span class="mainhead-name" data-mainhead-id="${selectedMainHeadId}">${selectedMainHeadName}</span></td>
+                    <td><span class="subhead-name" data-subhead-id="${selectedSubHeadId}">${finalText}</span></td>
+                    <td><input type="number" name="WorkDetailsList[${index}].Qty" value="${qty}" class="form-control qty-input" /></td>
+                    <td><input type="number" name="WorkDetailsList[${index}].Rate" value="${rate.toFixed(2)}" class="form-control rate-input" /></td>
+                    <td><input type="text" name="WorkDetailsList[${index}].GTotal" value="${gTotal.toFixed(2)}" class="form-control gtotal-input" readonly /></td>
+
+                    <input type="hidden" name="WorkDetailsList[${index}].MainHeadId" value="${selectedMainHeadId}" />
+                    <input type="hidden" name="WorkDetailsList[${index}].SubHeadId" value="${selectedSubHeadId}" />
+                    <input type="hidden" name="WorkDetailsList[${index}].ChildSubHeadId" value="${selectedChildSubHead.childSubHeadId}" />
+                    
+                    <input type="hidden" name="WorkDetailsList[${index}].Tax" value="0" />
+                    <input type="hidden" name="WorkDetailsList[${index}].Cess" value="0" />
+                    <input type="hidden" name="WorkDetailsList[${index}].GTotal" value="${gTotal.toFixed(2)}" />
+                    <input type="hidden" name="WorkDetailsList[${index}].SizeId" value="${selectedChildSubHead.sizeId}" />
+                    <input type="hidden" name="WorkDetailsList[${index}].Details" value="${finalText}" />
+                    <input type="hidden" name="WorkDetailsList[${index}].Active" value="Y" />
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger delete-btn">Delete</button>
+                    </td>
+            `;
+
+                    newRow.querySelector('.delete-btn').addEventListener('click', function () {
+                        const qtyToRemove = parseInt(newRow.querySelector('input[name$=".Qty"]').value);
+                        assignedSheets -= qtyToRemove;
+                        newRow.remove();
+                        updateMainHeadSubtotals();
+
+                    });
+
+                    tbody.appendChild(newRow);
+                    updateMainHeadSubtotals();
+
+                    index++;
+                }
+
+                qtyInput.value = '';
+                quantityModal.hide();
+
+                console.log("Selected childSubHead object:", selectedChildSubHead);
+
+                const subHeadsModalEl = document.getElementById('subHeadsModal');
+                const subHeadsModalInstance = bootstrap.Modal.getInstance(subHeadsModalEl);
+                if (subHeadsModalInstance) {
+                    subHeadsModalInstance.hide();
+                }
+            });
+
+            document.querySelector('#workOrderTable').addEventListener('click', function (e) {
+                if (e.target.classList.contains('mainhead-name')) {
+                    const mainHeadSpan = e.target;
+                    const row = mainHeadSpan.closest('tr');
+
+                    editingRow = row;
+
+                    // Update globals here - VERY IMPORTANT
+                    window.selectedMainHeadId = row.dataset.mainheadId;
+                    window.selectedMainHeadName = row.dataset.mainheadName;
+
+                    console.log(`Editing MainHead: ${window.selectedMainHeadName} with ID: ${window.selectedMainHeadId}`);
+
+                    openSubHeadModal(window.selectedMainHeadId, window.selectedMainHeadName);
+                }
+            });
+
+
+            function openSubHeadModal(mainHeadId, mainHeadName) {
+                console.log('SubHead Modal is opening...');
+                console.log(`MainHead for Modal: ${mainHeadName} (ID: ${mainHeadId})`);
+                console.log(`SubHead Modal is opening for MainHead: ${mainHeadName} (ID: ${mainHeadId})`);
+
+
+
+                window.selectedMainHeadName = mainHeadName;
+                window.selectedMainHeadId = mainHeadId;
+
+                const modalElement = document.getElementById('subHeadsModal');
+                const subHeadsList = document.getElementById('subHeadsList');
+                subHeadsList.innerHTML = ''; 
+
+                fetch(`/WorkOrder/GetSubHeads?mainHeadId=${mainHeadId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Network response was not ok");
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.length === 0) {
+                            subHeadsList.innerHTML = '<li class="list-group-item text-danger">No SubHeads found.</li>';
+                        } else {
+                            data.forEach(subHead => {
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item subhead-item';
+                                li.textContent = subHead.subHeadName;
+                                li.dataset.subheadId = subHead.subHeadId;
+                                subHeadsList.appendChild(li);
+                            });
+                        }
+
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching subheads:', error);
+                    });
+            }
+
+
+            document.getElementById('subHeadsList').addEventListener('click', function (e) {
+                if (e.target.classList.contains('subhead-item')) {
+                    // Set dataset values required by onSubHeadClick
+                    const selectedSubHeadId = e.target.dataset.subheadId;
+                    const selectedSubHeadName = e.target.textContent;
+
+                    // Set these globally so onSubHeadClick can access
+                    selectedSubHeadId && (window.selectedSubHeadId = selectedSubHeadId);
+                    selectedSubHeadName && (window.selectedSubHeadName = selectedSubHeadName);
+
+                    // Hide subheads modal before proceeding
+                    const subHeadsModalInstance = bootstrap.Modal.getInstance(document.getElementById('subHeadsModal'));
+                    subHeadsModalInstance?.hide();
+
+                    //  Reuse existing logic
+                    onSubHeadClick.call(e.target);
+                }
+            });
+
+            
+            const now = new Date().toISOString().slice(0, 16);  // Adjust to ISO 8601 format (YYYY-MM-DDTHH:mm)
+            //document.querySelector("[name='WorkOrder.Wdate']").min = now;
+            document.querySelector("[name='WorkOrder.Ddate']").min = now;
+
+            $(document).ready(function () {
+                $('.select-customer').select2({
+                    placeholder: "Search studio...",
+                    allowClear: true
+                });
+            });
+
+            $(document).ready(function () {
+                $('.select-size').select2({
+                    placeholder: "Search size...",
+                    allowClear: true
+                });
+            });
+
+            document.querySelector('form').addEventListener('submit', function (e) {
+                const totalSheets = parseInt(document.getElementById("WorkOrder_NoOfSheets").value || 0);
+                const validationSpan = document.getElementById("sheetsFormValidation");
+
+                const currentlyAssigned = calculateAssignedSheets();
+
+                if (currentlyAssigned !== totalSheets) {
+                    e.preventDefault();
+                    validationSpan.style.display = "block";
+                    validationSpan.textContent = `Please assign all ${totalSheets} sheets. Currently assigned: ${currentlyAssigned}`;
+                } else {
+                    validationSpan.style.display = "none";
+                }
+
+            });
+
+            document.getElementById('subHeadSearch').addEventListener('input', function () {
+                const query = this.value.toLowerCase();
+                const items = document.querySelectorAll('#subHeadsList .list-group-item');
+
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(query) ? '' : 'none';
+                });
+            });
+
+            document.addEventListener('input', function (e) {
+                if (e.target && e.target.classList.contains('qty-input')) {
+                    const row = e.target.closest('tr');
+                    const qty = parseInt(e.target.value) || 0;
+                    const rateInput = row.querySelector('.rate-input');
+                    const gTotalInput = row.querySelector('.gtotal-input');
+
+                    const rate = parseFloat(rateInput.value) || 0;
+                    const gTotal = qty * rate;
+
+                    gTotalInput.value = gTotal.toFixed(2);
+
+                    // Update hidden GTotal field
+                    row.querySelector('input[name$=".GTotal"]').value = gTotal.toFixed(2);
+
+                    // Optional: update hidden Qty too
+                    row.querySelector('input[name$=".Qty"]').value = qty;
+                }
+            });
+
+
+            function updateMainHeadSubtotals() {
+                const rows = document.querySelectorAll("#workOrderTable tbody tr");
+                let grandTotal = 0;
+
+                rows.forEach(row => {
+                    const qty = parseFloat(row.querySelector('input[name$=".Qty"]')?.value || 0);
+                    const rate = parseFloat(row.querySelector('input[name$=".Rate"]')?.value || 0);
+                    const gTotalField = row.querySelector('input[name$=".GTotal"]');
+
+                    const calculatedGTotal = qty * rate;
+                    grandTotal += calculatedGTotal;
+
+                    if (gTotalField) {
+                        gTotalField.value = calculatedGTotal.toFixed(2);
+                    }
+                });
+
+                // Update subtotal field
+                const subtotalField = document.getElementById("subtotalField");
+                subtotalField.value = grandTotal.toFixed(2);
+
+                // Also update balance when advance is entered
+                const advanceField = document.getElementById("advanceField");
+                const balanceField = document.getElementById("balanceField");
+
+                const advance = parseFloat(advanceField.value || 0);
+                const balance = grandTotal - advance;
+
+                balanceField.value = balance.toFixed(2);
+            }
+
+        });
+
+    </script>
+}
+
+

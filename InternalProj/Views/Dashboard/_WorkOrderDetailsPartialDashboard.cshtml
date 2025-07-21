@@ -1,0 +1,118 @@
+﻿@model InternalProj.ViewModel.WorkOrderViewModel
+
+<table class="table table-bordered table-hover table-sm">
+    <thead>
+        <tr>
+            <th>Work Order No</th>
+            <th>Studio</th>
+            <th>Work Type</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model.Results)
+        {
+            <tr>
+                <td>
+                    <a href="#" class="workorder-link" data-id="@order.WorkOrderId" data-bs-toggle="modal" data-bs-target="#workOrderDetailModal">
+                        @order.WorkOrderNo
+                    </a>
+                </td>
+                <td>@order.Customer?.StudioName</td>
+                <td>@order.WorkType?.TypeName</td>
+                <td>@order.Wdate?.ToString("dd MMM yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Stylish Pagination -->
+<div class="pagination-container text-center mt-3">
+    <div class="pagination-buttons d-inline-flex flex-wrap justify-content-center gap-1">
+        @if (Model.CurrentPage > 1)
+        {
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadPage(@(Model.CurrentPage - 1))">&lt;</button>
+        }
+
+        <button class="btn btn-outline-primary btn-sm @(Model.CurrentPage == 1 ? "active" : "")" onclick="loadPage(1)">1</button>
+
+        @if (Model.CurrentPage > 3)
+        {
+            <span class="px-2">...</span>
+        }
+
+        @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
+        {
+            <button class="btn btn-outline-primary btn-sm @(i == Model.CurrentPage ? "active" : "")" onclick="loadPage(@i)">@i</button>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages - 2)
+        {
+            <span class="px-2">...</span>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <button class="btn btn-outline-primary btn-sm @(Model.CurrentPage == Model.TotalPages ? "active" : "")" onclick="loadPage(@Model.TotalPages)">@Model.TotalPages</button>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadPage(@(Model.CurrentPage + 1))">&gt;</button>
+        }
+    </div>
+</div>
+
+<!-- Modal for full work order details -->
+<div class="modal fade" id="workOrderDetailModal" tabindex="-1" aria-labelledby="workOrderDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Work Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="workOrderDetailContent">
+                Loading...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadPage(page) {
+        $.get('/Dashboard/GetBoxContent', { id: 1, page: page }, function (data) {
+            $('#modalContent').html(data);
+        });
+    }
+
+    $(document).on('click', '.workorder-link', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+
+        $('#workOrderDetailContent').html("Loading...");
+        $.get('/WorkOrder/GetWorkOrderDetails', { id: id }, function (data) {
+            $('#workOrderDetailContent').html(data);
+        });
+    });
+</script>
+
+<style>
+    .pagination-container button.active {
+        background-color: #64126b;
+        color: white;
+        font-weight: bold;
+    }
+
+    .pagination-container button:hover {
+        background-color: #64126b;
+        color: white;
+    }
+
+    .pagination-container .btn {
+        min-width: 36px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #64126b;
+        color: #64126b;
+    }
+</style>
