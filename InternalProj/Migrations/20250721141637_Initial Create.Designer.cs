@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InternalProj.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250708095347_Created_First_Migration_080725")]
-    partial class Created_First_Migration_080725
+    [Migration("20250721141637_Initial Create")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -223,14 +223,12 @@ namespace InternalProj.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Phone2")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("PhoneTypeId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Whatsapp")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("ContactId");
@@ -269,7 +267,7 @@ namespace InternalProj.Migrations
                     b.Property<int?>("CustomerCategoryCategoryId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("Discount")
+                    b.Property<decimal?>("Discount")
                         .HasColumnType("numeric");
 
                     b.Property<string>("FirstName")
@@ -657,6 +655,43 @@ namespace InternalProj.Migrations
                     b.ToTable("RateTypeMasters");
                 });
 
+            modelBuilder.Entity("InternalProj.Models.Receipt", b =>
+                {
+                    b.Property<int>("ReceiptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReceiptId"));
+
+                    b.Property<double>("CurrentAmount")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModeId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("NetAmount")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("ReceiptDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WorkOrderId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ReceiptId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ModeId");
+
+                    b.HasIndex("WorkOrderId");
+
+                    b.ToTable("Receipts");
+                });
+
             modelBuilder.Entity("InternalProj.Models.RegionMaster", b =>
                 {
                     b.Property<int>("Id")
@@ -767,6 +802,9 @@ namespace InternalProj.Migrations
                         .HasMaxLength(1)
                         .HasColumnType("character varying(1)");
 
+                    b.Property<bool?>("IsFirstLogin")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
@@ -836,9 +874,6 @@ namespace InternalProj.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -863,9 +898,6 @@ namespace InternalProj.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Remarks")
-                        .HasColumnType("text");
 
                     b.HasKey("StaffId");
 
@@ -903,6 +935,52 @@ namespace InternalProj.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StateMasters");
+                });
+
+            modelBuilder.Entity("InternalProj.Models.StudioCallLog", b =>
+                {
+                    b.Property<int>("CallId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CallId"));
+
+                    b.Property<string>("Active")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)");
+
+                    b.Property<DateTime>("CallTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Region")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("StudioName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime?>("UpdatedCallTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CallId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("StudioCallLogs");
                 });
 
             modelBuilder.Entity("InternalProj.Models.SubHeadDetails", b =>
@@ -1359,6 +1437,33 @@ namespace InternalProj.Migrations
                     b.Navigation("SubHead");
                 });
 
+            modelBuilder.Entity("InternalProj.Models.Receipt", b =>
+                {
+                    b.HasOne("InternalProj.Models.CustomerReg", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InternalProj.Models.ModeOfPayment", "ModeOfPayment")
+                        .WithMany()
+                        .HasForeignKey("ModeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InternalProj.Models.WorkOrderMaster", "WorkOrder")
+                        .WithMany()
+                        .HasForeignKey("WorkOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("ModeOfPayment");
+
+                    b.Navigation("WorkOrder");
+                });
+
             modelBuilder.Entity("InternalProj.Models.RegionMaster", b =>
                 {
                     b.HasOne("InternalProj.Models.StateMaster", "State")
@@ -1466,6 +1571,17 @@ namespace InternalProj.Migrations
                         .HasForeignKey("DesignationMasterDesignationId");
 
                     b.Navigation("Branch");
+                });
+
+            modelBuilder.Entity("InternalProj.Models.StudioCallLog", b =>
+                {
+                    b.HasOne("InternalProj.Models.CustomerReg", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("InternalProj.Models.SubHeadDetails", b =>

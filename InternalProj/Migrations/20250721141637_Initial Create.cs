@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InternalProj.Migrations
 {
     /// <inheritdoc />
-    public partial class Created_First_Migration_080725 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -247,11 +247,9 @@ namespace InternalProj.Migrations
                     LastName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     DOB = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     DOJ = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    Remarks = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Active = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, defaultValue: "Y"),
                     BranchId = table.Column<int>(type: "integer", nullable: false),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
                     DeptMasterDeptId = table.Column<int>(type: "integer", nullable: true),
                     DesignationMasterDesignationId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -372,7 +370,7 @@ namespace InternalProj.Migrations
                     FirstName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     LastName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     StudioName = table.Column<string>(type: "text", nullable: false),
-                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Discount = table.Column<decimal>(type: "numeric", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Active = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false, defaultValue: "Y"),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
@@ -499,7 +497,8 @@ namespace InternalProj.Migrations
                     UserName = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    Active = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false)
+                    Active = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -661,8 +660,8 @@ namespace InternalProj.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
                     Phone1 = table.Column<string>(type: "text", nullable: false),
-                    Phone2 = table.Column<string>(type: "text", nullable: false),
-                    Whatsapp = table.Column<string>(type: "text", nullable: false),
+                    Phone2 = table.Column<string>(type: "text", nullable: true),
+                    Whatsapp = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: false),
                     PhoneTypeId = table.Column<int>(type: "integer", nullable: false),
                     Active = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false)
@@ -698,6 +697,32 @@ namespace InternalProj.Migrations
                     table.PrimaryKey("PK_OutstandingAmounts", x => x.Id);
                     table.ForeignKey(
                         name: "FK_OutstandingAmounts_CustomerRegs_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "CustomerRegs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudioCallLogs",
+                columns: table => new
+                {
+                    CallId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CustomerId = table.Column<int>(type: "integer", nullable: false),
+                    StudioName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Region = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    CallTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    UpdatedCallTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Active = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudioCallLogs", x => x.CallId);
+                    table.ForeignKey(
+                        name: "FK_StudioCallLogs_CustomerRegs_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "CustomerRegs",
                         principalColumn: "Id",
@@ -827,6 +852,42 @@ namespace InternalProj.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Invoices_WorkOrders_WorkOrderId",
+                        column: x => x.WorkOrderId,
+                        principalTable: "WorkOrders",
+                        principalColumn: "WorkOrderId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Receipts",
+                columns: table => new
+                {
+                    ReceiptId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ReceiptDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    NetAmount = table.Column<double>(type: "double precision", nullable: false),
+                    CurrentAmount = table.Column<double>(type: "double precision", nullable: false),
+                    ModeId = table.Column<int>(type: "integer", nullable: false),
+                    CustomerId = table.Column<int>(type: "integer", nullable: false),
+                    WorkOrderId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Receipts", x => x.ReceiptId);
+                    table.ForeignKey(
+                        name: "FK_Receipts_CustomerRegs_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "CustomerRegs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Receipts_ModeOfPayments_ModeId",
+                        column: x => x.ModeId,
+                        principalTable: "ModeOfPayments",
+                        principalColumn: "ModeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Receipts_WorkOrders_WorkOrderId",
                         column: x => x.WorkOrderId,
                         principalTable: "WorkOrders",
                         principalColumn: "WorkOrderId",
@@ -988,6 +1049,21 @@ namespace InternalProj.Migrations
                 column: "SubHeadId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Receipts_CustomerId",
+                table: "Receipts",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_ModeId",
+                table: "Receipts",
+                column: "ModeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_WorkOrderId",
+                table: "Receipts",
+                column: "WorkOrderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RegionMasters_StateId",
                 table: "RegionMasters",
                 column: "StateId");
@@ -1042,6 +1118,11 @@ namespace InternalProj.Migrations
                 table: "StaffRegs",
                 column: "StaffId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudioCallLogs_CustomerId",
+                table: "StudioCallLogs",
+                column: "CustomerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubHeads_AlbumSizeDetailsSizeId",
@@ -1164,6 +1245,9 @@ namespace InternalProj.Migrations
                 name: "RateMasters");
 
             migrationBuilder.DropTable(
+                name: "Receipts");
+
+            migrationBuilder.DropTable(
                 name: "StaffAddresses");
 
             migrationBuilder.DropTable(
@@ -1177,6 +1261,9 @@ namespace InternalProj.Migrations
 
             migrationBuilder.DropTable(
                 name: "StaffDesignations");
+
+            migrationBuilder.DropTable(
+                name: "StudioCallLogs");
 
             migrationBuilder.DropTable(
                 name: "TaxMasters");
