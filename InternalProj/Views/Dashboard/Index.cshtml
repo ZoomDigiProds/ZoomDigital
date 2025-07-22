@@ -1,26 +1,52 @@
 ﻿@model List<InternalProj.ViewModel.WorkOrderSummaryViewModel>
 
 @{
-    ViewData["Title"] = "Zoom Digital Press Image Processing";
+    ViewData["Title"] = "Zoom Digital Press";
 }
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Dashboard.css" asp-append-version="true" />
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger text-center" id="editError">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<script>
+    setTimeout(() => {
+        $('#editError').fadeOut('slow');
+    }, 5000);
+</script>
+
 
 <h2 class="text-center">Dashboard Overview</h2>
 
 <div class="container-fluid my-4 px-0">
     <div class="row g-3">
+
         @for (int i = 1; i <= 4; i++)
         {
             <div class="col-12 col-md-6 card-wrapper">
                 <div class="card shadow-sm dashboard-card p-3">
                     <div class="card-body text-center">
-                        @* <h5 class="card-title">Box @i</h5> *@
-
                         @if (i == 1)
                         {
                             <h5 class="card-title">Work Details</h5>
                             <div id="box1Content">
-                                <div id="dashboardWorkOrders">
+                                <div id="workOrderSummaryContainer">
                                     @await Html.PartialAsync("_WorkOrderSummaryPartial", Model)
+                                </div>
+                            </div>
+                        }
+                        else if (i == 2)
+                        {
+                            <h5 class="card-title">Today's Transactions</h5>
+                            <div id="box2Content">
+                                <div id="dailyTransactionSummaryContainer">
+                                    Loading...
                                 </div>
                             </div>
                         }
@@ -35,6 +61,7 @@
                 </div>
             </div>
         }
+
     </div>
 </div>
 
@@ -56,19 +83,60 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('.view-box-btn').click(function () {
-                const boxId = $(this).data('box');
-                $('#modalContent').html('Loading...');
-                $('#workOrderModal').modal('show');
+        $(document).on('click', '.view-box-btn', function () {
+            const boxId = parseInt($(this).data('box'));
+            let url = '';
+            let modalTitle = '';
 
-                $.get(`/Dashboard/GetBoxContent`, { id: boxId }, function (data) {
-                    $('#modalContent').html(data);
-                });
+            if (boxId === 2) {
+                url = '/DailyTransaction/PaginatedTransactionsPartial?page=1';
+                modalTitle = 'Today\'s Transactions';
+            } else {
+                url = `/Dashboard/GetBoxContent?id=${boxId}`;
+                modalTitle = 'Work Orders';
+            }
+
+            console.log("boxId:", boxId, "url:", url);
+
+            $('#workOrderModalLabel').text(modalTitle);
+
+            $.get(url, function (data) {
+                $('#modalContent').html(data);
+                $('#workOrderModal').modal('show');
             });
+        });
+
+        window.refreshDashboardData = function () {
+            $.get('/Dashboard/GetWorkOrderSummary', function (html) {
+                $('#workOrderSummaryContainer').html(html);
+            });
+        };
+
+        window.refreshTransactionData = function () {
+            $.get('/Dashboard/DailyTransactionSummaryPartial', function (html) {
+                $('#dailyTransactionSummaryContainer').html(html);
+            });
+        };
+
+        // Trigger refreshes every few seconds
+        setInterval(refreshDashboardData, 10000);
+        setInterval(refreshTransactionData, 500);
+
+        // Storage event: sync between tabs
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'workOrderUpdated') {
+                refreshDashboardData();
+            }
+        });
+
+        // Ensure modal cleanup
+        $('#workOrderModal').on('hidden.bs.modal', function () {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
         });
     </script>
 }
+
 
 
 

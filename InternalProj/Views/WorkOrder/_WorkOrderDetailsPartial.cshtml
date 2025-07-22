@@ -11,6 +11,10 @@
 
 <div>
     <h5>Work Order No: @Model.WorkOrder.WorkOrderNo</h5>
+    <a asp-controller="WorkOrder" asp-action="Edit" asp-route-id="@Model.WorkOrder.WorkOrderId" class="btn btn-primary btn-sm">
+        Edit Work Order
+    </a>
+
     <p><strong>Studio:</strong> @Model.WorkOrder.Customer.StudioName</p>
     <p><strong>Work Type:</strong> @Model.WorkOrder.WorkType.TypeName</p>
     <p><strong>Date:</strong> @displayDate</p>
@@ -38,7 +42,7 @@
                 </tr>
             }
         </tbody>
-      
+
         <tfoot>
             <tr>
                 <th colspan="3" class="text-end">Subtotal</th>
@@ -50,10 +54,10 @@
             </tr>
             <tr>
                 <th colspan="3" class="text-end">Balance</th>
-                <th>@((Model.WorkOrder.SubTotal - (Model.WorkOrder.Advance ?? 0)).ToString("N2"))</th>
+                @* <th>@((Model.WorkOrder.SubTotal - (Model.WorkOrder.Advance ?? 0)).ToString("N2"))</th> *@
+                <th>@(Model.Balance?.ToString("N2") ?? "0.00")</th>
             </tr>
         </tfoot>
 
     </table>
 </div>
- 

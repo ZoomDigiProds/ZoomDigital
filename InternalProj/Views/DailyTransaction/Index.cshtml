@@ -1,22 +1,60 @@
-﻿@model List<InternalProj.ViewModel.DailyTransactionSummaryViewModel>
+﻿@model List<InternalProj.ViewModel.DailyTransactionViewModel>
 @{
     ViewData["Title"] = "Daily Transactions";
+    int pageSize = 10;
+    int pageNumber = Convert.ToInt32(ViewContext.HttpContext.Request.Query["page"]);
+    if (pageNumber <= 0) pageNumber = 1;
+
+    var pagedModel = Model.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+    int totalPages = (int)Math.Ceiling(Model.Count / (double)pageSize);
 }
 
+<h2 class="text-center">Today's Transactions</h2>
 
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Work Order No</th>
+            <th>Studio Name</th>
+            <th class="text-end">Amount</th>
+            <th class="text-end">Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in pagedModel)
+        {
+            <tr>
+                <td>@item.WorkOrderNo</td>
+                <td>@item.StudioName</td>
+                <td class="text-end">₹@item.BillAmount.ToString("0.00")</td>
+                <td class="text-end">@item.LastTransactionDate.ToString("hh:mm tt")</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-<div id="dailyTransactionContainer">
-    @await Html.PartialAsync("_DailyTransactionTablePartial", Model)
-</div>
+@if (totalPages > 1)
+{
+    <nav class="mt-2">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageNumber ? "active" : "")">
+                    <a class="page-link" href="?page=@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
 
 @section Scripts {
     <script>
-        function refreshDailyTransactions() {
-            $.get('@Url.Action("RefreshTable", "DailyTransaction")', function (html) {
-                $('#dailyTransactionContainer').html(html);
+        function refreshTransactions() {
+            $.get('@Url.Action("Index", "DailyTransaction")', function (html) {
+                document.body.innerHTML = html;
             });
         }
 
-        setInterval(refreshDailyTransactions, 5000);
+        setInterval(refreshTransactions, 10000);
     </script>
 }

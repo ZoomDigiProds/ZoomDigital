@@ -33,15 +33,15 @@
 <div style="font-size: 0.9rem;">
     <form asp-action="Create" method="post">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label class="form-label">Receipt No</label>
                 <input class="form-control" value="@Model.ReceiptNo" readonly />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label class="form-label">Receipt Date</label>
                 <input asp-for="Receipt.ReceiptDate" class="form-control" type="date" readonly />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label class="form-label">Payment Type</label>
                 <select asp-for="Receipt.ModeId"
                         asp-items="@(new SelectList(Model.ModeOfPayments, "ModeId", "ModeType"))"
@@ -53,7 +53,7 @@
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label class="form-label">Select By</label>
                 <select id="selectType" class="form-control">
                     <option value="customer">Customer Name</option>
@@ -61,7 +61,7 @@
                 </select>
             </div>
 
-            <div class="col-md-6" id="customerNameBox">
+            <div class="col-md-3" id="customerNameBox">
                 <label class="form-label">Customer Name</label>
                 <select class="form-control" id="customerSelectByName">
                     <option value="">-- Select Customer --</option>
@@ -74,7 +74,7 @@
                 </select>
             </div>
 
-            <div class="col-md-6 d-none" id="studioNameBox">
+            <div class="col-md-3 d-none" id="studioNameBox">
                 <label class="form-label">Studio Name</label>
                 <select class="form-control" id="customerSelectByStudio">
                     <option value="">-- Select Studio --</option>
@@ -138,7 +138,7 @@
         <input type="hidden" asp-for="Receipt.CurrentAmount" id="CurrentAmount" />
     </form>
 
-        @if (Model.TotalPages > 1)
+    @*     @if (Model.TotalPages > 1)
     {
         <div class="pagination-container mt-3">
             <form asp-action="Create" method="get" class="d-inline">
@@ -161,6 +161,48 @@
             </form>
         </div>
     }
+ *@
+
+ @if (Model.TotalPages > 1)
+{
+    <div class="pagination-container text-center mt-3">
+        <form asp-action="Create" method="get" class="d-inline-flex flex-wrap justify-content-center gap-1">
+            <input type="hidden" name="customerId" value="@Model.Receipt.CustomerId" />
+
+            @if (Model.CurrentPage > 1)
+            {
+                <button type="submit" name="currentPage" value="@(Model.CurrentPage - 1)" class="pagination-btn">&lt;</button>
+            }
+
+            <button type="submit" name="currentPage" value="1" class="pagination-btn @(Model.CurrentPage == 1 ? "active" : "")">1</button>
+
+            @if (Model.CurrentPage > 3)
+            {
+                <span class="px-2 align-self-center">...</span>
+            }
+
+            @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
+            {
+                <button type="submit" name="currentPage" value="@i" class="pagination-btn @(i == Model.CurrentPage ? "active" : "")">@i</button>
+            }
+
+            @if (Model.CurrentPage < Model.TotalPages - 2)
+            {
+                <span class="px-2 align-self-center">...</span>
+            }
+
+            @if (Model.TotalPages > 1)
+            {
+                <button type="submit" name="currentPage" value="@Model.TotalPages" class="pagination-btn @(Model.CurrentPage == Model.TotalPages ? "active" : "")">@Model.TotalPages</button>
+            }
+
+            @if (Model.CurrentPage < Model.TotalPages)
+            {
+                <button type="submit" name="currentPage" value="@(Model.CurrentPage + 1)" class="pagination-btn">&gt;</button>
+            }
+        </form>
+    </div>
+}
 
 
 </div>       
@@ -170,12 +212,14 @@
         $(document).ready(function () {
             const currentId = $("#Receipt_CustomerId").val();
 
+            // Restore previously selected ModeId (from sessionStorage)
             const savedMode = sessionStorage.getItem("selectedModeId");
             if (savedMode) {
                 $("select[name='Receipt.ModeId']").val(savedMode);
                 sessionStorage.removeItem("selectedModeId");
             }
 
+            // Restore previously selected selectType if available
             const savedSelectType = sessionStorage.getItem("selectedSelectType");
             if (savedSelectType) {
                 $("#selectType").val(savedSelectType).trigger("change");
@@ -187,6 +231,7 @@
                     $("#customerSelectByName").val(currentId);
                 }
             } else {
+                // Default fallback if no sessionStorage
                 $("#selectType").trigger("change");
 
                 const studioOption = $("#customerSelectByStudio option[value='" + currentId + "']").length > 0;
@@ -198,6 +243,7 @@
             }
         });
 
+        // Toggle dropdown boxes based on selectType
         $("#selectType").on("change", function () {
             const type = $(this).val();
             const isStudio = type === "studio";
@@ -206,12 +252,15 @@
             $("#customerNameBox").toggleClass("d-none", isStudio);
         });
 
+        // When customer/studio changes, update hidden input and reload with GET
         $("#customerSelectByName, #customerSelectByStudio").on("change", function () {
             const customerId = $(this).val();
             if (!customerId) return;
 
+            // Update hidden field (so submit will work)
             $("#Receipt_CustomerId").val(customerId);
 
+            // Save selected ModeId and SelectType to restore after reload
             const selectedModeId = $("select[name='Receipt.ModeId']").val();
             const selectedType = $("#selectType").val();
 
@@ -224,6 +273,7 @@
             window.location.href = url.toString();
         });
 
+        // When a work order is selected
         $(document).on('change', 'input[name="selectedWorkOrder"]', function () {
             $("input.payNowInput").prop("disabled", true).val('');
             const row = $(this).closest("tr");
@@ -232,17 +282,10 @@
             $("#NetAmount").val($(this).data("net"));
         });
 
+        // Capture entered payment amount
         $(document).on('input', '.payNowInput', function () {
-            const enteredAmount = parseFloat($(this).val()) || 0;
-            const balance = parseFloat($(this).closest('tr').find('td').eq(4).text().replace(/[^0-9.-]+/g,"")) || 0;
-
-            if (enteredAmount > balance) {
-                alert("Amount entered exceeds the pending balance.");
-                $(this).val(balance.toFixed(2));
-                $("#CurrentAmount").val(balance.toFixed(2));
-            } else {
-                $("#CurrentAmount").val(enteredAmount);
-            }
+            const amt = parseFloat($(this).val()) || 0;
+            $("#CurrentAmount").val(amt);
         });
     </script>
 }
@@ -264,28 +307,29 @@
         vertical-align: middle;
     }
 
-    .pagination-btn {
-        font-size: 0.85rem;
-        padding: 4px 12px;
-        margin: 2px;
-        border: 1px solid #64126b;
-        background-color: #64126b;
-        border-radius: 20px;
-        cursor: pointer;
-        color: white;
-    }
-
     .pagination-container {
-        text-align: center;
-        margin-top: 10px;
-    }
+    text-align: center;
+    margin-top: 10px;
+}
 
-    .pagination-btn.active {
-        background-color: #64126b;
-        color: white;
-    }
+.pagination-btn {
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    margin: 2px;
+    border: 1px solid #64126b;
+    background-color: #64126b;
+    border-radius: 20px;
+    cursor: pointer;
+    color: white;
+}
 
-    .pagination-btn:hover {
-        background-color: #500d57;
-    }
+.pagination-btn.active {
+    background-color: #64126b;
+    color: white;
+}
+
+.pagination-btn:hover {
+    background-color: #500d57;
+}
+
 </style>

@@ -1,0 +1,30 @@
+﻿@model IEnumerable<InternalProj.ViewModel.DailyTransactionViewModel>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center text-muted">No transactions found for today.</div>
+}
+else
+{
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Work Order No</th>
+                <th>Studio</th>
+                <th class="text-end">Amount</th>
+                <th class="text-end">Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.WorkOrderNo</td>
+                    <td>@item.StudioName</td>
+                    <td class="text-end">₹@item.BillAmount.ToString("0.00")</td>
+                    <td class="text-end">@item.LastTransactionDate.ToString("hh:mm tt")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

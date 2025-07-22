@@ -1,30 +1,29 @@
 ﻿using InternalProj.Data;
-using InternalProj.Filters;
 using InternalProj.Models;
+using InternalProj.Service;
 using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Threading.Tasks;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
 namespace InternalProj.Controllers
 {
-    //[DepartmentAuthorize("ADMIN")]
     public class WorkOrderController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public WorkOrderController(ApplicationDbContext context)
+        private readonly WorkOrderService _workOrderService;
+
+        public WorkOrderController(ApplicationDbContext context, WorkOrderService workOrderService)
         {
             _context = context;
+            _workOrderService = workOrderService;
         }
 
         [HttpGet]
-        public IActionResult Create()   
+        public IActionResult Create()
         {
             var viewModel = new WorkOrderViewModel
             {
@@ -43,7 +42,7 @@ namespace InternalProj.Controllers
                 SubHeads = _context.SubHeads.Where(s => s.Active == "Y").ToList(),
                 Albums = _context.Albums.Where(s => s.Active == "Y").ToList(),
                 ChildSubHeads = _context.ChildSubHeads.Where(s => s.Active == "Y").ToList(),
-                RateMasterList = _context.RateMasters.Where(e => e.Active == "Y").ToList(),                
+                RateMasterList = _context.RateMasters.Where(e => e.Active == "Y").ToList(),
             };
             return View(viewModel);
         }
@@ -51,7 +50,7 @@ namespace InternalProj.Controllers
         [HttpGet]
         public IActionResult GetCustomerDetailsById(int id)
         {
-            //Console.WriteLine($"Received ID: {id}");
+            Console.WriteLine($"Received ID: {id}");
             var customer = _context.CustomerRegs
                 .Where(c => c.Id == id && c.Active == "Y")
                 .Join(_context.CustomerContacts,
@@ -69,6 +68,7 @@ namespace InternalProj.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(WorkOrderViewModel model)
         {
             if (!ModelState.IsValid)
@@ -82,17 +82,19 @@ namespace InternalProj.Controllers
                 }
 
                 PopulateDropdowns(model);
+
                 return View(model);
             }
-
-            //Console.WriteLine($"WorkDetailsList count: {model.WorkDetailsList?.Count ?? 0}");
 
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                model.WorkOrder.Active = "Y";
-                model.WorkOrder.Wdate = DateTime.UtcNow;
+                var isEdit = model.WorkOrder.WorkOrderId > 0;
+                double subTotal = 0;
+                var totalPaid = _context.Receipts
+                       .Where(r => r.WorkOrderId == model.WorkOrder.WorkOrderId)
+                       .Sum(r => (double?)r.CurrentAmount) ?? 0;
 
                 if (model.WorkOrder.Ddate.HasValue)
                 {
@@ -106,18 +108,103 @@ namespace InternalProj.Controllers
                     model.WorkOrder.Ddate = model.WorkOrder.Ddate.Value.ToUniversalTime();
                 }
 
-                // Save WorkOrder
-                _context.WorkOrders.Add(model.WorkOrder);
-                await _context.SaveChangesAsync(); 
+                List<WorkDetails> existingDetails = [];
+
+                if (isEdit)
+                {
+                    var existingOrder = await _context.WorkOrders
+                        .Include(w => w.WorkDetails)
+                            .ThenInclude(d => d.SubHead)
+                        .Include(w => w.WorkDetails)
+                            .ThenInclude(d => d.Size)
+                        .Include(w => w.WorkDetails)
+                            .ThenInclude(d => d.ChildSubHead)
+                        .Include(w => w.WorkDetails)
+                            .ThenInclude(d => d.MainHead)
+                        .FirstOrDefaultAsync(w => w.WorkOrderId == model.WorkOrder.WorkOrderId);
+
+
+                    if (existingOrder == null)
+                    {
+                        TempData["ErrorMessage"] = "Work order not found.";
+                        return RedirectToAction("Create");
+                    }
+
+                    model.WorkOrder.WorkOrderNo = existingOrder.WorkOrderNo;
+
+                    existingOrder.Ddate = model.WorkOrder.Ddate;
+                    existingOrder.SubTotal = model.WorkOrder.SubTotal;
+                    existingOrder.Balance = model.WorkOrder.Balance;
+                    existingOrder.Advance = model.WorkOrder.Advance;
+
+
+
+                    existingDetails = existingOrder.WorkDetails.ToList();
+
+                    var deletedIds = Request.Form["DeletedDetailIds"]
+                        .ToString().Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(int.Parse).ToList();
+
+                    var toDelete = existingOrder.WorkDetails.Where(d => deletedIds.Contains(d.WorkDetailsId)).ToList();
+                    _context.WorkDetails.RemoveRange(toDelete);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    // New work order
+                    model.WorkOrder.Wdate = DateTime.UtcNow;
+                    model.WorkOrder.Active = "Y";
+
+                    //model.WorkOrder.SubTotal = Math.Round(subTotal, 2);
+
+                    //if ((model.WorkOrder.Advance ?? 0) > model.WorkOrder.SubTotal)
+                    //{
+                    //    //ModelState.AddModelError("WorkOrder.Advance", "Advance cannot be greater than the SubTotal.");
+                    //    TempData["ErrorMessage"] = $"Advance amount cannot exceed SubTotal.";
+                    //    PopulateDropdowns(model);
+                    //    return View(model);
+                    //}
+
+                    subTotal = 0;
+
+                    if (model.WorkDetailsList != null)
+                    {
+                        foreach (var item in model.WorkDetailsList)
+                        {
+                            subTotal += item.Rate * item.Qty;
+                        }
+                    }
+
+                    model.WorkOrder.SubTotal = Math.Round(subTotal, 2);
+
+                    // Now validation works as expected
+                    if ((model.WorkOrder.Advance ?? 0) > model.WorkOrder.SubTotal)
+                    {
+                        TempData["ErrorMessage"] = $"Advance amount cannot exceed SubTotal.";
+                        PopulateDropdowns(model);
+                        return View(model);
+                    }
+
+
+                    model.WorkOrder.Balance = model.WorkOrder.SubTotal
+                        - (model.WorkOrder.Advance ?? 0)
+                        - totalPaid;
+
+                    if (model.WorkOrder.Balance < 0)
+                        model.WorkOrder.Balance = 0;
+
+
+
+                    _context.WorkOrders.Add(model.WorkOrder);
+                    await _context.SaveChangesAsync();
+                }
 
                 if (model.WorkDetailsList == null || !model.WorkDetailsList.Any())
                 {
-                    ModelState.AddModelError("", "Please add at least one work detail entry.");
+                    ModelState.AddModelError("", "Please add at least one work detail.");
                     PopulateDropdowns(model);
                     return View(model);
                 }
-
-                double subTotal = 0;
 
                 foreach (var detail in model.WorkDetailsList)
                 {
@@ -127,6 +214,16 @@ namespace InternalProj.Controllers
                         PopulateDropdowns(model);
                         return View(model);
                     }
+
+                    // Normalize missing/null values
+                    detail.ChildSubheadId = detail.ChildSubheadId == 0 ? null : detail.ChildSubheadId;
+                    detail.Tax ??= 0;
+                    detail.Cess ??= 0;
+                    detail.Active = "Y";
+                    detail.WorkOrderId = model.WorkOrder.WorkOrderId;
+                    detail.GTotal = detail.Qty * detail.Rate;
+
+                    subTotal += detail.GTotal;
 
                     var subHeadName = await _context.SubHeads
                         .Where(s => s.SubHeadId == detail.SubheadId)
@@ -138,146 +235,130 @@ namespace InternalProj.Controllers
                         .Select(s => s.Size)
                         .FirstOrDefaultAsync();
 
-                    var mainHead = await _context.MainHeads
-                        .FirstOrDefaultAsync(m => m.MainHeadId == detail.MainHeadId);
+                    var childName = detail.ChildSubheadId.HasValue
+                        ? await _context.ChildSubHeads
+                            .Where(c => c.ChildSubHeadId == detail.ChildSubheadId)
+                            .Select(c => c.ChildSubHeadName)
+                            .FirstOrDefaultAsync()
+                        : "";
 
-                    if (mainHead == null)
+                    detail.Details = $"{subHeadName} - {sizeName}" + (string.IsNullOrWhiteSpace(childName) ? "" : $" - {childName}");
+
+
+                    if (detail.WorkDetailsId > 0)
                     {
-                        ModelState.AddModelError("", $"Invalid MainHeadId: {detail.MainHeadId}. It does not exist.");
-                        PopulateDropdowns(model);
-                        return View(model);
-                    }
-
-
-                    if (detail.ChildSubheadId != null && detail.ChildSubheadId != 0)
-                    {
-                        var childExists = await _context.ChildSubHeads
-                            .AnyAsync(c => c.ChildSubHeadId == detail.ChildSubheadId);
-
-                        if (!childExists)
+                        var existing = existingDetails.FirstOrDefault(d => d.WorkDetailsId == detail.WorkDetailsId);
+                        if (existing != null)
                         {
-                            Console.WriteLine($"Warning: Invalid ChildSubheadId {detail.ChildSubheadId}, setting to null.");
-                            detail.ChildSubheadId = null;
+                            _context.Entry(existing).CurrentValues.SetValues(detail);
                         }
                     }
                     else
                     {
-                        detail.ChildSubheadId = null;
+                        _context.WorkDetails.Add(detail);
                     }
 
-                    if (detail.Rate > 0.00)
+                    // Optional: Auto-sync rate to RateMaster
+                    if (detail.Rate > 0)
                     {
                         var existingRate = await _context.RateMasters
                             .FirstOrDefaultAsync(r => r.SubHeadId == detail.SubheadId && r.SizeId == detail.SizeId && r.Active == "Y");
 
                         if (existingRate == null)
                         {
-                            existingRate = new RateMaster
+                            _context.RateMasters.Add(new RateMaster
                             {
                                 SubHeadId = detail.SubheadId,
                                 SizeId = detail.SizeId,
                                 MainHeadId = detail.MainHeadId,
-                                Rate = Math.Round((decimal)detail.Rate, 2),
+                                Rate = (decimal)detail.Rate,
                                 Active = "Y",
                                 Details = $"{subHeadName} - {sizeName}"
-                            };
-
-                            _context.RateMasters.Add(existingRate);
-
-                            try
-                            {
-                                await _context.SaveChangesAsync();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"RateMaster save error: {ex.Message}");
-                                throw;
-                            }
+                            });
                         }
                         else if (existingRate.Rate != (decimal)detail.Rate)
                         {
-                            existingRate.Rate = Math.Round((decimal)detail.Rate, 2);
-                            existingRate.Details = $"{subHeadName} - {sizeName}";
+                            existingRate.Rate = (decimal)detail.Rate;
                             _context.RateMasters.Update(existingRate);
-                            await _context.SaveChangesAsync();
                         }
-
-                        detail.Rate = (double)existingRate.Rate;
                     }
-
-                    Console.WriteLine($"subHeadName: {subHeadName}");
-                    Console.WriteLine($"sizeName: {sizeName}");
-
-                    detail.WorkOrderId = model.WorkOrder.WorkOrderId;
-                    detail.GTotal = detail.Qty * detail.Rate;
-                    detail.Tax ??= 0;
-                    detail.Cess ??= 0;
-                    detail.Active = "Y";
-
-                    subTotal += detail.GTotal;
-
-                    _context.WorkDetails.Add(detail);
                 }
+
+                await _context.SaveChangesAsync();
+
+
 
                 model.WorkOrder.SubTotal = Math.Round(subTotal, 2);
 
-                model.WorkOrder.Advance = model.Advance;
-                model.WorkOrder.Balance = model.Advance.HasValue
-                    ? model.SubTotal - model.Advance.Value
-                    : model.SubTotal;
+                if (isEdit)
+                {
+                    // Editing: consider receipts also
+                    model.WorkOrder.Balance = model.WorkOrder.SubTotal
+                        - (model.WorkOrder.Advance ?? 0)
+                        - totalPaid;
+                }
+                else
+                {
+                    // Creating: consider only advance
+                    model.WorkOrder.Balance = model.WorkOrder.SubTotal
+                        - (model.WorkOrder.Advance ?? 0);
+                }
 
-                _context.WorkOrders.Update(model.WorkOrder);
+                if (model.WorkOrder.Balance < 0)
+                    model.WorkOrder.Balance = 0;
+
 
                 await _context.SaveChangesAsync();
+
+                await _workOrderService.UpdateWorkOrderBalance(model.WorkOrder.WorkOrderId);
+
                 await transaction.CommitAsync();
 
-                var phoneNumber = await _context.CustomerContacts
-                .Where(c => c.CustomerId == model.WorkOrder.CustomerId)
-                .Select(c => c.Phone1)
-                .FirstOrDefaultAsync();
+                // SMS logic (if applicable)
+                var phone = await _context.CustomerContacts
+                    .Where(c => c.CustomerId == model.WorkOrder.CustomerId)
+                    .Select(c => c.Phone1)
+                    .FirstOrDefaultAsync();
 
-                if (!string.IsNullOrEmpty(phoneNumber))
+                if (!string.IsNullOrEmpty(phone))
                 {
                     try
                     {
-                        const string accountSid = "AC7052ba65c1bdf3346a3b4c3b10b8814b";
-                        const string authToken = "c64da20074379fe9a886304a882bceec";
-                        const string fromPhoneNumber = "+14849608592";
-
-                        TwilioClient.Init(accountSid, authToken);
-
-                        var message = $"Dear Customer, your Work Order #{model.WorkOrder.WorkOrderNo} has been successfully created.";
-
-                        var sms = MessageResource.Create(
-                            body: message,
-                            from: new PhoneNumber(fromPhoneNumber),
-                            to: new PhoneNumber(phoneNumber)
+                        TwilioClient.Init("AC7052ba65c1bdf3346a3b4c3b10b8814b", "c64da20074379fe9a886304a882bceec");
+                        var message = MessageResource.Create(
+                            body: $"Dear Customer, your Work Order #{model.WorkOrder.WorkOrderNo} has been successfully {(isEdit ? "updated" : "created")}.",
+                            from: new PhoneNumber("+14849608592"),
+                            to: new PhoneNumber(phone)
                         );
 
-                        Console.WriteLine($"SMS sent to {phoneNumber}: SID = {sms.Sid}, Status = {sms.Status}");
+                        Console.WriteLine($"SMS sent: {message.Sid}");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"SMS error: {ex.Message}");
+                        Console.WriteLine($"SMS send failed: {ex.Message}");
                     }
                 }
 
+                TempData["SuccessMessage"] = $"Work Order {(isEdit ? "updated" : "created")} successfully.";
 
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { redirectUrl = Url.Action("Create") });
+                }
 
-                TempData["SuccessMessage"] = "Work Order created successfully.";
                 return RedirectToAction("Create");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                Console.WriteLine($"Error: {ex.Message}");
-                //ModelState.AddModelError("", "An error occurred while saving the work order.");
+                Console.WriteLine($"Save error: {ex}");
                 TempData["ErrorMessage"] = "An error occurred while saving the work order.";
                 PopulateDropdowns(model);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return PartialView("Create", model);
                 return View(model);
             }
-          }
-
+        }
 
         private void PopulateDropdowns(WorkOrderViewModel model)
         {
@@ -359,11 +440,11 @@ namespace InternalProj.Controllers
                     rate = _context.RateMasters
                         .Where(r => r.SubHeadId == subHeadId && r.SizeId == sizeId && r.Active == "Y")
                         .Select(r => r.Rate)
-                        .FirstOrDefault(), 
+                        .FirstOrDefault(),
                     size = _context.Albums
                         .Where(s => s.SizeId == sizeId)
                         .Select(s => s.Size)
-                        .FirstOrDefault() 
+                        .FirstOrDefault()
                 })
                 .ToList();
 
@@ -377,6 +458,9 @@ namespace InternalProj.Controllers
                 .Include(w => w.WorkType)
                 .FirstOrDefault(w => w.WorkOrderId == id);
 
+            if (workOrder == null)
+                return NotFound();
+
             var details = _context.WorkDetails
                 .Include(d => d.SubHead)
                 .Include(d => d.Size)
@@ -384,10 +468,22 @@ namespace InternalProj.Controllers
                 .Where(d => d.WorkOrderId == id)
                 .ToList();
 
+            // Fetch total paid from Receipts
+            double totalPaid = _context.Receipts
+                .Where(r => r.WorkOrderId == id)
+                .Sum(r => (double?)r.CurrentAmount) ?? 0;
+
+            // Calculate balance
+            double advance = workOrder.Advance ?? 0;
+            double balance = Math.Max(0, workOrder.SubTotal - advance - totalPaid);
+
             var viewModel = new WorkOrderViewModel
             {
                 WorkOrder = workOrder,
-                WorkDetailsList = details
+                WorkDetailsList = details,
+                Advance = advance,
+                Balance = balance,
+                SubTotal = workOrder.SubTotal
             };
 
             return PartialView("_WorkOrderDetailsPartial", viewModel);
@@ -422,6 +518,52 @@ namespace InternalProj.Controllers
             return Json(new { workOrderNo = newOrderNo });
         }
 
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var workOrder = _context.WorkOrders
+                .AsNoTracking()
+                .Include(w => w.Customer)
+                .Include(w => w.WorkType)
+                .FirstOrDefault(w => w.WorkOrderId == id);
 
+            if (workOrder == null)
+                return NotFound();
+
+            var totalPaid = _context.Receipts
+                .Where(r => r.WorkOrderId == id)
+                .Sum(r => (double?)r.CurrentAmount) ?? 0;
+
+            var details = _context.WorkDetails
+                .Where(d => d.WorkOrderId == id)
+                .ToList();
+
+            var viewModel = new WorkOrderViewModel
+            {
+                WorkOrder = workOrder,
+                WorkDetailsList = details,
+                TotalPaid = totalPaid,
+                Customers = _context.CustomerRegs.Where(s => s.Active == "Y").ToList(),
+                WorkTypes = _context.WorkTypes.Where(s => s.Active == "Y").ToList(),
+                Machines = _context.Machines.Where(s => s.Active == "Y").ToList(),
+                DeliveryMasters = _context.DeliveryMasters.Where(s => s.Active == "Y").ToList(),
+                DeliveryModes = _context.DeliveryModes.Where(s => s.Active == "Y").ToList(),
+                OrderVias = _context.OrderVias.Where(s => s.Active == "Y").ToList(),
+                Branches = _context.Branches.Where(s => s.Active == "Y").ToList(),
+                StaffRegs = _context.StaffRegs.Where(s => s.Active == "Y").ToList(),
+                MainHeads = _context.MainHeads.Where(s => s.Active == "Y").ToList(),
+                SubHeads = _context.SubHeads.Where(s => s.Active == "Y").ToList(),
+                Albums = _context.Albums.Where(s => s.Active == "Y").ToList(),
+                ChildSubHeads = _context.ChildSubHeads.Where(s => s.Active == "Y").ToList(),
+                RateMasterList = _context.RateMasters.Where(e => e.Active == "Y").ToList(),
+                Advance = workOrder.Advance,
+                SubTotal = workOrder.SubTotal,
+                //Balance = Math.Max(0, workOrder.SubTotal - (workOrder.Advance ?? 0) - totalPaid)
+                Balance = workOrder.Balance ?? 0
+
+            };
+
+            return View("Create", viewModel);
+        }
     }
 }

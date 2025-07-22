@@ -7,17 +7,15 @@ namespace InternalProj.ViewModel
 {
     public class WorkOrderViewModel
     {
-        // WorkOrderMaster specific fields
         public WorkOrderMaster WorkOrder { get; set; } = new WorkOrderMaster();
         public List<WorkDetails> WorkDetailsList { get; set; } = new List<WorkDetails>();
 
-        // Collection properties for dropdowns and other relational data
         public IEnumerable<CustomerReg> Customers { get; set; } = new List<CustomerReg>();
         public IEnumerable<Machine> Machines { get; set; } = new List<Machine>();
         public IEnumerable<DeliveryMaster> DeliveryMasters { get; set; } = new List<DeliveryMaster>();
         public IEnumerable<DeliveryMode> DeliveryModes { get; set; } = new List<DeliveryMode>();
         public IEnumerable<OrderVia> OrderVias { get; set; } = new List<OrderVia>();
-        public IEnumerable<WorkType> WorkTypes { get; set; } = new List<WorkType>();        
+        public IEnumerable<WorkType> WorkTypes { get; set; } = new List<WorkType>();
         public IEnumerable<Branch> Branches { get; set; } = new List<Branch>();
         public IEnumerable<StaffReg> StaffRegs { get; set; } = new List<StaffReg>();
         public IEnumerable<MainHeadReg> MainHeads { get; set; } = new List<MainHeadReg>();
@@ -29,6 +27,7 @@ namespace InternalProj.ViewModel
         public IEnumerable<RateMaster> RateMasterList { get; set; } = new List<RateMaster>();
         public List<WorkOrderMaster> Results { get; set; } = new List<WorkOrderMaster>();
         public List<string> StudioList { get; set; } = new();
+        public string? CustomerFilter { get; set; }
         public string? StudioFilter { get; set; }
         public DateTime? FromDateFilter { get; set; }
         public DateTime? ToDateFilter { get; set; }
@@ -42,10 +41,14 @@ namespace InternalProj.ViewModel
 
         public DateTime? Wdate { get; set; }
         public DateTime? Ddate { get; set; }
+        public List<WorkOrderSummaryViewModel> ResultsSummary { get; set; } = new();
+
+        public double TotalPaid { get; set; }
+
     }
     public class CombinedSubHead
     {
-        public string DisplayName { get; set; } 
+        public string DisplayName { get; set; }
         public double Rate { get; set; }
     }
 

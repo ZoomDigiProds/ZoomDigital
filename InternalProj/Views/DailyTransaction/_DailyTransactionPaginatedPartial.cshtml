@@ -1,0 +1,103 @@
+﻿@model List<InternalProj.ViewModel.DailyTransactionViewModel>
+@{
+    int currentPage = ViewBag.CurrentPage as int? ?? 1;
+    int totalPages = ViewBag.TotalPages as int? ?? 1;
+    decimal pageTotal = Model.Sum(x => x.BillAmount);
+}
+
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h4 class="text-center flex-grow-1">Daily Transactions</h4>
+    <span class="fw-bold text-end">Total: ₹@pageTotal.ToString("0.00")</span>
+</div>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Work Order No</th>
+            <th>Studio Name</th>
+            <th class="text-end">Amount</th>
+            <th class="text-end">Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.WorkOrderNo</td>
+                <td>@item.StudioName</td>
+                <td class="text-end">₹@item.BillAmount.ToString("0.00")</td>
+                <td class="text-end">@item.LastTransactionDate.ToString("hh:mm tt")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@if (totalPages > 1)
+{
+    <div class="pagination-container text-center mt-3">
+        <div class="pagination-buttons d-inline-flex flex-wrap justify-content-center gap-1">
+            @if (currentPage > 1)
+            {
+                <button class="btn btn-outline-secondary btn-sm" onclick="loadTransactionsPage(@(currentPage - 1))">&lt;</button>
+            }
+
+            <button class="btn btn-outline-primary btn-sm @(currentPage == 1 ? "active" : "")" onclick="loadTransactionsPage(1)">1</button>
+
+            @if (currentPage > 3)
+            {
+                <span class="px-2">...</span>
+            }
+
+            @for (int i = Math.Max(2, currentPage - 1); i <= Math.Min(totalPages - 1, currentPage + 1); i++)
+            {
+                <button class="btn btn-outline-primary btn-sm @(i == currentPage ? "active" : "")" onclick="loadTransactionsPage(@i)">@i</button>
+            }
+
+            @if (currentPage < totalPages - 2)
+            {
+                <span class="px-2">...</span>
+            }
+
+            @if (totalPages > 1)
+            {
+                <button class="btn btn-outline-primary btn-sm @(currentPage == totalPages ? "active" : "")" onclick="loadTransactionsPage(@totalPages)">@totalPages</button>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <button class="btn btn-outline-secondary btn-sm" onclick="loadTransactionsPage(@(currentPage + 1))">&gt;</button>
+            }
+        </div>
+    </div>
+}
+
+<script>
+    function loadTransactionsPage(page) {
+        $.get(`/DailyTransaction/PaginatedTransactionsPartial?page=${page}`, function (html) {
+            $('#modalContent').html(html);
+        });
+    }
+</script>
+
+<style>
+    .pagination-container button.active {
+        background-color: #64126b;
+        color: white;
+        font-weight: bold;
+    }
+
+    .pagination-container button:hover {
+        background-color: #64126b;
+        color: white;
+    }
+
+    .pagination-container .btn {
+        min-width: 36px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #64126b;
+        color: #64126b;
+    }
+</style>

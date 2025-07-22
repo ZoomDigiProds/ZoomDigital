@@ -29,7 +29,13 @@ namespace InternalProj.Service
 
             var newBalance = (decimal)subTotal - (decimal)advance - (decimal)totalReceipts - totalInvoices;
 
-            workOrder.Balance = newBalance < 0 ? 0 : (double?)newBalance;
+            if (Math.Abs(newBalance) < 0.00001m)
+            {
+                newBalance = 0;
+            }
+
+            workOrder.Balance = (double?)newBalance;
+
 
             _context.WorkOrders.Update(workOrder);
             await _context.SaveChangesAsync();

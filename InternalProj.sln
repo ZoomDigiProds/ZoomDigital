@@ -5,10 +5,6 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternalProj", "InternalProj\InternalProj.csproj", "{5AEE7730-6AA9-4645-9580-AFC1748C6A91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternalProjTests", "InternalProjTests\InternalProjTests.csproj", "{3E26F8EA-A5AC-4E50-A4B6-E5A482359CAA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zoom.Tests", "Zoom.Tests\Zoom.Tests.csproj", "{C4225542-2A81-4CAC-BC69-E05F2FB15A33}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,14 +15,6 @@ Global
 		{5AEE7730-6AA9-4645-9580-AFC1748C6A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AEE7730-6AA9-4645-9580-AFC1748C6A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AEE7730-6AA9-4645-9580-AFC1748C6A91}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E26F8EA-A5AC-4E50-A4B6-E5A482359CAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E26F8EA-A5AC-4E50-A4B6-E5A482359CAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E26F8EA-A5AC-4E50-A4B6-E5A482359CAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E26F8EA-A5AC-4E50-A4B6-E5A482359CAA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4225542-2A81-4CAC-BC69-E05F2FB15A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4225542-2A81-4CAC-BC69-E05F2FB15A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4225542-2A81-4CAC-BC69-E05F2FB15A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4225542-2A81-4CAC-BC69-E05F2FB15A33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

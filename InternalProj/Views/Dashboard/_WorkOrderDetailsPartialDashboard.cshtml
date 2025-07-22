@@ -7,20 +7,27 @@
             <th>Studio</th>
             <th>Work Type</th>
             <th>Date</th>
+            <th>SubTotal</th>
+            <th>Advance</th>
+            <th>Balance</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var order in Model.Results)
+        @* @foreach (var order in Model.Results) *@
+        @foreach (var order in Model.ResultsSummary)
         {
             <tr>
                 <td>
-                    <a href="#" class="workorder-link" data-id="@order.WorkOrderId" data-bs-toggle="modal" data-bs-target="#workOrderDetailModal">
+                    <a href="#" class="workorder-link" data-id="@order.WorkOrderId">
                         @order.WorkOrderNo
                     </a>
                 </td>
-                <td>@order.Customer?.StudioName</td>
-                <td>@order.WorkType?.TypeName</td>
+                <td>@order.StudioName</td>
+                <td>@order.WorkTypeName</td>
                 <td>@order.Wdate?.ToString("dd MMM yyyy")</td>
+                <td>@order.SubTotal.ToString("N2")</td>
+                <td>@order.Advance.ToString("N2")</td>
+                <td>@order.Balance.ToString("N2")</td>
             </tr>
         }
     </tbody>
@@ -63,20 +70,6 @@
     </div>
 </div>
 
-<!-- Modal for full work order details -->
-<div class="modal fade" id="workOrderDetailModal" tabindex="-1" aria-labelledby="workOrderDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Work Order Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="workOrderDetailContent">
-                Loading...
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     function loadPage(page) {
@@ -89,9 +82,17 @@
         e.preventDefault();
         const id = $(this).data('id');
 
-        $('#workOrderDetailContent').html("Loading...");
-        $.get('/WorkOrder/GetWorkOrderDetails', { id: id }, function (data) {
-            $('#workOrderDetailContent').html(data);
+        // Hide modal first to clean up properly
+        $('#workOrderModal').modal('hide');
+
+        // Wait until it's hidden, then load and reopen with new content
+        $('#workOrderModal').one('hidden.bs.modal', function () {
+            $('#modalContent').html("Loading...");
+
+            $.get('/WorkOrder/GetWorkOrderDetails', { id: id }, function (data) {
+                $('#modalContent').html(data);
+                $('#workOrderModal').modal('show');
+            });
         });
     });
 </script>

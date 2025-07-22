@@ -14,199 +14,261 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container d-flex justify-content-center align-items-center  page-bottom-spacing">
-  <div class="card shadow p-4 w-100">
-    <h3 class="text-center">Work Order</h3>
+    <div class="card shadow p-4 w-100">
+        <h3 class="text-center">Work Order</h3>
 
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="alert alert-success text-center">
+            <div class="alert alert-success text-center" id="success">
                 @TempData["SuccessMessage"]
             </div>
         }
 
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger text-center">
+            <div class="alert alert-danger text-center" id="error">
                 @TempData["ErrorMessage"]
             </div>
         }
-        
+
+        <script>
+            setTimeout(() => {
+                $('#success').fadeOut('slow');
+            }, 5000);
+        </script>
+
+        <script>
+            setTimeout(() => {
+                $('#error').fadeOut('slow');
+            }, 5000);
+        </script>
+
         <div class="custom-form-wrapper">
-            <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label asp-for="WorkOrder.WorkOrderNo" class="form-label required-label">Order No</label>
-                    <input asp-for="WorkOrder.WorkOrderNo" id="workOrderNo" class="form-control" required readonly/>
+
+            <form id="workOrderForm" asp-action="Create" asp-controller="WorkOrder" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="WorkOrder.WorkOrderNo" class="form-label required-label">Order No</label>
+                        <input asp-for="WorkOrder.WorkOrderNo" id="workOrderNo" class="form-control" required readonly />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="WorkOrder.CustomerId" class="form-label required-label">Studio</label>
+                        <select asp-for="WorkOrder.CustomerId" id="studioDropdown" class="form-select select-customer" style="width: 100%" required>
+                            <option value="">-- Select Studio --</option>
+                            @foreach (var customer in Model.Customers)
+                            {
+                                <option value="@customer.Id">@customer.StudioName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Name</label>
+                        <input asp-for="WorkOrder.Name" class="form-control" id="customerFullName" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Mobile</label>
+                        <input asp-for="WorkOrder.Mobile" class="form-control" id="mobileNumber" readonly />
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <label asp-for="WorkOrder.CustomerId" class="form-label required-label">Studio</label>
-                    <select asp-for="WorkOrder.CustomerId" id="studioDropdown" class="form-select select-customer" style="width: 100%" required>
-                        <option value="">-- Select Studio --</option>
-                        @foreach (var customer in Model.Customers)
-                        {
-                            <option value="@customer.Id">@customer.StudioName</option>
-                        }
-                    </select>
-                </div>
-                    @* <input type="hidden" asp-for="WorkOrder.StudioName" id="hiddenStudioName" /> *@
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="WorkOrder.NoOfSheets" class="form-label required-label">No Of Sheets</label>
+                        <input asp-for="WorkOrder.NoOfSheets" type="number" class="form-control" min="1" max="100" required />
+                    </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Name</label>
-                    <input asp-for="WorkOrder.Name" class="form-control" id="customerFullName" readonly />
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Mobile</label>
-                    <input asp-for="WorkOrder.Mobile" class="form-control" id="mobileNumber" readonly />
-                </div>
-            </div>
 
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label asp-for="WorkOrder.NoOfSheets" class="form-label required-label">No Of Sheets</label>
-                    <input asp-for="WorkOrder.NoOfSheets" type="number" class="form-control" min="1" max="100" required />
+                    <div class="col-md-3">
+                        <label asp-for="WorkOrder.Ddate" class="form-label">Delivery Date and Time</label>
+                        <input asp-for="WorkOrder.Ddate" type="datetime-local" class="form-control" min="@now" />
+                        <span asp-validation-for="WorkOrder.Ddate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="WorkOrder.MachineId" class="form-label required-label">Machine</label>
+                        <select asp-for="WorkOrder.MachineId" class="form-select" asp-items="@(new SelectList(Model.Machines, "MachineId", "MachineName"))" required></select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="WorkOrder.OrderViaId" class="form-label required-label">Order Via</label>
+                        <select asp-for="WorkOrder.OrderViaId" class="form-select" asp-items="@(new SelectList(Model.OrderVias, "OrderViaId", "OrderViaCategory"))" required></select>
+                    </div>
                 </div>
 
-                @* <div class="col-md-3">
-                    <label asp-for="WorkOrder.NoOfCopies" class="form-label">No of Copies</label>
-                    <input asp-for="WorkOrder.NoOfCopies" class="form-control" value="1" />
-                </div> *@
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="WorkOrder.WorkTypeId" class="form-label required-label">Work Type</label>
+                        <select id="workTypeDropdown" asp-for="WorkOrder.WorkTypeId" class="form-select" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))" required></select>
+                    </div>
 
-                @* <div class="col-md-3">
-                    <label asp-for="WorkOrder.Wdate" class="form-label required-label">Order Date and Time</label>
-                    <input asp-for="WorkOrder.Wdate" type="datetime-local" class="form-control" value="@now" min="@now" />
-                    <span asp-validation-for="WorkOrder.Wdate" class="text-danger"></span>
-                </div> *@
+                    <div class="col-md-4">
+                        <label asp-for="WorkOrder.DeliveryTypeId" class="form-label required-label">Delivery Type</label>
+                        <select asp-for="WorkOrder.DeliveryTypeId" class="form-select" asp-items="@(new SelectList(Model.DeliveryMasters, "DeliveryId", "DeliveryName"))" required></select>
+                    </div>
 
-                <div class="col-md-3">
-                    <label asp-for="WorkOrder.Ddate" class="form-label required-label">Delivery Date and Time</label>
-                    <input asp-for="WorkOrder.Ddate" type="datetime-local" class="form-control" min="@now" />
-                    <span asp-validation-for="WorkOrder.Ddate" class="text-danger"></span>
+                    <div class="col-md-4">
+                        <label asp-for="WorkOrder.DeliveryModeId" class="form-label required-label">Delivery Mode</label>
+                        <select asp-for="WorkOrder.DeliveryModeId" class="form-select" asp-items="@(new SelectList(Model.DeliveryModes, "Id", "Name"))" required></select>
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <label asp-for="WorkOrder.MachineId" class="form-label required-label">Machine</label>
-                    <select asp-for="WorkOrder.MachineId" class="form-select" asp-items="@(new SelectList(Model.Machines, "MachineId", "MachineName"))" required></select>
+                <input type="hidden" asp-for="WorkOrder.Active" value="Y" />
+                <input type="hidden" name="WorkDetailsList[0].Active" value="Y" />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="WorkOrder.Description" class="form-label">Description</label>
+                        <input asp-for="WorkOrder.Description" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="WorkOrder.Remarks" class="form-label">Remarks</label>
+                        <input asp-for="WorkOrder.Remarks" class="form-control" />
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <label asp-for="WorkOrder.OrderViaId" class="form-label required-label">Order Via</label>
-                    <select asp-for="WorkOrder.OrderViaId" class="form-select" asp-items="@(new SelectList(Model.OrderVias, "OrderViaId", "OrderViaCategory"))" required></select>
-                </div>
-            </div>
+                <div class="row mb-3">
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label required-label">Staff</label>
+                        <select asp-for="WorkOrder.StaffId" class="form-select" required>
+                            @foreach (var staff in Model.StaffRegs)
+                            {
+                                <option value="@staff.StaffId">@staff.FirstName @staff.LastName</option>
+                            }
+                        </select>
+                    </div>
 
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label asp-for="WorkOrder.WorkTypeId" class="form-label required-label">Work Type</label>
-                    <select id="workTypeDropdown" asp-for="WorkOrder.WorkTypeId" class="form-select" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))" required></select>
-                </div>
+                    <div class="col-md-4">
+                        <label asp-for="WorkOrder.BranchId" class="form-label required-label">Branch</label>
+                        <select asp-for="WorkOrder.BranchId" class="form-select" asp-items="@(new SelectList(Model.Branches, "BranchId", "BranchName"))" required></select>
+                    </div>
 
-                <div class="col-md-4">
-                    <label asp-for="WorkOrder.DeliveryTypeId" class="form-label required-label">Delivery Type</label>
-                    <select asp-for="WorkOrder.DeliveryTypeId" class="form-select" asp-items="@(new SelectList(Model.DeliveryMasters, "DeliveryId", "DeliveryName"))" required></select>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="WorkOrder.DeliveryModeId" class="form-label required-label">Delivery Mode</label>
-                    <select asp-for="WorkOrder.DeliveryModeId" class="form-select" asp-items="@(new SelectList(Model.DeliveryModes, "Id", "Name"))" required></select>
-                </div>
-            </div>
-
-            <input type="hidden" asp-for="WorkOrder.Active" value="Y" />
-            <input type="hidden" name="WorkDetailsList[0].Active" value="Y" />
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label asp-for="WorkOrder.Description" class="form-label">Description</label>
-                    <input asp-for="WorkOrder.Description" class="form-control" />
+                    <div class="col-md-4">
+                        <label asp-for="WorkOrder.AlbumSizeId" class="form-label required-label">Size</label>
+                        <select asp-for="WorkOrder.AlbumSizeId" class="form-select select-size" asp-items="@(new SelectList(Model.Albums, "SizeId", "Size"))" id="SizeDropdown" style="width: 100%" required>
+                            <option value="">--Select Size--</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label asp-for="WorkOrder.Remarks" class="form-label">Remarks</label>
-                    <input asp-for="WorkOrder.Remarks" class="form-control" />
-                </div>
-            </div>
+                <hr />
 
-            <div class="row mb-3">
-                <div class="mb-3 col-md-4">
-                    <label class="form-label required-label">Staff</label>
-                    <select asp-for="WorkOrder.StaffId" class="form-select" required>
-                        @foreach (var staff in Model.StaffRegs)
-                        {
-                            <option value="@staff.StaffId">@staff.FirstName @staff.LastName</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="WorkOrder.BranchId" class="form-label required-label">Branch</label>
-                    <select asp-for="WorkOrder.BranchId" class="form-select" asp-items="@(new SelectList(Model.Branches, "BranchId", "BranchName"))" required></select>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="WorkOrder.AlbumSizeId" class="form-label required-label">Size</label>
-                    <select asp-for="WorkOrder.AlbumSizeId" class="form-select select-size" asp-items="@(new SelectList(Model.Albums, "SizeId", "Size"))" id="SizeDropdown" style="width: 100%" required>
-                        <option value="">--Select Size--</option>
-                    </select>
-                </div>
-            </div>
-
-            <hr />
-
-            <table id="workOrderTable" class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th class="form-label">Main Head</th>
-                        <th class="form-label">Subhead</th>
-                        <th class="form-label">Qty</th>
-                        <th class="form-label">Rate</th>
-                        <th class="form-label">GTotal</th>
-                    </tr>
-                </thead>
-                <tbody id="mainHeadBody">
-                    @foreach (var mainHead in Model.MainHeads)
-                    {
-                        <tr class="mainhead-row" data-mainhead-id="@mainHead.MainHeadId" data-mainhead-name="@mainHead.MainHeadName">
-                            <td>@mainHead.MainHeadName</td>
+                <table id="workOrderTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="form-label">Main Head</th>
+                            <th class="form-label">Subhead</th>
+                            <th class="form-label">Qty</th>
+                            <th class="form-label">Rate</th>
+                            <th class="form-label">GTotal</th>
                         </tr>
-                    }
-                </tbody>
+                    </thead>
 
-                @* <tfoot id="subtotalFooter"></tfoot> *@
+
+                    <tbody id="mainHeadBody">
+                        <input type="hidden" asp-for="WorkOrder.WorkOrderId" />
+                        <input type="hidden" name="WorkOrder.WorkOrderId" value="@Model.WorkOrder?.WorkOrderId" />
+
+                        @foreach (var mainHead in Model.MainHeads)
+                        {
+                            <tr class="mainhead-row" data-mainhead-id="@mainHead.MainHeadId" data-mainhead-name="@mainHead.MainHeadName">
+                                <td>@mainHead.MainHeadName</td>
+                            </tr>
+                        }
+
+
+                        @if (Model.WorkDetailsList != null && Model.WorkDetailsList.Any())
+                        {
+                            var i = 0;
+                            foreach (var detail in Model.WorkDetailsList)
+                            {
+
+                                var mainHeadName = Model.MainHeads.FirstOrDefault(m => m.MainHeadId == detail.MainHeadId)?.MainHeadName ?? "-";
+                                var subHeadName = Model.SubHeads.FirstOrDefault(s => s.SubHeadId == detail.SubheadId)?.SubHeadName ?? "-";
+                                var sizeName = Model.Albums.FirstOrDefault(s => s.SizeId == detail.SizeId)?.Size ?? "-";
+                                var childSubName = detail.ChildSubheadId.HasValue
+                                ? Model.ChildSubHeads.FirstOrDefault(c => c.ChildSubHeadId == detail.ChildSubheadId)?.ChildSubHeadName ?? "-"
+                                : "";
+
+                                var combinedName = string.IsNullOrWhiteSpace(childSubName)
+                                ? $"{subHeadName} - {sizeName}"
+                                : $"{subHeadName} - {sizeName} - {childSubName}";
+                                <tr data-mainhead-id="@detail.MainHeadId" data-mainhead-name="@detail.MainHead?.MainHeadName">
+
+                                    <td><span class="mainhead-name" data-mainhead-id="@detail.MainHeadId">@detail.MainHead?.MainHeadName</span></td>
+                                    <td><span class="subhead-name" data-subhead-id="@detail.SubheadId">@combinedName</span></td>
+                                    <td><input type="number" name="WorkDetailsList[@i].Qty" value="@detail.Qty" class="form-control qty-input" /></td>
+                                    <td><input type="number" name="WorkDetailsList[@i].Rate" value="@detail.Rate.ToString("F2")" class="form-control rate-input" /></td>
+                                    <td><input type="text" name="WorkDetailsList[@i].GTotal" value="@detail.GTotal.ToString("F2")" class="form-control gtotal-input" readonly /></td>
+
+                                    <input type="hidden" name="WorkDetailsList[@i].MainHeadId" value="@detail.MainHeadId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].SubHeadId" value="@detail.SubheadId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].ChildSubHeadId" value="@detail.ChildSubheadId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Tax" value="@detail.Tax" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Cess" value="@detail.Cess" />
+                                    <input type="hidden" name="WorkDetailsList[@i].SizeId" value="@detail.SizeId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Details" value="@combinedName" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Active" value="@detail.Active" />
+                                    <input type="hidden" name="WorkDetailsList[@i].WorkDetailsId" value="@detail.WorkDetailsId" />
+
+                                    <td><button type="button" class="btn btn-sm btn-danger delete-btn">Delete</button></td>
+                                </tr>
+                                i++;
+                            }
+                        }
+
+                    </tbody>
+                    <input type="hidden" id="deletedDetailIds" name="DeletedDetailIds" />
+
                     <tfoot id="subtotalFooter">
                         <tr>
                             <td colspan="4" class="text-end fw-bold">Subtotal</td>
                             <td>
-                                <input type="text" id="subtotalField" name="SubTotal" class="form-control" readonly />
+                                <input type="text" id="subtotalField" name="WorkOrder.SubTotal" class="form-control"
+                                       value="@(Model.WorkOrder?.SubTotal ?? 0)" readonly />
                             </td>
                         </tr>
                         <tr>
                             <td colspan="4" class="text-end fw-bold">Advance</td>
                             <td>
-                                <input type="number" id="advanceField" name="Advance" class="form-control" />
+                                <input type="number"
+                                       id="advanceField"
+                                       name="WorkOrder.Advance"
+                                       class="form-control"
+                                       value="@(Model.WorkOrder?.Advance ?? 0.00)"
+                                       step="0.01"
+                                       @(Model.WorkOrder?.WorkOrderId > 0 ? "readonly" : "") />
                             </td>
                         </tr>
+
                         <tr>
                             <td colspan="4" class="text-end fw-bold">Balance</td>
                             <td>
-                                <input type="text" id="balanceField" name="Balance" class="form-control" readonly />
+                                <input type="text" id="balanceField" name="WorkOrder.Balance" class="form-control"
+                                       value="@(Model.WorkOrder?.Balance ?? 0)" readonly />
                             </td>
+                            <input type="hidden" id="totalPaidField" value="@Model.TotalPaid" />
+
                         </tr>
                     </tfoot>
 
-            </table>
+                </table>
 
-            <span id="sheetsFormValidation" class="text-danger" style="display:none;">All sheets must be assigned before submitting.</span>
+                <span id="sheetsFormValidation" class="text-danger" style="display:none;">All sheets must be assigned before submitting.</span>
 
-            <div class="d-grid">
-                <button class="btn btn-primary" type="submit">Submit</button>
-            </div>
-        </form>
+                <div class="d-grid">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
 
 <!-- SubHeads Modal -->
 <div class="modal fade" id="subHeadsModal" tabindex="-1" aria-labelledby="subHeadsModalLabel" aria-hidden="true">
@@ -272,7 +334,11 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
+        const isEditMode = @(Model.WorkOrder.WorkOrderId > 0 ? "true" : "false")
+
         document.addEventListener('DOMContentLoaded', function () {
             let selectedMainHeadId = null;
             let selectedMainHeadName = "";
@@ -282,7 +348,9 @@
             let totalSheets = parseInt(document.querySelector('[name="WorkOrder.NoOfSheets"]').value);
             let assignedSheets = 0;
             let editingRow = null;
-            let index = 0;
+            let index = @Model.WorkDetailsList?.Count ?? 0;
+
+
 
             const subHeadsModalEl = document.getElementById('subHeadsModal');
             const childSubHeadsModalEl = document.getElementById('childSubHeadsModal');
@@ -292,12 +360,12 @@
             const childSubHeadsModal = new bootstrap.Modal(childSubHeadsModalEl);
             const quantityModal = new bootstrap.Modal(quantityModalEl);
 
-            
+
             $(document).ready(function () {
                 $('.select-customer').select2({
                     placeholder: "Search studio...",
                     allowClear: true
-                });               
+                });
             });
 
             $(document).ready(function () {
@@ -316,23 +384,18 @@
                             console.log(data);
                             $('#customerFullName').val(data.fullName || '');
                             $('#mobileNumber').val(data.mobile || '');
-                            //$('#hiddenStudioName').val(data.studioName || '');
                         })
                         .catch(error => {
                             console.error('Error fetching customer details:', error);
                             $('#customerFullName').val('');
                             $('#mobileNumber').val('');
-                            //$('#hiddenStudioName').val('');
                         });
                 } else {
                     $('#customerFullName').val('');
                     $('#mobileNumber').val('');
-                    //$('#hiddenStudioName').val('');
                 }
             });
 
-
-            // Step 1: Double-click on MainHead row
             document.getElementById('mainHeadBody').addEventListener('dblclick', function (e) {
                 const row = e.target.closest('.mainhead-row');
                 if (row) {
@@ -384,7 +447,7 @@
                 selectedSubHeadName = this.textContent;
 
                 console.log(`Clicked SubHead: ${selectedSubHeadName} [ID: ${selectedSubHeadId}]`);
-                console.log(`Associated MainHead: ${window.selectedMainHeadName}`); 
+                console.log(`Associated MainHead: ${window.selectedMainHeadName}`);
 
 
                 const sizeDropdown = document.getElementById('SizeDropdown');
@@ -412,7 +475,6 @@
                         const size = sizeDropdown.options[sizeDropdown.selectedIndex]?.text || '';
 
                         if (data.length === 0) {
-                            // No child subheads – skip to quantity modal
                             selectedChildSubHead = {
                                 name: selectedSubHeadName,
                                 rate: 0.00,
@@ -427,8 +489,6 @@
                             if (quantityModal) quantityModal.show();
                             return;
                         }
-
-                        // If child subheads exist
                         data.forEach(child => {
                             const li = document.createElement('li');
                             li.className = 'list-group-item list-group-item-action';
@@ -440,7 +500,6 @@
                             childList.appendChild(li);
                         });
 
-                        // Hide subheads modal and show child subheads modal
                         if (subHeadsModal) subHeadsModal.hide();
                         if (childSubHeadsModal) childSubHeadsModal.show();
                     })
@@ -465,8 +524,7 @@
                 const size = sizeDropdown.options[sizeDropdown.selectedIndex]?.text || '';
                 const name = this.textContent.trim();
                 const childSubHeadId = this.dataset.childSubHeadId;
-                               
-                // Validate rate and size
+
                 if (isNaN(rate) || rate < 0) {
                     alert("Rate is missing or invalid.");
                     return;
@@ -477,9 +535,8 @@
                     return;
                 }
 
-                // Set selected object
                 selectedChildSubHead = { name, rate, size, sizeId, childSubHeadId };
-               
+
                 if (typeof childSubHeadsModal !== 'undefined') childSubHeadsModal.hide();
 
                 document.getElementById("sheetsInput").value = "";
@@ -508,14 +565,18 @@
 
                 $(document).ready(function () {
                     const selectedWorkTypeId = $('#workTypeDropdown').val();
-                    if (selectedWorkTypeId) {
-                        fetchWorkOrderNo(selectedWorkTypeId); 
+
+                    if (!isEditMode && selectedWorkTypeId) {
+                        fetchWorkOrderNo(selectedWorkTypeId);
                     }
 
                     $('#workTypeDropdown').on('change', function () {
-                        const workTypeId = $(this).val();
-                        fetchWorkOrderNo(workTypeId); 
+                        if (!isEditMode) {
+                            const workTypeId = $(this).val();
+                            fetchWorkOrderNo(workTypeId);
+                        }
                     });
+
                 });
 
             $(document).ready(function () {
@@ -531,7 +592,7 @@
                     updateMainHeadSubtotals();
                 });
             });
-         
+
             function calculateAssignedSheets() {
                 let totalAssigned = 0;
                 document.querySelectorAll("#workOrderTable tbody tr").forEach(row => {
@@ -563,7 +624,7 @@
 
                 let adjustedAssignedSheets = currentlyAssigned;
 
-                const remainingSheets = totalSheets - adjustedAssignedSheets;                                            
+                const remainingSheets = totalSheets - adjustedAssignedSheets;
 
                 if (parseInt(selectedMainHeadId) === 1) {
                     if(remainingSheets <= 0){
@@ -571,7 +632,7 @@
                         validationMessage.textContent = 'All sheets are already assigned. You cannot add more.';
                         return;
                     }
-                
+
 
                     if (isNaN(qty) || qty < 1 || qty > remainingSheets) {
                         validationMessage.style.display = 'block';
@@ -587,12 +648,11 @@
                 }
 
                 validationMessage.style.display = 'none';
-                                
+
                 let finalText = "";
                 let rate = 0;
 
                 if (selectedChildSubHead && selectedChildSubHead.name && selectedChildSubHead.size) {
-                    // When ChildSubHead is selected
                     finalText = `${selectedSubHeadName} - ${selectedChildSubHead.size} - ${selectedChildSubHead.name}`;
                     rate = parseFloat(selectedChildSubHead.rate);
 
@@ -602,12 +662,11 @@
                     }
 
                 } else {
-                    // When no ChildSubHead is selected
                     const sizeInput = document.getElementById('SizeDropdown')?.value || "Unknown Size";
                     finalText = `${selectedSubHeadName} - ${sizeInput}`;
-                    rate = 0; 
+                    rate = 0;
                 }
-                // Check if size is missing
+
                 if (!selectedChildSubHead.size) {
                     alert("Size is missing in the selected ChildSubHead.");
                     return;
@@ -631,8 +690,6 @@
                     adjustedAssignedSheets -= originalQty;
                     adjustedAssignedSheets += qty;
 
-                    //assignedSheets += qty;
-                    
                     const mainHeadCell = editingRow.querySelector('.mainhead-name');
                     mainHeadCell.textContent = window.selectedMainHeadName;
 
@@ -645,9 +702,8 @@
 
                     qtyInputField.value = qty;
                     rateInputField.value = rate.toFixed(2);
-                    gTotalInputField.value = gTotal.toFixed(2);                    
+                    gTotalInputField.value = gTotal.toFixed(2);
 
-                    // Ensure hidden fields are updated as well
                     editingRow.querySelector('input[name$=".MainHeadId"]').value = selectedMainHeadId;
                     editingRow.querySelector('input[name$=".SubHeadId"]').value = selectedSubHeadId;
                     editingRow.querySelector('input[name$=".ChildSubHeadId"]').value = selectedChildSubHead.childSubHeadId;
@@ -661,8 +717,7 @@
                     updateMainHeadSubtotals();
 
                 } else {
-                    //assignedSheets += qty;
-                    
+
                     const newRow = document.createElement("tr");
                     newRow.setAttribute('data-mainhead-id', selectedMainHeadId);
                     newRow.setAttribute('data-mainhead-name', selectedMainHeadName);
@@ -676,13 +731,14 @@
                     <input type="hidden" name="WorkDetailsList[${index}].MainHeadId" value="${selectedMainHeadId}" />
                     <input type="hidden" name="WorkDetailsList[${index}].SubHeadId" value="${selectedSubHeadId}" />
                     <input type="hidden" name="WorkDetailsList[${index}].ChildSubHeadId" value="${selectedChildSubHead.childSubHeadId}" />
-                    
+
                     <input type="hidden" name="WorkDetailsList[${index}].Tax" value="0" />
                     <input type="hidden" name="WorkDetailsList[${index}].Cess" value="0" />
                     <input type="hidden" name="WorkDetailsList[${index}].GTotal" value="${gTotal.toFixed(2)}" />
                     <input type="hidden" name="WorkDetailsList[${index}].SizeId" value="${selectedChildSubHead.sizeId}" />
                     <input type="hidden" name="WorkDetailsList[${index}].Details" value="${finalText}" />
                     <input type="hidden" name="WorkDetailsList[${index}].Active" value="Y" />
+
                     <td>
                         <button type="button" class="btn btn-sm btn-danger delete-btn">Delete</button>
                     </td>
@@ -721,7 +777,6 @@
 
                     editingRow = row;
 
-                    // Update globals here - VERY IMPORTANT
                     window.selectedMainHeadId = row.dataset.mainheadId;
                     window.selectedMainHeadName = row.dataset.mainheadName;
 
@@ -744,7 +799,7 @@
 
                 const modalElement = document.getElementById('subHeadsModal');
                 const subHeadsList = document.getElementById('subHeadsList');
-                subHeadsList.innerHTML = ''; 
+                subHeadsList.innerHTML = '';
 
                 fetch(`/WorkOrder/GetSubHeads?mainHeadId=${mainHeadId}`)
                     .then(response => {
@@ -775,26 +830,21 @@
 
             document.getElementById('subHeadsList').addEventListener('click', function (e) {
                 if (e.target.classList.contains('subhead-item')) {
-                    // Set dataset values required by onSubHeadClick
                     const selectedSubHeadId = e.target.dataset.subheadId;
                     const selectedSubHeadName = e.target.textContent;
 
-                    // Set these globally so onSubHeadClick can access
                     selectedSubHeadId && (window.selectedSubHeadId = selectedSubHeadId);
                     selectedSubHeadName && (window.selectedSubHeadName = selectedSubHeadName);
 
-                    // Hide subheads modal before proceeding
                     const subHeadsModalInstance = bootstrap.Modal.getInstance(document.getElementById('subHeadsModal'));
                     subHeadsModalInstance?.hide();
 
-                    //  Reuse existing logic
                     onSubHeadClick.call(e.target);
                 }
             });
 
-            
-            const now = new Date().toISOString().slice(0, 16);  // Adjust to ISO 8601 format (YYYY-MM-DDTHH:mm)
-            //document.querySelector("[name='WorkOrder.Wdate']").min = now;
+
+            const now = new Date().toISOString().slice(0, 16);
             document.querySelector("[name='WorkOrder.Ddate']").min = now;
 
             $(document).ready(function () {
@@ -849,14 +899,43 @@
 
                     gTotalInput.value = gTotal.toFixed(2);
 
-                    // Update hidden GTotal field
                     row.querySelector('input[name$=".GTotal"]').value = gTotal.toFixed(2);
 
-                    // Optional: update hidden Qty too
                     row.querySelector('input[name$=".Qty"]').value = qty;
                 }
             });
 
+            const deletedDetailIds = [];
+
+            $(document).on('click', '.delete-btn', function () {
+                const $row = $(this).closest('tr');
+                const workDetailsId = $row.find('input[name$=".WorkDetailsId"]').val();
+                if (workDetailsId > 0) {
+                    deletedDetailIds.push(workDetailsId);
+                }
+                $row.remove();
+                updateDeletedIdsField();
+                updateTotals();
+            });
+
+            function updateDeletedIdsField() {
+                $("#deletedDetailIds").val(deletedDetailIds.join(','));
+            }
+
+            function updateTotals() {
+                let subtotal = 0;
+                $(".gtotal-input").each(function () {
+                    subtotal += parseFloat($(this).val()) || 0;
+                });
+
+                $("#subtotalField").val(subtotal.toFixed(2));
+
+                const advance = parseFloat($("#advanceField").val()) || 0;
+                const totalPaid = parseFloat($("#totalPaidField").val()) || 0;
+                const balance = subtotal - advance - totalPaid;
+
+                $("#balanceField").val(balance.toFixed(2));
+            }
 
             function updateMainHeadSubtotals() {
                 const rows = document.querySelectorAll("#workOrderTable tbody tr");
@@ -875,23 +954,72 @@
                     }
                 });
 
-                // Update subtotal field
                 const subtotalField = document.getElementById("subtotalField");
                 subtotalField.value = grandTotal.toFixed(2);
 
-                // Also update balance when advance is entered
-                const advanceField = document.getElementById("advanceField");
+                const advance = parseFloat(document.getElementById("advanceField").value || 0);
+                const totalPaid = parseFloat(document.getElementById("totalPaidField").value || 0);
                 const balanceField = document.getElementById("balanceField");
-
-                const advance = parseFloat(advanceField.value || 0);
-                const balance = grandTotal - advance;
+                const balance = grandTotal - advance - totalPaid;
 
                 balanceField.value = balance.toFixed(2);
             }
+
+            updateMainHeadSubtotals();
+
+            form.on('submit', function (e) {
+                const totalSheets = parseInt(document.getElementById("WorkOrder_NoOfSheets").value || 0);
+                const validationSpan = document.getElementById("sheetsFormValidation");
+                const currentlyAssigned = calculateAssignedSheets();
+
+                if (currentlyAssigned !== totalSheets) {
+                    e.preventDefault();
+                    validationSpan.style.display = "block";
+                    validationSpan.textContent = `Please assign all ${totalSheets} sheets. Currently assigned: ${currentlyAssigned}`;
+                    return false;
+                } else {
+                    validationSpan.style.display = "none";
+                }
+
+                e.preventDefault();
+
+                const formData = new FormData(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            $('#workOrderFormContainer').html(response);
+                        }
+                    },
+                    error: function () {
+                        alert('Error occurred while saving Work Order.');
+                    }
+                });
+            });
+
+
+                function refreshWorkOrderSummary() {
+            $('#workOrderSummaryContainer').fadeOut(200, function () {
+                $.get('/Dashboard/GetWorkOrderSummary', function (html) {
+                    $('#workOrderSummaryContainer').html(html).fadeIn(200);
+                });
+            });
+        }
+
+        function loadPage(page) {
+            $.get('/Dashboard/GetBoxContent', { id: 1, page: page }, function (data) {
+                $('#modalContent').html(data);
+            });
+        }
 
         });
 
     </script>
 }
-
-

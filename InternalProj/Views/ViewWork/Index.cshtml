@@ -5,140 +5,149 @@
     var slno = (Model.CurrentPage - 1) * 10 + 1;
 }
 
-@* <link rel="stylesheet" href="~/css/ViewWork.css" asp-append-version="true" /> *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/Invoice.css" asp-append-version="true" />
+}
 
 <div class="container d-flex justify-content-center align-items-center">
-  <div class="card shadow p-4 w-100">
-    <h3 class="text-center">Work Order Details</h3>
-     <div class="custom-form-wrapper">
-       <form asp-action="Index" method="post" class="filter-form">   
-        <div class="form-group">
-            <label for="studio">Studio:</label>
-            <input type="text" id="studio" name="studio" list="studioList" placeholder="Enter studio name" value="@Model.StudioFilter" />
-            <datalist id="studioList">
-                @foreach (var studio in Model.StudioList)
-                {
-                    <option value="@studio"></option>
-                }
-            </datalist>
-        </div>
+    <div class="card shadow p-4 w-100">
+        <h3 class="text-center">Work Order Details</h3>
+        <div class="custom-form-wrapper">
+
+            <form asp-action="Search" method="post" class="filter-form mb-4">
+                <div class="row align-items-end">
+
+                    <div class="form-group col-md-2">
+                        <label for="studio" class="form-label">Studio</label>
+                        <select id="studio" name="studio" class="form-control">
+                            <option value="">-- Select Studio --</option>
+                            @foreach (var studio in Model.StudioList)
+                            {
+                                var isSelected = studio == Model.StudioFilter ? "selected" : "";
+                                @Html.Raw($"<option value=\"{studio}\" {isSelected}>{studio}</option>")
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="fromDate" class="form-label">From Date</label>
+                        <input type="date" id="fromDate" name="fromDate" class="form-control" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="toDate" class="form-label">To Date</label>
+                        <input type="date" id="toDate" name="toDate" class="form-control" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="workTypeId" class="form-label">Work Type</label>
+                        <select asp-for="WorkTypeFilter" class="form-control" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <button type="submit">Search</button>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <a href="@Url.Action("Index", "ViewWork")" class="btn-refresh">Refresh</a>
+                    </div>
 
 
-    <div class="form-group">
-        <label for="fromDate">From Date:</label>
-        <input type="date" id="fromDate" name="fromDate" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
-    </div>
-
-    <div class="form-group">
-        <label for="toDate">To Date:</label>
-        <input type="date" id="toDate" name="toDate" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
-    </div>
-
-    <div class="form-group">
-        <label for="workTypeId">Work Type:</label>
-        <select asp-for="WorkTypeFilter" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))" name="workTypeId">
-            <option value="">-- Select Work Type --</option>
-        </select>
-
-    </div>
-
-
-    <div class="button-cont" style="display: flex; gap: 20px; align-items: center;">
-        <button type="submit">Search</button>
-        <a href="@Url.Action("Index", "ViewWork")" class="btn-refresh">Refresh</a>
-    </div>
-
-</form>
- 
-        @if (Model.Results != null && Model.Results.Any())
-{
-    <table class="workorder-table">
-        <thead>
-            <tr>
-                <th>Sl No</th>
-                <th>Work Order No</th>
-                <th>Studio Name</th>                
-                <th>Work Type</th>                
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Advance</th>
-                <th>Balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Results)
-            {
-                <tr>
-                    <td>@(slno++)</td>
-                    @* <td>@item.WorkOrderNo</td> *@
-                    <td>
-                        <a href="#" class="workorder-link" data-id="@item.WorkOrderId">
-                            @item.WorkOrderNo
-                        </a>
-                    </td>
-
-                    <td>@item.Customer?.StudioName</td>                   
-                    <td>@item.WorkType?.TypeName</td>                    
-                    <td>@item.Wdate?.ToString("dd-MM-yyyy")</td>
-                    <td>@item.SubTotal.ToString("N2")</td>
-                    <td>@item.Advance?.ToString("N2")</td>
-                    <td>@((item.SubTotal - (item.Advance ?? 0)).ToString("N2"))</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    @if (Model.TotalPages > 1)
-    {
-        <div class="pagination-container">
-            <form asp-action="Index" method="post" class="pagination-form">
-                <input type="hidden" name="studio" value="@Context.Request.Form["studio"]" />
-                <input type="hidden" name="fromDate" value="@Context.Request.Form["fromDate"]" />
-                <input type="hidden" name="toDate" value="@Context.Request.Form["toDate"]" />
-                <input type="hidden" name="workTypeId" value="@Context.Request.Form["workTypeId"]" />
-
-                <div class="pagination-buttons">
-                    @if (Model.CurrentPage > 1)
-                    {
-                        <button name="currentPage" value="@(Model.CurrentPage - 1)" class="pagination-btn">&lt;</button>
-                    }
-
-                    <button name="currentPage" value="1" class="pagination-btn @(Model.CurrentPage == 1 ? "active" : "")">1</button>
-
-                    @if (Model.CurrentPage > 3)
-                    {
-                        <span class="dots">...</span>
-                    }
-
-                    @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
-                    {
-                        <button name="currentPage" value="@i" class="pagination-btn @(i == Model.CurrentPage ? "active" : "")">@i</button>
-                    }
-
-                    @if (Model.CurrentPage < Model.TotalPages - 2)
-                    {
-                        <span class="dots">...</span>
-                    }
-
-                    @if (Model.TotalPages > 1)
-                    {
-                        <button name="currentPage" value="@Model.TotalPages" class="pagination-btn @(Model.CurrentPage == Model.TotalPages ? "active" : "")">@Model.TotalPages</button>
-                    }
-
-                    @if (Model.CurrentPage < Model.TotalPages)
-                    {
-                        <button name="currentPage" value="@(Model.CurrentPage + 1)" class="pagination-btn">&gt;</button>
-                    }
                 </div>
             </form>
-        </div>
-    }
 
-}
-else
-{
-    <p>No records found.</p>
-}
+            @if (Model.ResultsSummary != null && Model.ResultsSummary.Any())
+            {
+                <table class="workorder-table">
+                    <thead>
+                        <tr>
+                            <th>Sl No</th>
+                            <th>Work Order No</th>
+                            <th>Studio Name</th>
+                            <th>Work Type</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Advance</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ResultsSummary)
+                        {
+                            <tr>
+                                <td>@(slno++)</td>
+                                @* <td>@item.WorkOrderNo</td> *@
+                                <td>
+                                    <a href="#" class="workorder-link" data-id="@item.WorkOrderId">
+                                        @item.WorkOrderNo
+                                    </a>
+                                </td>
+
+                                <td>@item.StudioName</td>
+                                <td>@item.WorkTypeName</td>
+                                <td>@item.Wdate?.ToString("dd-MM-yyyy")</td>
+                                <td>@item.SubTotal.ToString("N2")</td>
+                                <td>@item.Advance.ToString("N2")</td>
+                                <td>@item.Balance.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="pagination-container">
+                        <form asp-action="Index" method="get" class="pagination-form">
+
+                            <input type="hidden" name="studio" value="@Model.StudioFilter" />
+                            <input type="hidden" name="fromDate" value="@Model.FromDateFilter?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="toDate" value="@Model.ToDateFilter?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
+                            <input type="hidden" name="isSearch" value="true" />
+
+                            <div class="pagination-buttons">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <button name="currentPage" value="@(Model.CurrentPage - 1)" class="pagination-btn">&lt;</button>
+                                }
+
+                                <button name="currentPage" value="1" class="pagination-btn @(Model.CurrentPage == 1 ? "active" : "")">1</button>
+
+                                @if (Model.CurrentPage > 3)
+                                {
+                                    <span class="dots">...</span>
+                                }
+
+                                @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
+                                {
+                                    <button name="currentPage" value="@i" class="pagination-btn @(i == Model.CurrentPage ? "active" : "")">@i</button>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages - 2)
+                                {
+                                    <span class="dots">...</span>
+                                }
+
+                                @if (Model.TotalPages > 1)
+                                {
+                                    <button name="currentPage" value="@Model.TotalPages" class="pagination-btn @(Model.CurrentPage == Model.TotalPages ? "active" : "")">@Model.TotalPages</button>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <button name="currentPage" value="@(Model.CurrentPage + 1)" class="pagination-btn">&gt;</button>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                }
+
+            }
+            else
+            {
+                <p>No records found.</p>
+            }
 
         </div>
     </div>
@@ -190,7 +199,7 @@ else
     /* Global page styles */
     body {
         color: #333;
-        font:13px;
+        font: 13px;
     }
 
     h3 {
@@ -212,7 +221,7 @@ else
         display: flex;
         flex-direction: column;
         min-width: 150px;
-        max-width: 220px;
+        max-width: 320px;
     }
 
     label {
@@ -231,12 +240,12 @@ else
         transition: border-color 0.3s ease;
     }
 
-    input[type="text"]:focus,
-    input[type="date"]:focus,
-    select:focus {
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
             border-color: #4a0357;
-        outline: none;
-    }
+            outline: none;
+        }
 
     button {
         padding: 10px 20px;
@@ -251,9 +260,9 @@ else
         font-weight: 500;
     }
 
-    button:hover {
+        button:hover {
             background-color: #9007a8;
-    }
+        }
 
     /* Table styling */
     .workorder-table {
@@ -264,22 +273,22 @@ else
         font-size: 13px;
     }
 
-    .workorder-table th,
-    .workorder-table td {
-        border: 1px solid #ddd;
-        padding: 8px 10px;
-        text-align: left;
-    }
+        .workorder-table th,
+        .workorder-table td {
+            border: 1px solid #ddd;
+            padding: 8px 10px;
+            text-align: left;
+        }
 
-    .workorder-table thead {
-        background-color: #64126b;
-        color: white;
-        font-weight: 600;
-    }
+        .workorder-table thead {
+            background-color: #64126b;
+            color: white;
+            font-weight: 600;
+        }
 
-    .workorder-table tbody tr:hover {
-        background-color: #f1f7ff;
-    }
+        .workorder-table tbody tr:hover {
+            background-color: #f1f7ff;
+        }
 
     /* Responsive for small screens */
     @@media (max-width: 700px) {
@@ -299,7 +308,7 @@ else
 
     .btn-refresh {
         padding: 10px 20px;
-        text-decoration:none;
+        text-decoration: none;
         font-size: 14px;
         background-color: #07ad33;
         border: none;
@@ -317,7 +326,7 @@ else
         }
 
 
-    .button-cont{
+    .button-cont {
         display: flex;
     }
 
@@ -366,5 +375,4 @@ else
         font-weight: bold;
         color: #999;
     }
-
 </style>
