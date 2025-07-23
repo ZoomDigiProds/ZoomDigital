@@ -62,7 +62,7 @@ namespace InternalProj.Controllers
                 CustomerCategories = _context.CustomerCategories.Where(p => p.Active == "Y").ToList(),
                 Branches = _context.Branches.Where(c => c.Active == "Y").ToList(),
                 RateTypes = _context.RateTypeMasters.Where(d => d.Active == "Y").ToList(),
-                StaffRegs = _context.StaffRegs.Where(e => e.Active == "Y").ToList(),                
+                StaffRegs = _context.StaffRegs.Where(e => e.Active == "Y").ToList(),
             };
 
             return View(model);
@@ -75,6 +75,15 @@ namespace InternalProj.Controllers
         {
             if (ModelState.IsValid)
             {
+                var staffId = HttpContext.Session.GetInt32("StaffId");
+                var staffName = HttpContext.Session.GetString("UserName");
+
+                if (staffId == null || string.IsNullOrEmpty(staffName))
+                {
+                    TempData["ErrorMessage"] = "Staff session expired. Please log in again.";
+                    return RedirectToAction("Login", "Account");
+                }
+
                 var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
 
                 var newCustomer = new CustomerReg
@@ -88,7 +97,7 @@ namespace InternalProj.Controllers
                     CategoryId = model.CategoryId,
                     BranchId = model.BranchId,
                     RateTypeId = model.RateTypeId,
-                    StaffId = model.StaffId,
+                    StaffId = staffId.Value
                 };
 
                 _context.CustomerRegs.Add(newCustomer);
@@ -134,7 +143,7 @@ namespace InternalProj.Controllers
                 }
             }
 
-            // If validation fails, re-fill dropdowns
+            // If validation fails, reload dropdowns
             model.StateMasterRegs = _context.StateMasters.Where(s => s.Active == "Y").ToList();
             model.RegionMasterRegs = _context.RegionMasters.Where(r => r.Active == "Y").ToList();
             model.PhoneTypes = _context.PhoneTypes.Where(p => p.Active == "Y").ToList();
@@ -143,6 +152,7 @@ namespace InternalProj.Controllers
             model.RateTypes = _context.RateTypeMasters.Where(e => e.Active == "Y").ToList();
             model.StaffRegs = _context.StaffRegs.Where(r => r.Active == "Y").ToList();
 
+            TempData["ErrorMessage"] = "An error occurred while registering customer. Please check all fields.";
             return View(model);
         }
 

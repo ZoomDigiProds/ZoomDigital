@@ -53,7 +53,7 @@ namespace InternalProj.Controllers
                 if (result == PasswordVerificationResult.Success)
                 {
                     HttpContext.Session.SetString("UserName", user.UserName);
-                    HttpContext.Session.SetString("StaffId", user.StaffId.ToString());
+                    HttpContext.Session.SetInt32("StaffId", user.StaffId);
 
                     var userDepartments = _context.StaffDepartments
                         .Where(sd => sd.StaffId == user.StaffId)

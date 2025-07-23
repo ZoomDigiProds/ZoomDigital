@@ -4,6 +4,9 @@
     ViewData["Title"] = "Customer Registration";
 }
 
+@{
+    var staffName = Context.Session.GetString("UserName");
+}
 
 @section Styles {
     <link rel="stylesheet" href="~/css/Customer.css" asp-append-version="true" />
@@ -167,18 +170,11 @@
                     </div>
 
                     <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Staff</label>
-                        <select name="StaffId" class="form-select" required>
-                            <option value="">-- Select Staff --</option>
-                            @foreach (var staff in Model.StaffRegs)
-                            {
-                                <option value="@staff.StaffId">
-                                    @staff.FirstName @staff.LastName
-                                </option>
-                            }
-                        </select>
+                        @* <label class="form-label">Staff</label> *@
+                        <input type="hidden" name="Staff" value="@staffName" />
                     </div>
 
+                    <br />
                     <br />
 
                     <div class="d-grid">
