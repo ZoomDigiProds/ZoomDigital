@@ -118,11 +118,10 @@ namespace InternalProj.Controllers
                 _context.SaveChanges();
 
                 TempData["SuccessMessage"] = "Customer registration successful!";
-                return RedirectToAction("Index", "StaffReg");
+                return RedirectToAction("Create");
             }
             else
             {
-                Console.WriteLine("Model is NOT valid");
                 foreach (var error in ModelState)
                 {
                     foreach (var err in error.Value.Errors)
