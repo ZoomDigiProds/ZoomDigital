@@ -45,7 +45,6 @@
     <style>
         .nav-link.active {
             font-weight: bold;
-            color: #ffc107 !important;
         }
 
         .profile-section {
@@ -92,14 +91,14 @@
                                     <a class="nav-link @(controller == "Receipt" && action == "Index" ? "active" : "")"
                                     asp-area="" asp-controller="Receipt" asp-action="Create">Receipt</a>
                                 </li>
-                                <li class="nav-item">
+                                @* <li class="nav-item">
                                     <a class="nav-link @(controller == "CustomerReg" ? "active" : "")"
                                     asp-area="" asp-controller="CustomerReg" asp-action="Create">Customer Registration</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link @(controller == "StaffReg" ? "active" : "")"
                                     asp-area="" asp-controller="StaffReg" asp-action="Index">Staff Registration</a>
-                                </li>
+                                </li> *@
                                 <li class="nav-item">
                                     <a class="nav-link @(controller == "WorkOrder" ? "active" : "")"
                                     asp-area="" asp-controller="WorkOrder" asp-action="Create">Work Order</a>
@@ -108,7 +107,7 @@
                                     <a class="nav-link @(controller == "ViewWork" ? "active" : "")"
                                     asp-area="" asp-controller="ViewWork" asp-action="Index">Reports</a>
                                 </li>
-                                <li class="nav-item">
+                                @* <li class="nav-item">
                                     <a class="nav-link @(controller == "StudioCallLogs" ? "active" : "")"
                                     asp-area="" asp-controller="StudioCallLogs" asp-action="Index">CallLogs</a>
                                 </li>
@@ -121,10 +120,10 @@
                                    asp-area="" asp-controller="Invoice" asp-action="CreateInvoice">Invoice</a>
                                 </li>
                             }
-                            <li class="nav-item">
+                            @* <li class="nav-item">
                                 <a class="nav-link @(controller == "Home" && action == "Privacy" ? "active" : "")"
                                    asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
+                            </li> *@
 
                             @if (menuItems.Any(item => isAdmin || item.AllowedDepts.Any(dep => departments.Contains(dep))))
                             @* @if (menuItems.Any(item => item.AllowedDepts.Any(dep => departments.Contains(dep)))) *@

@@ -41,6 +41,9 @@ namespace InternalProj
                 app.UseHsts();
             }
 
+            //builder.WebHost.UseUrls("http://192.168.1.62:5190");
+
+
             app.UseStaticFiles();
 
             app.UseRouting();

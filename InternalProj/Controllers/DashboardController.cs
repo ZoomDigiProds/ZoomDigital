@@ -195,7 +195,6 @@ namespace InternalProj.Controllers
         {
             try
             {
-                // Get IST Timezone safely
                 TimeZoneInfo indiaZone;
                 try
                 {
@@ -206,15 +205,12 @@ namespace InternalProj.Controllers
                     indiaZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kolkata");
                 }
 
-                // Get today's date in IST
                 var nowIST = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaZone);
                 var todayIST = nowIST.Date;
 
-                // Convert today's date range in IST to UTC for DB comparison
                 var startUtc = TimeZoneInfo.ConvertTimeToUtc(todayIST, indiaZone);
                 var endUtc = TimeZoneInfo.ConvertTimeToUtc(todayIST.AddDays(1).AddTicks(-1), indiaZone);
 
-                // Advance from WorkOrders
                 var advanceData = _context.WorkOrders
                     .Include(w => w.Customer)
                     .Where(w => w.Wdate >= startUtc && w.Wdate <= endUtc && w.Advance > 0)

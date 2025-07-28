@@ -88,11 +88,49 @@ public class ReceiptController : Controller
             return View(model);
         }
 
-        if (model.Receipt.CustomerId == 0 || model.Receipt.WorkOrderId == 0)
+        if (!ModelState.IsValid || model.Receipt.CustomerId == 0 || model.Receipt.WorkOrderId == 0 || model.Receipt.CurrentAmount == 0)
         {
             TempData["Error"] = "Please select a valid customer and work order before submitting.";
+
             model.ModeOfPayments = _context.ModeOfPayments.ToList();
             model.Customers = _context.CustomerRegs.ToList();
+
+            // Populate additional view model data
+            var workOrders = _context.WorkOrders
+                .Where(w => w.CustomerId == model.Receipt.CustomerId && w.Active == "Y")
+                .Select(w => new WorkOrderSummaryDto
+                {
+                    WorkOrderId = w.WorkOrderId,
+                    WorkOrderNo = w.WorkOrderNo,
+                    Wdate = w.Wdate,
+                    SubTotal = w.SubTotal,
+                    Advance = w.Advance ?? 0,
+                    TotalPaid = _context.Receipts
+                        .Where(r => r.WorkOrderId == w.WorkOrderId)
+                        .Sum(r => (double?)r.CurrentAmount) ?? 0
+                })
+                .AsEnumerable()
+                .Select(w =>
+                {
+                    w.Balance = Math.Max(0, w.SubTotal - w.Advance - w.TotalPaid);
+                    return w;
+                })
+                .Where(w => w.Balance > 0)
+                .OrderByDescending(w => w.Wdate)
+                .ToList();
+
+            int pageSize = 10;
+            int currentPage = model.CurrentPage > 0 ? model.CurrentPage : 1;
+            var pagedOrders = workOrders.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+            double totalBalance = workOrders.Sum(w => w.Balance);
+            int totalItems = workOrders.Count;
+
+            model.ReceiptNo = _context.Receipts.Any() ? _context.Receipts.Max(r => r.ReceiptId) + 1 : 1;
+            model.PagedWorkOrders = pagedOrders;
+            model.CurrentPage = currentPage;
+            model.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            model.TotalBalance = totalBalance;
+
             return View(model);
         }
 
