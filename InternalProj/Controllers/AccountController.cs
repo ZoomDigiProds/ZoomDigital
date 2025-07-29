@@ -1,5 +1,4 @@
-﻿
-using InternalProj.Data;
+﻿using InternalProj.Data;
 using InternalProj.Filters;
 using InternalProj.Models;
 using MailKit.Net.Smtp;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
 
@@ -23,8 +23,8 @@ namespace InternalProj.Controllers
             _context = context;
             _emailSettings = emailSettings.Value;
         }
-
         //for invalid user who tries to accesspage without authorization
+
         public IActionResult AccessDenied()
         {
             return View();
@@ -61,12 +61,11 @@ namespace InternalProj.Controllers
                         .ToList();
 
                     HttpContext.Session.SetString("UserDepartments", string.Join(",", userDepartments));
-
                     TempData["SuccessMessage"] = "Login successful!";
 
                     if (user.IsFirstLogin == true)
                     {
-                        HttpContext.Session.SetString("IsFirstLogin", "true"); // ✅ Set to true
+                        HttpContext.Session.SetString("IsFirstLogin", "true"); // ✅ set to true
                         return RedirectToAction("ResetPassword", "Account", new { staffId = user.StaffId });
                     }
                     else
@@ -184,7 +183,6 @@ namespace InternalProj.Controllers
             }
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ResetPassword(string? token, string newPassword)
@@ -222,14 +220,43 @@ namespace InternalProj.Controllers
             }
 
             var passwordHasher = new PasswordHasher<StaffCredentials>();
-            staffUser.Password = passwordHasher.HashPassword(staffUser, newPassword);
 
+            //  Combine current and last 3 password hashes
+            var lastPasswords = _context.StaffPasswordHistories
+                .Where(p => p.StaffId == staffUser.StaffId)
+                .OrderByDescending(p => p.ChangedOn)
+                .Take(3)
+                .Select(p => p.HashedPassword)
+                .ToList();
+
+            lastPasswords.Insert(0, staffUser.Password);
+
+            foreach (var oldHashed in lastPasswords)
+            {
+                var check = passwordHasher.VerifyHashedPassword(staffUser, oldHashed, newPassword);
+                if (check == PasswordVerificationResult.Success)
+                {
+                    ViewBag.Error = "You cannot reuse your current or any of your last 3 passwords.";
+                    ViewBag.Token = token;
+                    return View();
+                }
+            }
+
+            // Save current password to history
+            _context.StaffPasswordHistories.Add(new StaffPasswordHistory
+            {
+                StaffId = staffUser.StaffId,
+                HashedPassword = staffUser.Password,
+                ChangedOn = DateTime.UtcNow
+            });
+
+            // Update with new password
+            staffUser.Password = passwordHasher.HashPassword(staffUser, newPassword);
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Password reset successful!";
             return RedirectToAction("Index", "Dashboard");
         }
-
 
         public IActionResult Logout()
         {

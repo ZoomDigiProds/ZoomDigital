@@ -1,5 +1,6 @@
 ﻿using InternalProj.Data;
 using InternalProj.Filters;
+using InternalProj.Helpers;
 using InternalProj.Models;
 using InternalProj.Service;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ZoomColorLab.Controllers
 {
-    [DepartmentAuthorize()]
+    //[DepartmentAuthorize()]
     public class StaffRegController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -45,8 +46,9 @@ namespace ZoomColorLab.Controllers
                 //CategoryId = s.CategoryId,
                 Branches = branches,
                 //CustomerCategories = categories,
-                Address1 = s.Addresses?.FirstOrDefault()?.Address1,
-                Phone1 = s.Contacts?.FirstOrDefault()?.Phone1,
+                Phone1 = EncryptionHelper.Decrypt(s.Contacts?.FirstOrDefault()?.Phone1),
+                Phone2 = EncryptionHelper.Decrypt(s.Contacts?.FirstOrDefault()?.Phone2),
+                Whatsapp = EncryptionHelper.Decrypt(s.Contacts?.FirstOrDefault()?.Whatsapp),
                 Email = s.Contacts?.FirstOrDefault()?.Email,
                 UserName = s.Credentials?.FirstOrDefault()?.UserName,
                 Active = s.Active
@@ -151,9 +153,9 @@ namespace ZoomColorLab.Controllers
                 var staffContact = new StaffContact
                 {
                     StaffId = newStaff.StaffId,
-                    Phone1 = Phone1,
-                    Phone2 = Phone2,
-                    Whatsapp = Whatsapp,
+                    Phone1 = EncryptionHelper.Encrypt(Phone1),
+                    Phone2 = EncryptionHelper.Encrypt(Phone2),
+                    Whatsapp = EncryptionHelper.Encrypt(Whatsapp),
                     Email = Email,
                     PhoneTypeId = PhoneTypeId,
                     Active = "Y"
@@ -250,9 +252,9 @@ namespace ZoomColorLab.Controllers
                 UserName = credentials?.UserName,
                 Address1 = staff.Addresses?.FirstOrDefault()?.Address1,
                 Address2 = staff.Addresses?.FirstOrDefault()?.Address2,
-                Phone1 = staff.Contacts?.FirstOrDefault()?.Phone1,
-                Phone2 = staff.Contacts?.FirstOrDefault()?.Phone2,
-                Whatsapp = staff.Contacts?.FirstOrDefault()?.Whatsapp,
+                Phone1 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone1),
+                Phone2 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone2),
+                Whatsapp = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Whatsapp),
                 Email = staff.Contacts?.FirstOrDefault()?.Email,
                 PhoneTypeId = staff.Contacts?.FirstOrDefault()?.PhoneTypeId ?? 0,
                 SelectedDeptIds = staff.StaffDepartments.Select(sd => sd.DeptId).ToList(),
@@ -291,16 +293,20 @@ namespace ZoomColorLab.Controllers
             }
 
             // ✅ Uniqueness checks
+            var usernameToCheck = UserName?.Trim().ToLower();
+
             var existingUser = await _context.StaffCredentials
-                .FirstOrDefaultAsync(c => c.UserName == UserName && c.StaffId != model.StaffRegId);
+                .FirstOrDefaultAsync(c => c.UserName.ToLower() == usernameToCheck && c.StaffId != model.StaffRegId);
 
             if (existingUser != null)
             {
                 ModelState.AddModelError("UserName", "Username already exists.");
             }
 
+            var emailToCheck = Email?.Trim().ToLower();
+
             var existingEmail = await _context.StaffContacts
-                .FirstOrDefaultAsync(c => c.Email == Email && c.StaffId != model.StaffRegId);
+                .FirstOrDefaultAsync(c => c.Email.ToLower() == emailToCheck && c.StaffId != model.StaffRegId);
 
             if (existingEmail != null)
             {
@@ -518,9 +524,9 @@ namespace ZoomColorLab.Controllers
                 UserName = credentials?.UserName,
                 Address1 = staff.Addresses?.FirstOrDefault()?.Address1,
                 Address2 = staff.Addresses?.FirstOrDefault()?.Address2,
-                Phone1 = staff.Contacts?.FirstOrDefault()?.Phone1,
-                Phone2 = staff.Contacts?.FirstOrDefault()?.Phone2,
-                Whatsapp = staff.Contacts?.FirstOrDefault()?.Whatsapp,
+                Phone1 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone1),
+                Phone2 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone2),
+                Whatsapp = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Whatsapp),
                 Email = staff.Contacts?.FirstOrDefault()?.Email,
                 PhoneTypeId = staff.Contacts?.FirstOrDefault()?.PhoneTypeId ?? 0,
                 SelectedDeptIds = staff.StaffDepartments.Select(sd => sd.DeptId).ToList(),
