@@ -3,52 +3,67 @@
     ViewData["Title"] = "Customer List";
 }
 
-<h2>Customer Registrations</h2>
+@* <h2 class="text-2xl font-bold mb-6 text-gray-900">Customer Registrations</h2> *@
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Customer Registrations</h3>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Studio Name</th>
-            <th>Discount</th>
-            <th>Category</th>
-            <th>Branch</th>
-            <th>Rate Type</th>
-            <th>Staff</th>
-            @* <th>Address</th> *@
-            <th>Contacts</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var customer in Model.CustomerRegs)
-        {
+<div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+        <thead class="bg-gray-100">
             <tr>
-                <td>@customer.FirstName @customer.LastName</td>
-                <td>@customer.StudioName</td>
-                <td>@customer.Discount?.ToString("0.##")</td>
-                <td>@customer.CustomerCategory?.CategoryName</td>
-                <td>@customer.Branch?.BranchName</td>
-                <td>@customer.RateTypeMaster?.RateTypeName</td>
-                <td>@customer.StaffReg?.FirstName @customer.StaffReg?.LastName</td>
-
-                <td>
-                    @if (customer.Contacts != null && customer.Contacts.Any())
-                    {
-                        <ul>
-                            @foreach (var contact in customer.Contacts)
-                            {
-                                <li>
-                                    @contact.PhoneType?.PhoneTypeName: @contact.Phone1
-                                </li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <em>No Contacts</em>
-                    }
-                </td>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Name</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Studio Name</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Discount</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Category</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Branch</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Rate Type</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Staff</th>
+                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Contacts</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @foreach (var customer in Model.CustomerRegs)
+            {
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-900 text-sm font-medium">
+                        @customer.FirstName @customer.LastName
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
+                        @customer.StudioName
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
+                        @customer.Discount?.ToString("0.##")
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
+                        @customer.CustomerCategory?.CategoryName
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
+                        @customer.Branch?.BranchName
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
+                        @customer.RateTypeMaster?.RateTypeName
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
+                        @customer.StaffReg?.FirstName @customer.StaffReg?.LastName
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm max-w-xs">
+                        @if (customer.Contacts != null && customer.Contacts.Any())
+                        {
+                            <ul class="list-disc list-inside space-y-1">
+                                @foreach (var contact in customer.Contacts)
+                                {
+                                    <li>
+                                        <span class="font-semibold">@contact.PhoneType?.PhoneTypeName:</span> @contact.Phone1
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <em class="italic text-gray-400">No Contacts</em>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

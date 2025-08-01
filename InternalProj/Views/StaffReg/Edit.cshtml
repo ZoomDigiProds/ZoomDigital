@@ -4,282 +4,197 @@
     ViewData["Title"] = "Edit Staff";
 }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<!-- Tailwind CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 
-<style>
-    .form-section {
-        max-width: 1000px;
-        margin: auto;
-    }
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Edit Staff Details</h3>
 
-    .registration-form {
-        background-color: #f2f2f2;
-        padding: 30px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    .form-label {
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .form-control, .form-select {
-        font-size: 14px;
-        height: 32px;
-    }
-
-    .form-heading {
-        text-align: center;
-        font-weight: bold;
-        font-size: 18px;
-        margin-bottom: 20px;
-    }
-
-    .form-buttons {
-        text-align: center;
-        margin-top: 50px;
-    }
-
-    .btn-icon {
-        width: 90px;
-        margin: 15px;
-    }
-
-    .four-col-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px 20px;
-    }
-
-    .multi-checkbox-dropdown {
-        position: relative;
-    }
-
-    .selected-items {
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        height: 32px;
-        line-height: 32px;
-        padding: 0 10px;
-        background-color: #fff;
-        cursor: pointer;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-
-    .checkbox-list {
-        position: absolute;
-        background: white;
-        border: 1px solid #ced4da;
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        display: none;
-        z-index: 100;
-    }
-
-    .multi-checkbox-dropdown.open .checkbox-list {
-        display: block;
-    }
-
-    .multi-checkbox-dropdown label {
-        display: block;
-        padding: 4px 8px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-        .multi-checkbox-dropdown label:hover {
-            background-color: #f8f9fa;
+<div class="min-h-screen bg-gray-100 py-8 px-4 flex justify-center">
+    <div class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-8">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-100 text-green-800 rounded p-3 text-center font-semibold mb-6" id="success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 text-red-800 rounded p-3 text-center font-semibold mb-6" id="error">
+                @TempData["ErrorMessage"]
+            </div>
         }
 
-    .text-danger {
-        font-size: 13px;
-    }
-</style>
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="bg-red-100 text-red-800 rounded p-4 mb-6">
+                <ul class="list-disc list-inside">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
 
-<div class="container mt-4">
-    <div class="form-section">
-        <div class="registration-form shadow">
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success text-center" id="success">
-                    @TempData["SuccessMessage"]
+        <script>
+            setTimeout(() => { document.getElementById('success')?.classList.add('hidden'); }, 5000);
+            setTimeout(() => { document.getElementById('error')?.classList.add('hidden'); }, 5000);
+        </script>
+
+        @* <h2 class="text-center text-2xl font-bold mb-8">Edit Staff Details</h2> *@
+
+        <form asp-action="Edit" method="post" id="editForm" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="StaffRegId" value="@Model.StaffRegId" />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="FirstName">First Name</label>
+                    <input id="FirstName" name="FirstName" type="text" value="@Model.FirstName" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
                 </div>
-            }
-
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger text-center" id="error">
-                    @TempData["ErrorMessage"]
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="LastName">Last Name</label>
+                    <input id="LastName" name="LastName" type="text" value="@Model.LastName" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
                 </div>
-            }
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Address1">Address 1</label>
+                    <input id="Address1" name="Address1" type="text" value="@Model.Address1" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Address2">Address 2</label>
+                    <input id="Address2" name="Address2" type="text" value="@Model.Address2"
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
 
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="DOB">DOB</label>
+                    <input id="DOB" name="DOB" type="date" value="@Model.DOB?.ToString("yyyy-MM-dd")" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="DOJ">DOJ</label>
+                    <input id="DOJ" name="DOJ" type="date" value="@Model.DOJ?.ToString("yyyy-MM-dd")" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Phone1">Phone 1</label>
+                    <input id="Phone1" name="Phone1" type="text" value="@Model.Phone1" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Phone2">Phone 2</label>
+                    <input id="Phone2" name="Phone2" type="text" value="@Model.Phone2"
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Whatsapp">WhatsApp</label>
+                    <input id="Whatsapp" name="Whatsapp" type="text" value="@Model.Whatsapp"
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Email">Email</label>
+                    <input id="Email" name="Email" type="email" value="@Model.Email" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    @Html.ValidationMessage("Email", "", new { @class = "text-red-600 text-xs mt-1 block" })
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="PhoneTypeId">Phone Type</label>
+                    <select id="PhoneTypeId" name="PhoneTypeId" required
+                            class="w-full rounded border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                        <option value="">-- Select --</option>
+                        @foreach (var type in Model.PhoneTypes)
                         {
-                            <li>@error.ErrorMessage</li>
+                            <option value="@type.PhoneTypeId" selected="@(Model.PhoneTypeId == type.PhoneTypeId)">
+                                @type.PhoneTypeName
+                            </option>
                         }
-                    </ul>
+                    </select>
                 </div>
-            }
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="BranchId">Branch</label>
+                    <select id="BranchId" name="BranchId" required
+                            class="w-full rounded border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                        <option value="">-- Select --</option>
+                        @foreach (var branch in Model.Branches)
+                        {
+                            <option value="@branch.BranchId" selected="@(Model.BranchId == branch.BranchId)">
+                                @branch.BranchName
+                            </option>
+                        }
+                    </select>
+                </div>
 
-            <script>
-                setTimeout(() => $('#success').fadeOut('slow'), 5000);
-                setTimeout(() => $('#error').fadeOut('slow'), 5000);
-            </script>
-
-            <div class="form-heading">Edit Staff Details</div>
-
-            <form asp-action="Edit" method="post" id="editForm">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="StaffRegId" value="@Model.StaffRegId" />
-
-                <div class="four-col-grid">
-                    <div>
-                        <label class="form-label">First Name</label>
-                        <input name="FirstName" value="@Model.FirstName" class="form-control" required />
-                    </div>
-                    <div>
-                        <label class="form-label">Last Name</label>
-                        <input name="LastName" value="@Model.LastName" class="form-control" required />
-                    </div>
-                    <div>
-                        <label class="form-label">Address 1</label>
-                        <input name="Address1" value="@Model.Address1" class="form-control" required />
-                    </div>
-                    <div>
-                        <label class="form-label">Address 2</label>
-                        <input name="Address2" value="@Model.Address2" class="form-control" />
-                    </div>
-
-                    <div>
-                        <label class="form-label">DOB</label>
-                        <input name="DOB" type="date" value="@Model.DOB?.ToString("yyyy-MM-dd")" class="form-control" required />
-                    </div>
-                    <div>
-                        <label class="form-label">DOJ</label>
-                        <input name="DOJ" type="date" value="@Model.DOJ?.ToString("yyyy-MM-dd")" class="form-control" required />
-                    </div>
-                    <div>
-                        <label class="form-label">Phone 1</label>
-                        <input name="Phone1" value="@Model.Phone1" class="form-control" required />
-                    </div>
-                    <div>
-                        <label class="form-label">Phone 2</label>
-                        <input name="Phone2" value="@Model.Phone2" class="form-control" />
-                    </div>
-
-                    <div>
-                        <label class="form-label">WhatsApp</label>
-                        <input name="Whatsapp" value="@Model.Whatsapp" class="form-control" />
-                    </div>
-                    <div>
-                        <label class="form-label">Email</label>
-                        <input name="Email" value="@Model.Email" class="form-control" required />
-                        @Html.ValidationMessage("Email", "", new { @class = "text-danger" })
-                    </div>
-                    <div>
-                        <label class="form-label">Phone Type</label>
-                        <select name="PhoneTypeId" class="form-select" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var type in Model.PhoneTypes)
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
+                    <div id="designationDropdown" class="multi-checkbox-dropdown relative w-full">
+                        <div tabindex="0"
+                             class="selected-items border border-gray-300 rounded px-3 py-2 bg-white cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                            Select Designation(s)
+                        </div>
+                        <div class="checkbox-list absolute left-0 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-gray-300 rounded shadow-md hidden z-50 text-sm">
+                            @foreach (var desig in Model.Designations)
                             {
-                                <option value="@type.PhoneTypeId" selected="@(Model.PhoneTypeId == type.PhoneTypeId)">
-                                    @type.PhoneTypeName
-                                </option>
+                                var isChecked = Model.SelectedDesignationIds?.Contains(desig.DesignationId) ?? false;
+                                <label class="block px-2 py-1 hover:bg-gray-100 cursor-pointer">
+                                    <input type="checkbox" name="SelectedDesignationIds" value="@desig.DesignationId"
+                                           @(isChecked ? "checked" : "") class="mr-2 align-middle" />
+                                    @desig.Name
+                                </label>
                             }
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Branch</label>
-                        <select name="BranchId" class="form-select" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var branch in Model.Branches)
-                            {
-                                <option value="@branch.BranchId" selected="@(Model.BranchId == branch.BranchId)">
-                                    @branch.BranchName
-                                </option>
-                            }
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="form-label">Designation</label>
-                        <div class="multi-checkbox-dropdown" id="designationDropdown">
-                            <div class="selected-items" tabindex="0">Select Designation(s)</div>
-                            <div class="checkbox-list">
-                                @foreach (var desig in Model.Designations)
-                                {
-                                    var isChecked = Model.SelectedDesignationIds?.Contains(desig.DesignationId) ?? false;
-                                    <label>
-                                        <input type="checkbox" name="SelectedDesignationIds" value="@desig.DesignationId" @(isChecked ? "checked" : "") />
-                                        @desig.Name
-                                    </label>
-                                }
-                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <input type="hidden" name="Active" value="Y" />
+                <input type="hidden" name="Active" value="Y" />
 
-                    <div>
-                        <label class="form-label">Department</label>
-                        <div class="multi-checkbox-dropdown" id="departmentDropdown">
-                            <div class="selected-items" tabindex="0">Select Department(s)</div>
-                            <div class="checkbox-list">
-                                @foreach (var dept in Model.Departments)
-                                {
-                                    var isChecked = Model.SelectedDeptIds?.Contains(dept.DeptId) ?? false;
-                                    <label>
-                                        <input type="checkbox" name="SelectedDeptIds" value="@dept.DeptId" @(isChecked ? "checked" : "") />
-                                        @dept.Name
-                                    </label>
-                                }
-                            </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Department</label>
+                    <div id="departmentDropdown" class="multi-checkbox-dropdown relative w-full">
+                        <div tabindex="0"
+                             class="selected-items border border-gray-300 rounded px-3 py-2 bg-white cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                            Select Department(s)
+                        </div>
+                        <div class="checkbox-list absolute left-0 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-gray-300 rounded shadow-md hidden z-50 text-sm">
+                            @foreach (var dept in Model.Departments)
+                            {
+                                var isChecked = Model.SelectedDeptIds?.Contains(dept.DeptId) ?? false;
+                                <label class="block px-2 py-1 hover:bg-gray-100 cursor-pointer">
+                                    <input type="checkbox" name="SelectedDeptIds" value="@dept.DeptId"
+                                           @(isChecked ? "checked" : "") class="mr-2 align-middle" />
+                                    @dept.Name
+                                </label>
+                            }
                         </div>
                     </div>
-                    @* <div> *@
-                    @*     <label class="form-label">Category</label> *@
-                    @*     <select name="CategoryId" class="form-select" required> *@
-                    @*         <option value="">-- Select Category --</option> *@
-                    @*         @foreach (var cat in Model.CustomerCategories) *@
-                    @*         { *@
-                    @*             <option value="@cat.CategoryId" selected="@(Model.CategoryId == cat.CategoryId)"> *@
-                    @*                 @cat.CategoryName *@
-                    @*             </option> *@
-                    @*         } *@
-                    @*     </select> *@
-                    @* </div> *@
-
-
-                    @* <div> *@
-                    @*     <label class="form-label">Remarks</label> *@
-                    @*     <textarea name="Remarks" class="form-control">@Model.Remarks</textarea> *@
-                    @* </div> *@
-                    <div>
-                        <label class="form-label">Username</label>
-                        <input name="UserName" value="@Model.UserName" class="form-control" required />
-                        @Html.ValidationMessage("UserName", "", new { @class = "text-danger" })
-                    </div>
-
-                    <div>
-                        <label class="form-label">Password (Leave blank to keep unchanged)</label>
-                        <input name="Password" type="password" class="form-control" />
-                    </div>
                 </div>
 
-                <div class="form-buttons">
-                    <button type="submit" class="btn btn-primary btn-icon">Update</button>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="UserName">Username</label>
+                    <input id="UserName" name="UserName" type="text" value="@Model.UserName" required
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    @Html.ValidationMessage("UserName", "", new { @class = "text-red-600 text-xs mt-1 block" })
                 </div>
-            </form>
-        </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Password">
+                        Password (Leave blank to keep unchanged)
+                    </label>
+                    <input id="Password" name="Password" type="password"
+                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-8">
+                <button type="submit"
+                        class="btn-submit bg-purple-900 hover:bg-purple-800 transition text-white font-semibold px-8 py-2 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    Update
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -287,22 +202,28 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        function setupMultiCheckboxDropdown(id) {
+                function setupMultiCheckboxDropdown(id) {
             const dropdown = document.getElementById(id);
             const display = dropdown.querySelector('.selected-items');
             const checkboxList = dropdown.querySelector('.checkbox-list');
             const checkboxes = checkboxList.querySelectorAll('input[type=checkbox]');
 
-            display.addEventListener('click', () => dropdown.classList.toggle('open'));
+            // Toggle dropdown visibility by toggling 'hidden' class on checkboxList
+            display.addEventListener('click', () => {
+                checkboxList.classList.toggle('hidden');
+            });
             display.addEventListener('keydown', e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    dropdown.classList.toggle('open');
+                    checkboxList.classList.toggle('hidden');
                 }
             });
 
+            // Close dropdown when clicking outside
             document.addEventListener('click', e => {
-                if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+                if (!dropdown.contains(e.target)) {
+                    checkboxList.classList.add('hidden');
+                }
             });
 
             function updateText() {
@@ -316,7 +237,8 @@
             updateText();
         }
 
-        setupMultiCheckboxDropdown("departmentDropdown");
-        setupMultiCheckboxDropdown("designationDropdown");
+        setupMultiCheckboxDropdown('designationDropdown');
+        setupMultiCheckboxDropdown('departmentDropdown');
+
     </script>
 }

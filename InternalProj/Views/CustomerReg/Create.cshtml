@@ -9,125 +9,135 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/Customer.css" asp-append-version="true" />
+    @* <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/Customer.css" asp-append-version="true" /> *@
 }
 
-@* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" /> *@
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Customer Registration</h3>
 
-<div class="container d-flex justify-content-center align-items-center  page-bottom-spacing">
-    <div class="card shadow p-4 w-100">
-        <h3 class="text-center">Customer Registration</h3>
+<div class="min-h-screen flex flex-col justify-center items-center py-10 px-4 bg-gray-50">
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-7xl">
 
-        @* @if (TempData["SuccessMessage"] != null)
+         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="alert alert-success text-center" id="success">
+            <div id="success" class="bg-green-100 text-green-800 rounded-lg p-4 text-center mb-6">
                 @TempData["SuccessMessage"]
             </div>
-        } *@
+        } 
+
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger text-center" id="error">
+            <div id="error" class="bg-red-100 text-red-800 rounded-lg p-4 text-center mb-6">
                 @TempData["ErrorMessage"]
             </div>
         }
 
         <script>
-            // setTimeout(() => {
-            //     $('#success').fadeOut('slow');
-            // }, 5000);
+            setTimeout(() => {
+                $('#success').fadeOut('slow');
+            }, 5000);
 
             setTimeout(() => {
-                $('#error').fadeOut('slow');
+                const error = document.getElementById('error');
+                if (error) error.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                setTimeout(() => error?.remove(), 600);
             }, 5000);
         </script>
 
         <div class="custom-form-wrapper">
             <form asp-action="Create" method="post" class="custom-form">
-                <div class="row">
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">First Name</label>
-                        <input asp-for="FirstName" class="form-control" />
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div>
+                        <label asp-for="FirstName" class="block text-gray-700 font-semibold mb-1 required-label"></label>
+                        <input asp-for="FirstName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <span asp-validation-for="FirstName" class="text-red-600 text-sm"></span>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Last Name</label>
-                        <input asp-for="LastName" class="form-control" />
-                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    <div>
+                        <label asp-for="LastName" class="block text-gray-700 font-semibold mb-1 required-label"></label>
+                        <input asp-for="LastName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <span asp-validation-for="LastName" class="text-red-600 text-sm"></span>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Studio</label>
-                        <input asp-for="Studio" class="form-control" />
-                        <span asp-validation-for="Studio" class="text-danger"></span>
-                    </div>
-                    
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label">Discount</label>
-                        <input type="number" name="Discount" class="form-control" required min="0" max="100" step="0.01" />
-                        <span asp-validation-for="Discount" class="text-danger"></span>
+                    <div>
+                        <label asp-for="Studio" class="block text-gray-700 font-semibold mb-1 required-label"></label>
+                        <input asp-for="Studio" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <span asp-validation-for="Studio" class="text-red-600 text-sm"></span>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Address 1</label>
-                        <input asp-for="Address1" class="form-control" />
-                        <span asp-validation-for="Address1" class="text-danger"></span>
+                    <div>
+                        <label for="Discount" class="block text-gray-700 font-semibold mb-1">Discount</label>
+                        <input type="number" name="Discount" min="0" max="100" step="0.01" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <span asp-validation-for="Discount" class="text-red-600 text-sm"></span>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label">Address 2</label>
-                        <input asp-for="Address2" class="form-control" />
-                        <span asp-validation-for="Address2" class="text-danger"></span>
+                    <div>
+                        <label asp-for="Address1" class="block text-gray-700 font-semibold mb-1 required-label"></label>
+                        <input asp-for="Address1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <span asp-validation-for="Address1" class="text-red-600 text-sm"></span>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">State</label>
-                        <select id="StateId" name="StateId" class="form-select" required>
+                    <div>
+                        <label asp-for="Address2" class="block text-gray-700 font-semibold mb-1"></label>
+                        <input asp-for="Address2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <span asp-validation-for="Address2" class="text-red-600 text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label for="StateId" class="block text-gray-700 font-semibold mb-1 required-label">State</label>
+                        <select id="StateId" name="StateId" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="">-- Select State --</option>
                             @foreach (var state in Model.StateMasterRegs)
                             {
                                 <option value="@state.Id">@state.Name</option>
                             }
                         </select>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#addStateModal">Add State</a>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#addStateModal" class="text-blue-700 hover:underline text-sm mt-1 inline-block">Add State</a>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Region</label>
-                        <select id="RegionId" name="RegionId" class="form-select" required>
+                    <div>
+                        <label for="RegionId" class="block text-gray-700 font-semibold mb-1 required-label">Region</label>
+                        <select id="RegionId" name="RegionId" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="">-- Select Region --</option>
                             @foreach (var region in Model.RegionMasterRegs)
                             {
                                 <option value="@region.Id">@region.Name</option>
                             }
                         </select>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#addRegionModal">Add Region</a>
-
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#addRegionModal" class="text-blue-700 hover:underline text-sm mt-1 inline-block">Add Region</a>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Phone 1</label>
-                        <input type="text" name="Phone1" class="form-control" required pattern="^\+?[0-9]{7,15}$" />
+                    <div>
+                        <label for="Phone1" class="block text-gray-700 font-semibold mb-1 required-label">Phone 1</label>
+                        <input type="text" name="Phone1" required pattern="^\+?[0-9]{7,15}$"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label">Phone 2</label>
-                        <input type="text" name="Phone2" class="form-control" pattern="^\+?[0-9]{7,15}$" />
+                    <div>
+                        <label for="Phone2" class="block text-gray-700 font-semibold mb-1">Phone 2</label>
+                        <input type="text" name="Phone2" pattern="^\+?[0-9]{7,15}$"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label">WhatsApp</label>
-                        <input type="text" name="Whatsapp" class="form-control" pattern="^\+?[0-9]{7,15}$" />
+                    <div>
+                        <label for="Whatsapp" class="block text-gray-700 font-semibold mb-1">WhatsApp</label>
+                        <input type="text" name="Whatsapp" pattern="^\+?[0-9]{7,15}$"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Email</label>
-                        <input type="email" name="Email" class="form-control" />
+                    <div>
+                        <label for="Email" class="block text-gray-700 font-semibold mb-1 required-label">Email</label>
+                        <input type="email" name="Email"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Phone Type</label>
-                        <select name="PhoneTypeId" class="form-select" required>
+                    <div>
+                        <label for="PhoneTypeId" class="block text-gray-700 font-semibold mb-1 required-label">Phone Type</label>
+                        <select name="PhoneTypeId" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="">-- Select Phone Type --</option>
                             @foreach (var type in Model.PhoneTypes)
                             {
@@ -136,10 +146,10 @@
                         </select>
                     </div>
 
-
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Customer Category</label>
-                        <select name="CategoryId" class="form-select" required>
+                    <div>
+                        <label for="CategoryId" class="block text-gray-700 font-semibold mb-1 required-label">Customer Category</label>
+                        <select name="CategoryId" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="">-- Select Category --</option>
                             @foreach (var category in Model.CustomerCategories)
                             {
@@ -148,9 +158,10 @@
                         </select>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Branch</label>
-                        <select name="BranchId" class="form-select" required>
+                    <div>
+                        <label for="BranchId" class="block text-gray-700 font-semibold mb-1 required-label">Branch</label>
+                        <select name="BranchId" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="">-- Select Branch --</option>
                             @foreach (var branch in Model.Branches)
                             {
@@ -158,9 +169,11 @@
                             }
                         </select>
                     </div>
-                    <div class="mb-3 col-md-3">
-                        <label class="form-label required-label">Rate Type</label>
-                        <select name="RateTypeId" class="form-select" required>
+
+                    <div>
+                        <label for="RateTypeId" class="block text-gray-700 font-semibold mb-1 required-label">Rate Type</label>
+                        <select name="RateTypeId" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="">-- Select RateType --</option>
                             @foreach (var type in Model.RateTypes)
                             {
@@ -169,18 +182,18 @@
                         </select>
                     </div>
 
-                    <div class="mb-3 col-md-3">
-                        @* <label class="form-label">Staff</label> *@
+                    <div class="hidden">
                         <input type="hidden" name="Staff" value="@staffName" />
                     </div>
-
-                    <br />
-                    <br />
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </div>
                 </div>
+
+                <div class="mt-8 flex justify-center">
+                    <button type="submit"
+                            class="w-full max-w-xs md:w-auto px-6 py-3 bg-blue-900 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors duration-300">
+                        Register
+                    </button>
+                </div>
+
             </form>
         </div>
     </div>
@@ -188,50 +201,49 @@
 
 <div class="modal fade" id="addStateModal" tabindex="-1" aria-labelledby="addStateModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="addStateForm">
+        <form id="addStateForm" class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New State</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header flex justify-between items-center mb-4">
+                    <h5 class="modal-title text-xl font-bold">Add New State</h5>
+                    <button type="button" class="btn-close text-gray-600 hover:text-gray-900" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">State Name</label>
-                        <input type="text" id="newStateName" class="form-control" required />
+                <div class="modal-body space-y-4">
+                    <div>
+                        <label for="newStateName" class="block font-semibold mb-1">State Name</label>
+                        <input type="text" id="newStateName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required />
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Active</label>
-                        <select id="newStateActive" class="form-select">
+                    <div>
+                        <label for="newStateActive" class="block font-semibold mb-1">Active</label>
+                        <select id="newStateActive" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="Y">Yes</option>
                             <option value="N">No</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Add State</button>
+                <div class="modal-footer mt-6 text-right">
+                    <button type="submit" class="px-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-300">Add State</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-
 <div class="modal fade" id="addRegionModal" tabindex="-1" aria-labelledby="addRegionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="addRegionForm">
+        <form id="addRegionForm" class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Region</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header flex justify-between items-center mb-4">
+                    <h5 class="modal-title text-xl font-bold">Add New Region</h5>
+                    <button type="button" class="btn-close text-gray-600 hover:text-gray-900" data-bs-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Region Name</label>
-                        <input type="text" id="newRegionName" class="form-control" required />
+                <div class="modal-body space-y-4">
+                    <div>
+                        <label for="newRegionName" class="block font-semibold mb-1">Region Name</label>
+                        <input type="text" id="newRegionName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required />
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">State</label>
-                        <select id="newRegionStateId" class="form-select" required>
+                    <div>
+                        <label for="newRegionStateId" class="block font-semibold mb-1">State</label>
+                        <select id="newRegionStateId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
                             <option value="">-- Select State --</option>
                             @foreach (var state in Model.StateMasterRegs)
                             {
@@ -239,23 +251,21 @@
                             }
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Active</label>
-                        <select id="newRegionActive" class="form-select">
+                    <div>
+                        <label for="newRegionActive" class="block font-semibold mb-1">Active</label>
+                        <select id="newRegionActive" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
                             <option value="Y">Yes</option>
                             <option value="N">No</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Add Region</button>
+                <div class="modal-footer mt-6 text-right">
+                    <button type="submit" class="px-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-300">Add Region</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
-
-
 
 @section Scripts {
     <script>
@@ -275,7 +285,6 @@
                     });
                 });
         });
-
 
         document.getElementById('addStateForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -297,7 +306,12 @@
                         option.text = data.name;
                         option.selected = true;
                         stateSelect.appendChild(option);
-                        bootstrap.Modal.getInstance(document.getElementById('addStateModal')).hide();
+
+                        const modalEl = document.getElementById('addStateModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        modalInstance.hide();
+
+                        stateSelect.dispatchEvent(new Event('change'));
                     }
                 });
         });
@@ -323,7 +337,10 @@
                         option.text = data.name;
                         option.selected = true;
                         regionSelect.appendChild(option);
-                        bootstrap.Modal.getInstance(document.getElementById('addRegionModal')).hide();
+
+                        const modalEl = document.getElementById('addRegionModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        modalInstance.hide();
                     }
                 });
         });

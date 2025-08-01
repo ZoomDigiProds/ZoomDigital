@@ -1,4 +1,4 @@
-﻿@model InternalProj.ViewModel.HeadMasterViewModel
+﻿@* @model InternalProj.ViewModel.HeadMasterViewModel
 
 @{
     ViewData["Title"] = "Head Master";
@@ -60,13 +60,11 @@
 
 @section Scripts {
     <script>
-        // Expand/collapse toggle for MainHead and SubHead
         $(document).on('click', '.expand-toggle', function () {
             const target = $(this).data('target');
             $(target).collapse('toggle');
         });
 
-        // Expand Size: show subheads and rates for selected MainHead and Size
         $(document).on('click', '.expand-size', function () {
             const subHeadId = $(this).data('subheadid');
             const sizeId = $(this).data('sizeid');
@@ -74,7 +72,7 @@
             const sizeName = $(this).data('sizename');
 
             $.get('/HeadMaster/GetSubHeadsAndRates', { mainHeadId, sizeId }, function (data) {
-                let html = `<h6 class="text-primary mb-2">Selected Size: ${sizeName}</h6>`; // 👈 show size name
+                let html = `<h6 class="text-primary mb-2">Selected Size: ${sizeName}</h6>`;
                     html += `<table class="table table-bordered table-sm">
                                 <thead class="table-light">
                                     <tr>
@@ -106,7 +104,6 @@
                         });
                     }
 
-                // Add row to add new ChildSubHead under this SubHead
                 html += `<tr>
                             <td class="ps-4">
                                 <input type="text" class="form-control form-control-sm newChildName" data-subheadid="${item.subHeadId}" placeholder="New ChildSubHead" />
@@ -118,7 +115,6 @@
 
                         });
 
-                        // Row to add new SubHead with rate
                         html += `<tr>
                                     <td><input type="text" class="form-control form-control-sm" id="newSubHeadName" placeholder="New SubHead Name" /></td>
                                     <td><input type="number" class="form-control form-control-sm" id="newSubHeadRate" placeholder="Rate" /></td>
@@ -132,7 +128,6 @@
                     });
                 });
 
-        // Save rate for an existing SubHead
         $(document).on('click', '.saveRateBtn', function () {
             const subHeadId = $(this).data('subheadid');
             const sizeId = $(this).data('sizeid');
@@ -153,7 +148,6 @@
             });
         });
 
-        // Add new SubHead and then add rate
         $(document).on('click', '#addNewSubHeadBtn', function () {
             const mainHeadId = $(this).data('mainheadid');
             const sizeId = $(this).data('sizeid');
@@ -165,12 +159,10 @@
                 return;
             }
 
-            // Step 1: Add SubHead
             $.post('/HeadMaster/AddSubHead', { mainHeadId, subHeadName: name })
                 .done(res => {
                     const subHeadId = res.subHead.subHeadId;
 
-                    // Step 2: Add Rate
                     $.post('/HeadMaster/AddRate', {
                         subHeadId,
                         sizeId,
@@ -182,7 +174,6 @@
                 });
         });
 
-        // (Optional) Add ChildSubHead table and entry logic on SubHead row click
         $(document).on('click', '.clickable-subhead', function () {
             const subHeadId = $(this).data('subheadid');
 
@@ -214,7 +205,6 @@
             });
         });
 
-        // Save new ChildSubHead
                $(document).on('click', '.addChildSubHeadBtn', function () {
             const subHeadId = $(this).data('subheadid');
             const input = $('.newChildName[data-subheadid="' + subHeadId + '"]');
@@ -229,12 +219,275 @@
                 subHeadId,
                 childSubHeadName: childName
             }).done(() => {
-                $('.expand-size[data-subheadid="' + subHeadId + '"]').click(); // Collapse
+                $('.expand-size[data-subheadid="' + subHeadId + '"]').click();
                 setTimeout(() => {
-                    $('.expand-size[data-subheadid="' + subHeadId + '"]').click(); // Expand to refresh
+                    $('.expand-size[data-subheadid="' + subHeadId + '"]').click();
                 }, 200);
             });
         });
 
+    </script>
+} *@
+
+
+
+
+
+@model InternalProj.ViewModel.HeadMasterViewModel
+
+@{
+    ViewData["Title"] = "Head Master";
+    Layout = "_Layout";
+}
+
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Head Master</h3>
+
+<div class="flex flex-col md:flex-row gap-8">
+    <!-- Left panel: Hierarchy tree -->
+    <div class="md:w-1/2">
+        <div id="hierarchyTree" class="border border-gray-300 rounded-md p-4 overflow-auto max-h-[80vh]">
+            <ul class="list-none space-y-2">
+                @foreach (var main in Model.MainHeads)
+                {
+                    <li>
+                        <span class="expand-toggle cursor-pointer font-bold text-blue-600 hover:text-blue-800 inline-block mb-1"
+                              data-target="#main-@main.MainHeadId">
+                            + @main.MainHeadName
+                        </span>
+                        <ul id="main-@main.MainHeadId" class="list-none pl-5 mt-1 hidden">
+                            @foreach (var sub in Model.SubHeads.Where(s => s.MainHeadId == main.MainHeadId))
+                            {
+                                <li>
+                                    <span class="expand-toggle cursor-pointer text-gray-600 hover:text-gray-800 inline-block mb-1"
+                                          data-target="#sub-@sub.SubHeadId">
+                                        + @sub.SubHeadName
+                                    </span>
+                                    <ul id="sub-@sub.SubHeadId" class="list-none pl-5 mt-1 hidden">
+                                        @foreach (var size in Model.AlbumSizes)
+                                        {
+                                            <li>
+                                                <span class="expand-size cursor-pointer text-gray-800 hover:text-gray-900 inline-block mb-1"
+                                                      data-mainheadid="@main.MainHeadId"
+                                                      data-subheadid="@sub.SubHeadId"
+                                                      data-sizeid="@size.SizeId"
+                                                      data-sizename="@size.Size"
+                                                      data-target="#size-@sub.SubHeadId-@size.SizeId">
+                                                    + @size.Size
+                                                </span>
+                                                <ul id="size-@sub.SubHeadId-@size.SizeId" class="list-none pl-5 mt-1 hidden">
+                                                    @foreach (var child in Model.ChildSubHeads.Where(c => c.SubHeadId == sub.SubHeadId))
+                                                    {
+                                                        <li class="text-sm text-gray-500">@child.ChildSubHeadName</li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Right panel: Rate panel -->
+    <div class="md:w-1/2">
+        <h5 class="mb-4 text-xl font-semibold">SubHeads & Rates</h5>
+        <div id="ratePanel">
+            <div class="bg-blue-100 border border-blue-300 text-blue-700 rounded-md p-4">
+                Select a size to view subheads and rates
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tailwind doesn't have a built-in collapse, so replace Bootstrap collapse with toggle of hidden class
+        $(document).on('click', '.expand-toggle', function () {
+            const target = $(this).data('target');
+            $(target).toggleClass('hidden');
+        });
+
+        $(document).on('click', '.expand-size', function () {
+            const subHeadId = $(this).data('subheadid');
+            const sizeId = $(this).data('sizeid');
+            const mainHeadId = $(this).data('mainheadid');
+            const sizeName = $(this).data('sizename');
+
+            $.get('/HeadMaster/GetSubHeadsAndRates', { mainHeadId, sizeId }, function (data) {
+                let html = `<h6 class="text-blue-700 font-semibold mb-3">Selected Size: ${sizeName}</h6>`;
+                html += `<table class="min-w-full border border-gray-300 divide-y divide-gray-200 table-auto text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="border-r border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">SubHead</th>
+                                    <th class="border-r border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Rate</th>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                data.forEach(item => {
+                    html += `<tr class="hover:bg-gray-50 cursor-pointer clickable-subhead" data-subheadid="${item.subHeadId}">
+                                <td class="border-r border-gray-300 px-3 py-2">${item.subHeadName}</td>
+                                <td class="border-r border-gray-300 px-3 py-2">
+                                    ${item.hasRate ? item.rate.toFixed(2) :
+                                        `<input type="number" step="0.01" class="newRateInput border border-gray-300 rounded-sm w-full px-2 py-1"
+                                                data-subheadid="${item.subHeadId}" placeholder="Enter Rate" />`}
+                                </td>
+                                <td class="px-3 py-2">
+                                    ${item.hasRate ? '' : `<button class="saveRateBtn bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-2 py-1 rounded"
+                                        data-subheadid="${item.subHeadId}" data-sizeid="${sizeId}">Save</button>`}
+                                </td>
+                             </tr>`;
+
+                    if (item.childSubHeads && item.childSubHeads.length > 0) {
+                        item.childSubHeads.forEach(child => {
+                            html += `<tr>
+                                        <td class="pl-6 text-sm text-gray-500">↳ ${child.childSubHeadName}</td>
+                                        <td colspan="2"></td>
+                                     </tr>`;
+                        });
+                    }
+
+                    html += `<tr>
+                                <td class="pl-3">
+                                    <input type="text" class="newChildName border border-gray-300 rounded-sm w-full px-2 py-1 text-sm"
+                                           data-subheadid="${item.subHeadId}"
+                                           placeholder="New ChildSubHead" />
+                                </td>
+                                <td colspan="2" class="text-left">
+                                    <button class="addChildSubHeadBtn bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded"
+                                            data-subheadid="${item.subHeadId}">Add</button>
+                                </td>
+                             </tr>`;
+                });
+
+                html += `<tr>
+                            <td>
+                                <input type="text" id="newSubHeadName" class="border border-gray-300 rounded-sm w-full px-2 py-1 text-sm" placeholder="New SubHead Name" />
+                            </td>
+                            <td>
+                                <input type="number" id="newSubHeadRate" class="border border-gray-300 rounded-sm w-full px-2 py-1 text-sm" placeholder="Rate" step="0.01" />
+                            </td>
+                            <td>
+                                <button id="addNewSubHeadBtn" data-mainheadid="${mainHeadId}" data-sizeid="${sizeId}"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded">Add</button>
+                            </td>
+                        </tr>`;
+
+                html += `</tbody></table>`;
+
+                $('#ratePanel').html(html);
+            });
+        });
+
+        $(document).on('click', '.saveRateBtn', function () {
+            const subHeadId = $(this).data('subheadid');
+            const sizeId = $(this).data('sizeid');
+            const rateInput = $('.newRateInput[data-subheadid="' + subHeadId + '"]');
+            const rate = parseFloat(rateInput.val());
+
+            if (isNaN(rate) || rate <= 0) {
+                alert('Enter a valid rate.');
+                return;
+            }
+
+            $.post('/HeadMaster/AddRate', {
+                subHeadId: subHeadId,
+                sizeId: sizeId,
+                rate: rate
+            }).done(() => {
+                // Refresh the selected size data
+                $('.expand-size[data-subheadid="' + subHeadId + '"][data-sizeid="' + sizeId + '"]').click();
+            });
+        });
+
+        $(document).on('click', '#addNewSubHeadBtn', function () {
+            const mainHeadId = $(this).data('mainheadid');
+            const sizeId = $(this).data('sizeid');
+            const name = $('#newSubHeadName').val().trim();
+            const rate = parseFloat($('#newSubHeadRate').val());
+
+            if (!name || isNaN(rate) || rate <= 0) {
+                alert("Enter valid SubHead name and rate.");
+                return;
+            }
+
+            $.post('/HeadMaster/AddSubHead', { mainHeadId, subHeadName: name })
+                .done(res => {
+                    const subHeadId = res.subHead.subHeadId;
+
+                    $.post('/HeadMaster/AddRate', {
+                        subHeadId,
+                        sizeId,
+                        rate,
+                        name
+                    }).done(() => {
+                        $('.expand-size[data-sizeid="' + sizeId + '"]').first().click();
+                    });
+                });
+        });
+
+        $(document).on('click', '.clickable-subhead', function () {
+            const subHeadId = $(this).data('subheadid');
+
+            $.get('/HeadMaster/GetChildSubHeads', { subHeadId }, function (data) {
+                let html = `<h6 class="mt-6 font-semibold text-lg">Child SubHeads</h6>
+                            <table class="min-w-full border border-gray-300 divide-y divide-gray-200 table-auto text-sm mb-6">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Name</th>
+                                        <th class="px-3 py-2 text-left font-semibold text-gray-700">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                data.forEach(c => {
+                    html += `<tr>
+                                <td class="px-3 py-2">${c.childSubHeadName}</td>
+                                <td class="px-3 py-2"></td>
+                             </tr>`;
+                });
+
+                html += `<tr>
+                            <td class="px-3 py-2">
+                                <input type="text" id="newChildName" class="border border-gray-300 rounded-sm w-full px-2 py-1 text-sm" placeholder="New ChildSubHead" />
+                            </td>
+                            <td class="px-3 py-2">
+                                <button id="addChildSubHeadBtn" data-subheadid="${subHeadId}"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-2 py-1 rounded">Add</button>
+                            </td>
+                         </tr>`;
+
+                html += `</tbody></table>`;
+
+                // Append below existing content
+                $('#ratePanel').append(html);
+            });
+        });
+
+        $(document).on('click', '.addChildSubHeadBtn', function () {
+            const subHeadId = $(this).data('subheadid');
+            const input = $('.newChildName[data-subheadid="' + subHeadId + '"]');
+            const childName = input.val().trim();
+
+            if (!childName) {
+                alert('Enter ChildSubHead name.');
+                return;
+            }
+
+            $.post('/HeadMaster/AddChildSubHead', {
+                subHeadId,
+                childSubHeadName: childName
+            }).done(() => {
+                $('.expand-size[data-subheadid="' + subHeadId + '"]').click();
+                setTimeout(() => {
+                    $('.expand-size[data-subheadid="' + subHeadId + '"]').click();
+                }, 200);
+            });
+        });
     </script>
 }

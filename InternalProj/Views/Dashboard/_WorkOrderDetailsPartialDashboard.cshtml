@@ -1,4 +1,4 @@
-﻿@model InternalProj.ViewModel.WorkOrderViewModel
+﻿@* @model InternalProj.ViewModel.WorkOrderViewModel
 
 <table class="table table-bordered table-hover table-sm">
     <thead>
@@ -13,7 +13,6 @@
         </tr>
     </thead>
     <tbody>
-        @* @foreach (var order in Model.Results) *@
         @foreach (var order in Model.ResultsSummary)
         {
             <tr>
@@ -33,7 +32,6 @@
     </tbody>
 </table>
 
-<!-- Stylish Pagination -->
 <div class="pagination-container text-center mt-3">
     <div class="pagination-buttons d-inline-flex flex-wrap justify-content-center gap-1">
         @if (Model.CurrentPage > 1)
@@ -82,10 +80,8 @@
         e.preventDefault();
         const id = $(this).data('id');
 
-        // Hide modal first to clean up properly
         $('#workOrderModal').modal('hide');
 
-        // Wait until it's hidden, then load and reopen with new content
         $('#workOrderModal').one('hidden.bs.modal', function () {
             $('#modalContent').html("Loading...");
 
@@ -116,4 +112,125 @@
         border: 1px solid #64126b;
         color: #64126b;
     }
-</style>
+</style> *@
+
+
+
+
+
+
+
+
+
+
+@model InternalProj.ViewModel.WorkOrderViewModel
+
+<div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 divide-y divide-gray-200 table-auto">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Work Order No</th>
+                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Studio</th>
+                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Work Type</th>
+                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Date</th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">SubTotal</th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Advance</th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 whitespace-nowrap">Balance</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @foreach (var order in Model.ResultsSummary)
+            {
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-blue-600 hover:underline cursor-pointer text-sm font-medium">
+                        <a href="#" class="workorder-link" data-id="@order.WorkOrderId">
+                            @order.WorkOrderNo
+                        </a>
+                    </td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.StudioName</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.WorkTypeName</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.Wdate?.ToString("dd MMM yyyy")</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.SubTotal.ToString("N2")</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.Advance.ToString("N2")</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm text-right">@order.Balance.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination-container mt-3 flex flex-wrap justify-center gap-2">
+    @if (Model.CurrentPage > 1)
+    {
+        <button class="min-w-[36px] px-3 py-1 rounded-full border border-purple-800 text-purple-800 text-sm font-semibold hover:bg-purple-700 hover:text-white transition-colors"
+                onclick="loadPage(@(Model.CurrentPage - 1))">
+            &lt;
+        </button>
+    }
+
+    <button class="min-w-[36px] px-3 py-1 rounded-full border text-sm font-semibold transition-colors
+               @(Model.CurrentPage == 1 ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
+            onclick="loadPage(1)">
+        1
+    </button>
+
+    @if (Model.CurrentPage > 3)
+    {
+        <span class="px-2 text-gray-500 select-none">...</span>
+    }
+
+    @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
+    {
+        <button class="min-w-[36px] px-3 py-1 rounded-full border text-sm font-semibold transition-colors
+                       @(i == Model.CurrentPage ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
+                onclick="loadPage(@i)">
+            @i
+        </button>
+    }
+
+    @if (Model.CurrentPage < Model.TotalPages - 2)
+    {
+        <span class="px-2 text-gray-500 select-none">...</span>
+    }
+
+    @if (Model.TotalPages > 1)
+    {
+        <button class="min-w-[36px] px-3 py-1 rounded-full border text-sm font-semibold transition-colors
+                       @(Model.CurrentPage == Model.TotalPages ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
+                onclick="loadPage(@Model.TotalPages)">
+            @Model.TotalPages
+        </button>
+    }
+
+    @if (Model.CurrentPage < Model.TotalPages)
+    {
+        <button class="min-w-[36px] px-3 py-1 rounded-full border border-purple-800 text-purple-800 text-sm font-semibold hover:bg-purple-700 hover:text-white transition-colors"
+                onclick="loadPage(@(Model.CurrentPage + 1))">
+            &gt;
+        </button>
+    }
+</div>
+
+<script>
+    function loadPage(page) {
+        $.get('/Dashboard/GetBoxContent', { id: 1, page: page }, function (data) {
+            $('#modalContent').html(data);
+        });
+    }
+
+    $(document).on('click', '.workorder-link', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+
+        $('#workOrderModal').modal('hide');
+
+        $('#workOrderModal').one('hidden.bs.modal', function () {
+            $('#modalContent').html("Loading...");
+
+            $.get('/WorkOrder/GetWorkOrderDetails', { id: id }, function (data) {
+                $('#modalContent').html(data);
+                $('#workOrderModal').modal('show');
+            });
+        });
+    });
+</script>

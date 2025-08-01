@@ -5,36 +5,37 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/Dashboard.css" asp-append-version="true" />
 }
 
 @if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-danger text-center" id="editError">
+    <div id="editError" class="bg-red-100 text-red-800 rounded-lg p-3 text-center mb-4">
         @TempData["ErrorMessage"]
     </div>
 }
 
 <script>
     setTimeout(() => {
-        $('#editError').fadeOut('slow');
+        const editError = document.getElementById('editError');
+        if (editError) {
+            editError.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => editError.remove(), 600);
+        }
     }, 5000);
 </script>
 
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Dashboard Overview</h3>
 
-<h2 class="text-center">Dashboard Overview</h2>
-
-<div class="container-fluid my-4 px-0">
-    <div class="row g-3">
-
+<div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @for (int i = 1; i <= 4; i++)
         {
-            <div class="col-12 col-md-6 card-wrapper">
-                <div class="card shadow-sm dashboard-card p-3">
-                    <div class="card-body text-center">
+            <div class="card-wrapper">
+                <div class="dashboard-card bg-white rounded-lg shadow p-4 flex flex-col justify-between min-h-[200px]">
+                    <div class="text-center">
                         @if (i == 1)
                         {
-                            <h5 class="card-title">Work Details</h5>
+                            <h5 class="text-xl font-semibold mb-4">Work Details</h5>
                             <div id="box1Content">
                                 <div id="workOrderSummaryContainer">
                                     @await Html.PartialAsync("_WorkOrderSummaryPartial", Model)
@@ -43,43 +44,45 @@
                         }
                         else if (i == 2)
                         {
-                            <h5 class="card-title">Today's Transactions</h5>
+                            <h5 class="text-xl font-semibold mb-4">Today's Transactions</h5>
                             <div id="box2Content">
-                                <div id="dailyTransactionSummaryContainer">
+                                <div id="dailyTransactionSummaryContainer" class="text-gray-600">
                                     Loading...
                                 </div>
                             </div>
                         }
                         else
                         {
-                            <p class="card-text">Placeholder for content</p>
+                            <p class="text-gray-700">Placeholder for content</p>
                         }
                     </div>
-                </div>
-                <div class="text-center mt-2">
-                    <button class="btn btn-primary view-box-btn" data-box="@i">View</button>
+
+                    <div class="mt-4 text-center">
+                        <button type="button"
+                                data-box="@i"
+                                class="view-box-btn bg-blue-900 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            View
+                        </button>
+                    </div>
                 </div>
             </div>
         }
-
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="workOrderModal" tabindex="-1" aria-labelledby="workOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="workOrderModalLabel">Work Orders</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content rounded-lg shadow-lg">
+            <div class="modal-header flex justify-between items-center p-4 border-b border-gray-200">
+                <h5 class="modal-title text-xl font-semibold" id="workOrderModalLabel">Work Orders</h5>
+                <button type="button" class="btn-close text-gray-600 hover:text-gray-900" data-bs-dismiss="modal" aria-label="Close">&times;</button>
             </div>
-            <div class="modal-body" id="modalContent">
+            <div class="modal-body p-6" id="modalContent">
                 Loading...
             </div>
         </div>
     </div>
 </div>
-
 
 @section Scripts {
     <script>
@@ -137,10 +140,6 @@
     </script>
 }
 
-
-
-
-
 <style>
     .dashboard-card {
         min-height: 200px;
@@ -149,12 +148,7 @@
         justify-content: space-between;
     }
 
-    .view-button-container {
-        text-align: center;
-        margin-top: 0.5rem;
-    }
-
     .card-wrapper {
-        margin-bottom: 20px;
+        margin-bottom: 1.25rem; /* 20px */
     }
 </style>

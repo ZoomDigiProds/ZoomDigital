@@ -1,4 +1,4 @@
-﻿@model InternalProj.ViewModel.ReceiptViewModel
+﻿@* @model InternalProj.ViewModel.ReceiptViewModel
 
 @{
     ViewData["Title"] = "Create Receipt";
@@ -136,7 +136,7 @@
         <input type="hidden" asp-for="Receipt.WorkOrderId" id="WorkOrderId" />
         <input type="hidden" asp-for="Receipt.NetAmount" id="NetAmount" />
         <input type="hidden" asp-for="Receipt.CurrentAmount" id="CurrentAmount" />
-    </form>
+    </form> *@
 
     @*     @if (Model.TotalPages > 1)
     {
@@ -163,7 +163,7 @@
     }
  *@
 
- @if (Model.TotalPages > 1)
+@*  @if (Model.TotalPages > 1)
 {
     <div class="pagination-container text-center mt-3">
         <form asp-action="Create" method="get" class="d-inline-flex flex-wrap justify-content-center gap-1">
@@ -212,14 +212,12 @@
         $(document).ready(function () {
             const currentId = $("#Receipt_CustomerId").val();
 
-            // Restore previously selected ModeId (from sessionStorage)
             const savedMode = sessionStorage.getItem("selectedModeId");
             if (savedMode) {
                 $("select[name='Receipt.ModeId']").val(savedMode);
                 sessionStorage.removeItem("selectedModeId");
             }
 
-            // Restore previously selected selectType if available
             const savedSelectType = sessionStorage.getItem("selectedSelectType");
             if (savedSelectType) {
                 $("#selectType").val(savedSelectType).trigger("change");
@@ -231,7 +229,6 @@
                     $("#customerSelectByName").val(currentId);
                 }
             } else {
-                // Default fallback if no sessionStorage
                 $("#selectType").trigger("change");
 
                 const studioOption = $("#customerSelectByStudio option[value='" + currentId + "']").length > 0;
@@ -243,7 +240,6 @@
             }
         });
 
-        // Toggle dropdown boxes based on selectType
         $("#selectType").on("change", function () {
             const type = $(this).val();
             const isStudio = type === "studio";
@@ -252,15 +248,12 @@
             $("#customerNameBox").toggleClass("d-none", isStudio);
         });
 
-        // When customer/studio changes, update hidden input and reload with GET
         $("#customerSelectByName, #customerSelectByStudio").on("change", function () {
             const customerId = $(this).val();
             if (!customerId) return;
 
-            // Update hidden field (so submit will work)
             $("#Receipt_CustomerId").val(customerId);
 
-            // Save selected ModeId and SelectType to restore after reload
             const selectedModeId = $("select[name='Receipt.ModeId']").val();
             const selectedType = $("#selectType").val();
 
@@ -273,7 +266,6 @@
             window.location.href = url.toString();
         });
 
-        // When a work order is selected
         $(document).on('change', 'input[name="selectedWorkOrder"]', function () {
             $("input.payNowInput").prop("disabled", true).val('');
             const row = $(this).closest("tr");
@@ -282,7 +274,6 @@
             $("#NetAmount").val($(this).data("net"));
         });
 
-        // Capture entered payment amount
         $(document).on('input', '.payNowInput', function () {
             const amt = parseFloat($(this).val()) || 0;
             $("#CurrentAmount").val(amt);
@@ -332,4 +323,392 @@
     background-color: #500d57;
 }
 
+</style> *@
+
+
+
+
+
+
+
+
+
+
+@model InternalProj.ViewModel.ReceiptViewModel
+
+@{
+    ViewData["Title"] = "Create Receipt";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div
+        class="flex items-center gap-3 bg-green-100 border border-green-300 text-green-800 px-5 py-3 rounded-lg shadow mb-6 text-center max-w-3xl mx-auto"
+        id="success" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-6 w-6 flex-shrink-0"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor"
+             stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+        </svg>
+        <span>@TempData["Success"]</span>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div
+        class="flex items-center gap-3 bg-red-100 border border-red-300 text-red-800 px-5 py-3 rounded-lg shadow mb-6 text-center max-w-3xl mx-auto"
+        id="error" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-6 w-6 flex-shrink-0"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor"
+             stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span>@TempData["Error"]</span>
+    </div>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Receipt.css" asp-append-version="true" />
+}
+
+<script>
+    setTimeout(() => {
+        const success = document.getElementById('success');
+        if (success) {
+            success.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => success.remove(), 600);
+        }
+    }, 5000);
+    setTimeout(() => {
+        const error = document.getElementById('error');
+        if (error) {
+            error.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => error.remove(), 600);
+        }
+    }, 5000);
+</script>
+
+@* <h2 class="text-center text-3xl text-blue-900 font-extrabold mb-8 tracking-tight">Receipt</h2> *@
+<h3 class="text-2xl font-extrabold mt-8 mb-8 text-gray-900">Receipt</h3>
+
+<div class="max-w-5xl mx-auto bg-white p-8 md:p-12 rounded-xl shadow-lg border border-gray-200">
+
+    <form asp-action="Create" method="post" class="space-y-12 text-sm">
+
+        <!-- Top row: Receipt Info and Payment Mode -->
+        <div class="grid grid-cols-1 sm:grid-cols-6 gap-6 mb-6 text-gray-700">
+            <div>
+                <label class="block font-semibold mb-1">Receipt No</label>
+                <input type="text" 
+                       class="w-full rounded-md border border-gray-300 px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+                       value="@Model.ReceiptNo" readonly aria-readonly="true" />
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Receipt Date</label>
+                <input asp-for="Receipt.ReceiptDate" type="date" 
+                       class="w-full rounded-md border border-gray-300 px-3 py-2 bg-gray-100 cursor-not-allowed"
+                       readonly aria-readonly="true" />
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block font-semibold mb-1">Payment Type</label>
+                <select asp-for="Receipt.ModeId" 
+                        asp-items="@(new SelectList(Model.ModeOfPayments, "ModeId", "ModeType"))"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Select By + Customer / Studio selectors + Total Balance -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-end mb-8 text-gray-700">
+
+            <div class="sm:col-span-3">
+                <label for="selectType" class="block font-semibold mb-1">Select By</label>
+                <select id="selectType" class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        aria-label="Select by Customer or Studio Name">
+                    <option value="customer">Customer Name</option>
+                    <option value="studio">Studio Name</option>
+                </select>
+            </div>
+
+            <div id="customerNameBox" class="sm:col-span-3">
+                <label class="block font-semibold mb-1">Customer Name</label>
+                <select id="customerSelectByName" class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="">-- Select Customer --</option>
+                    @foreach (var c in Model.Customers)
+                    {
+                        var selected = c.Id == Model.Receipt.CustomerId ? "selected" : "";
+                        @:<option value="@c.Id" @selected>@c.FirstName @c.LastName</option>
+                    }
+                </select>
+            </div>
+
+            <div id="studioNameBox" class="sm:col-span-3 hidden">
+                <label class="block font-semibold mb-1">Studio Name</label>
+                <select id="customerSelectByStudio" class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="">-- Select Studio --</option>
+                    @foreach (var c in Model.Customers)
+                    {
+                        var selected = c.Id == Model.Receipt.CustomerId ? "selected" : "";
+                        @:<option value="@c.Id" @selected>@c.StudioName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="sm:col-span-3 flex justify-end items-center text-blue-700 font-semibold text-lg">
+                <span>Total Balance:&nbsp;</span>
+                <span class="text-2xl font-bold" style="color:#5190f5;">₹@Model.TotalBalance.ToString("N2")</span>
+            </div>
+        </div>
+
+        <!-- Work Orders Table -->
+        <div class="overflow-x-auto rounded-lg shadow-md border border-gray-300">
+            <table class="min-w-full table-auto divide-y divide-gray-200 text-gray-700">
+                <thead class="bg-blue-50">
+                    <tr>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase">Select</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase">WorkOrder No</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase">Date</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Net</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Balance</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase">Pay Now</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.PagedWorkOrders)
+                    {
+                        <tr class="hover:bg-blue-50 transition-colors">
+                            <td class="text-center px-4 py-2 align-middle">
+                                <input type="radio" name="selectedWorkOrder"
+                                    data-id="@order.WorkOrderId"
+                                    data-net="@order.SubTotal"
+                                    class="form-radio text-blue-600 focus:ring-2 focus:ring-blue-400" />
+                            </td>
+                            <td class="px-4 py-2 align-middle">@order.WorkOrderNo</td>
+                            <td class="text-center px-4 py-2 align-middle">@order.Wdate?.ToString("yyyy-MM-dd")</td>
+                            <td class="text-right px-4 py-2 align-middle">@order.SubTotal.ToString("N2")</td>
+                            <td class="text-right px-4 py-2 align-middle">@order.Balance.ToString("N2")</td>
+                            <td class="px-4 py-2 align-middle">
+                                <input type="number" class="form-input payNowInput w-full rounded border border-gray-300 px-2 py-1"
+                                       disabled min="0" step="0.01" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Submit button -->
+        <div class="mt-8 flex justify-center">
+            <button type="submit"
+                class="inline-block px-14 py-3 bg-gradient-to-r from-blue-800 to-blue-600 hover:from-blue-900 hover:to-blue-700
+                       text-white font-extrabold rounded-2xl shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-600 transition-transform transform hover:scale-105">
+                Submit
+            </button>
+        </div>
+
+        <!-- Hidden inputs for model binding -->
+        <input type="hidden" asp-for="Receipt.CustomerId" id="Receipt_CustomerId" />
+        <input type="hidden" asp-for="Receipt.WorkOrderId" id="WorkOrderId" />
+        <input type="hidden" asp-for="Receipt.NetAmount" id="NetAmount" />
+        <input type="hidden" asp-for="Receipt.CurrentAmount" id="CurrentAmount" />
+
+    </form>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination-container mt-6 flex flex-wrap justify-center gap-2">
+            <form asp-action="Create" method="get" class="inline-flex flex-wrap justify-center gap-2">
+                <input type="hidden" name="customerId" value="@Model.Receipt.CustomerId" />
+
+                @if (Model.CurrentPage > 1)
+                {
+                    <button type="submit" name="currentPage" value="@(Model.CurrentPage - 1)"
+                            class="pagination-btn bg-purple-700 text-white rounded-full px-3 py-1 text-sm hover:bg-purple-800 transition">
+                        &lt;
+                    </button>
+                }
+
+                <button type="submit" name="currentPage" value="1"
+                        class="pagination-btn rounded-full px-3 py-1 text-sm font-semibold 
+                        @(Model.CurrentPage == 1
+                            ? "bg-purple-700 text-white" 
+                            : "text-purple-700 border border-purple-700 hover:bg-purple-700 hover:text-white") transition">
+                    1
+                </button>
+
+                @if (Model.CurrentPage > 3)
+                {
+                    <span class="px-2 py-1 text-gray-500 select-none self-center">...</span>
+                }
+
+                @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
+                {
+                    <button type="submit" name="currentPage" value="@i"
+                            class="pagination-btn rounded-full px-3 py-1 text-sm font-semibold 
+                            @(i == Model.CurrentPage
+                                ? "bg-purple-700 text-white" 
+                                : "text-purple-700 border border-purple-700 hover:bg-purple-700 hover:text-white") transition">
+                        @i
+                    </button>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages - 2)
+                {
+                    <span class="px-2 py-1 text-gray-500 select-none self-center">...</span>
+                }
+
+                @if (Model.TotalPages > 1)
+                {
+                    <button type="submit" name="currentPage" value="@Model.TotalPages"
+                            class="pagination-btn rounded-full px-3 py-1 text-sm font-semibold 
+                            @(Model.CurrentPage == Model.TotalPages
+                                ? "bg-purple-700 text-white" 
+                                : "text-purple-700 border border-purple-700 hover:bg-purple-700 hover:text-white") transition">
+                        @Model.TotalPages
+                    </button>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <button type="submit" name="currentPage" value="@(Model.CurrentPage + 1)"
+                            class="pagination-btn bg-purple-700 text-white rounded-full px-3 py-1 text-sm hover:bg-purple-800 transition">
+                        &gt;
+                    </button>
+                }
+            </form>
+        </div>
+    }
+</div>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            const currentId = $("#Receipt_CustomerId").val();
+
+            // Restore previously selected ModeId (from sessionStorage)
+            const savedMode = sessionStorage.getItem("selectedModeId");
+            if (savedMode) {
+                $("select[name='Receipt.ModeId']").val(savedMode);
+                sessionStorage.removeItem("selectedModeId");
+            }
+
+            // Restore previously selected selectType if available
+            const savedSelectType = sessionStorage.getItem("selectedSelectType");
+            if (savedSelectType) {
+                $("#selectType").val(savedSelectType).trigger("change");
+                sessionStorage.removeItem("selectedSelectType");
+
+                if (savedSelectType === "studio") {
+                    $("#customerSelectByStudio").val(currentId);
+                } else {
+                    $("#customerSelectByName").val(currentId);
+                }
+            } else {
+                // Default fallback if no sessionStorage
+                $("#selectType").trigger("change");
+
+                const studioOption = $("#customerSelectByStudio option[value='" + currentId + "']").length > 0;
+                if (studioOption) {
+                    $("#customerSelectByStudio").val(currentId);
+                } else {
+                    $("#customerSelectByName").val(currentId);
+                }
+            }
+        });
+
+        // Toggle dropdown boxes based on selectType
+        $("#selectType").on("change", function () {
+            const type = $(this).val();
+            const isStudio = (type === "studio");
+            $("#studioNameBox").toggleClass("hidden", !isStudio);
+            $("#customerNameBox").toggleClass("hidden", isStudio);
+        });
+
+        // When customer/studio changes, update hidden input and reload with GET
+        $("#customerSelectByName, #customerSelectByStudio").on("change", function () {
+            const customerId = $(this).val();
+            if (!customerId) return;
+
+            // Update hidden field for submission
+            $("#Receipt_CustomerId").val(customerId);
+
+            // Save selected ModeId and SelectType to restore after reload
+            const selectedModeId = $("select[name='Receipt.ModeId']").val();
+            const selectedType = $("#selectType").val();
+
+            sessionStorage.setItem("selectedModeId", selectedModeId);
+            sessionStorage.setItem("selectedSelectType", selectedType);
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("customerId", customerId);
+            url.searchParams.set("currentPage", "1");
+            window.location.href = url.toString();
+        });
+
+        // Enable payNowInput on selected workorder radio
+        $(document).on('change', 'input[name="selectedWorkOrder"]', function () {
+            $("input.payNowInput").prop("disabled", true).val('');
+            let row = $(this).closest("tr");
+            row.find(".payNowInput").prop("disabled", false);
+            $("#WorkOrderId").val($(this).data("id"));
+            $("#NetAmount").val($(this).data("net"));
+        });
+
+        // Update hidden CurrentAmount when input changes
+        $(document).on('input', '.payNowInput', function () {
+            const amt = parseFloat($(this).val()) || 0;
+            $("#CurrentAmount").val(amt);
+        });
+    </script>
+}
+
+<style>
+    /* Pagination button base styles */
+    .pagination-btn {
+        cursor: pointer;
+        border-radius: 9999px;
+        font-size: 0.875rem; /* text-sm */
+        padding: 0.25rem 0.75rem; /* py-1 px-3 */
+        border: 1px solid #64126b;
+        background-color: #64126b;
+        color: white;
+        transition: background-color 0.2s ease;
+    }
+    .pagination-btn:hover {
+        background-color: #500d57;
+    }
+    .pagination-btn.active,
+    .pagination-btn[disabled] {
+        background-color: #64126b;
+        color: white;
+        cursor: default;
+    }
+
+    /* Custom small adjustments to radio and inputs */
+    input.form-radio {
+        width: 1.25rem; /* 20px */
+        height: 1.25rem;
+    }
+
+    /* Scrollbar tweak for work order list */
+    #workOrderListBox::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    #workOrderListBox::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 9999px;
+    }
+    #workOrderListBox::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 9999px;
+    }
 </style>

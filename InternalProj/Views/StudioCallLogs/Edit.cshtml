@@ -1,76 +1,79 @@
 ﻿@model InternalProj.Models.StudioCallLog
 
 @{
-
     ViewData["Title"] = "Edit";
-
 }
 
-<h1>Edit Details</h1>
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Edit Details</h3>
 
-<h4>StudioCallLog</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<h4 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Studio Call Log</h4>
+<hr class="mb-8" />
+
+<div class="flex justify-center px-4">
+    <div class="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg">
+        <form asp-action="Edit" class="space-y-6">
+
+            <div asp-validation-summary="ModelOnly" class="text-red-600 text-sm"></div>
+
             <input type="hidden" asp-for="CallId" />
-            <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
-                <span asp-validation-for="CustomerId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StudioName" class="control-label"></label>
-                <input asp-for="StudioName" class="form-control" />
-                <span asp-validation-for="StudioName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Region" class="control-label"></label>
-                <input asp-for="Region" class="form-control" />
-                <span asp-validation-for="Region" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CallTime" class="control-label"></label>
-                <input asp-for="CallTime" class="form-control" />
-                <span asp-validation-for="CallTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedCallTime" class="control-label"></label>
-                <input asp-for="UpdatedCallTime" class="form-control" />
-                <span asp-validation-for="UpdatedCallTime" class="text-danger"></span>
+
+            <div>
+                <label asp-for="CustomerId" class="block mb-1 font-medium text-gray-700"></label>
+                <select asp-for="CustomerId" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" asp-items="ViewBag.CustomerId"></select>
+                <span asp-validation-for="CustomerId" class="text-red-600 text-sm mt-1 block"></span>
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div>
+                <label asp-for="StudioName" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="StudioName" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <span asp-validation-for="StudioName" class="text-red-600 text-sm mt-1 block"></span>
             </div>
-            <div class="form-group">
-                <a asp-action="Delete" asp-route-id="@Model.CallId" class="btn btn-danger">Delete</a>
+
+            <div>
+                <label asp-for="Phone" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Phone" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <span asp-validation-for="Phone" class="text-red-600 text-sm mt-1 block"></span>
+            </div>
+
+            <div>
+                <label asp-for="Region" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Region" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <span asp-validation-for="Region" class="text-red-600 text-sm mt-1 block"></span>
+            </div>
+
+            <div>
+                <label asp-for="CallTime" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="CallTime" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <span asp-validation-for="CallTime" class="text-red-600 text-sm mt-1 block"></span>
+            </div>
+
+            <div>
+                <label asp-for="Description" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Description" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <span asp-validation-for="Description" class="text-red-600 text-sm mt-1 block"></span>
+            </div>
+
+            <div>
+                <label asp-for="UpdatedCallTime" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="UpdatedCallTime" class="block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <span asp-validation-for="UpdatedCallTime" class="text-red-600 text-sm mt-1 block"></span>
+            </div>
+
+            <div class="flex space-x-4">
+                <input type="submit" value="Save" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-xl shadow hover:bg-indigo-700 cursor-pointer transition" />
+                <a asp-action="Delete" asp-route-id="@Model.CallId" class="px-6 py-2 bg-red-600 text-white font-semibold rounded-xl shadow hover:bg-red-700 cursor-pointer transition text-center">Delete</a>
             </div>
 
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="mt-6 text-center">
+    <a asp-action="Index" class="text-indigo-600 hover:underline font-medium">Back to List</a>
 </div>
 
 @section Scripts {
-
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
 }
-

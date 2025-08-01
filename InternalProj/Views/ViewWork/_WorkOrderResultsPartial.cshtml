@@ -1,0 +1,116 @@
+﻿@model InternalProj.ViewModel.WorkOrderViewModel
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+
+@if (Model.ResultsSummary != null && Model.ResultsSummary.Any())
+{
+    <div class="overflow-x-auto rounded-lg shadow mb-6">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr class="bg-purple-800 text-white">
+                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Sl No</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Work Order No</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Studio Name</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Work Type</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Date</th>
+                    <th class="px-4 py-2 text-right text-xs font-bold uppercase">Amount</th>
+                    <th class="px-4 py-2 text-right text-xs font-bold uppercase">Advance</th>
+                    <th class="px-4 py-2 text-right text-xs font-bold uppercase">Balance</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+                @{
+                    var slno = (Model.CurrentPage - 1) * 10 + 1;
+                    var counter = slno;
+                }
+                @foreach (var item in Model.ResultsSummary)
+                {
+                    <tr class="hover:bg-purple-50">
+                        <td class="px-4 py-2 whitespace-nowrap">@counter</td>
+                        @{
+                            counter++;
+                        }
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            <a href="#" data-id="@item.WorkOrderId"
+                               class="text-indigo-600 underline hover:text-indigo-900 cursor-pointer">
+                                @item.WorkOrderNo
+                            </a>
+                        </td>
+                        <td class="px-4 py-2 whitespace-nowrap">@item.StudioName</td>
+                        <td class="px-4 py-2 whitespace-nowrap">@item.WorkTypeName</td>
+                        <td class="px-4 py-2 whitespace-nowrap">@item.Wdate?.ToString("dd-MM-yyyy")</td>
+                        <td class="px-4 py-2 text-right whitespace-nowrap">@item.SubTotal.ToString("N2")</td>
+                        <td class="px-4 py-2 text-right whitespace-nowrap">@item.Advance.ToString("N2")</td>
+                        <td class="px-4 py-2 text-right whitespace-nowrap">@item.Balance.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="flex justify-center my-6">
+            <form asp-action="Index" method="get" class="inline-flex items-center space-x-1" id="paginationForm">
+                <input type="hidden" name="studio" value="@Model.StudioFilter" />
+                <input type="hidden" name="fromDate" value="@Model.FromDateFilter?.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="toDate" value="@Model.ToDateFilter?.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
+                <input type="hidden" name="isSearch" value="true" />
+
+                @if (Model.CurrentPage > 1)
+                {
+                    <button name="currentPage" value="@(Model.CurrentPage - 1)"
+                            class="px-3 py-1 rounded-full bg-purple-700 text-white text-sm hover:bg-purple-800 ajaxPageBtn">
+                        &lt;
+                    </button>
+                }
+
+                <button name="currentPage" value="1"
+                        class="px-3 py-1 rounded-full @(Model.CurrentPage == 1 ? "bg-purple-700 text-white" : "bg-white border border-purple-300 text-purple-700 hover:bg-purple-100") text-sm ajaxPageBtn"
+                        @(Model.CurrentPage == 1 ? "disabled" : "")>
+                    1
+                </button>
+
+                @if (Model.CurrentPage > 3)
+                {
+                    <span class="px-2 select-none">...</span>
+                }
+
+                @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
+                {
+                    <button name="currentPage" value="@i"
+                            class="px-3 py-1 rounded-full @(i == Model.CurrentPage ? "bg-purple-700 text-white" : "bg-white border border-purple-300 text-purple-700 hover:bg-purple-100") text-sm ajaxPageBtn"
+                            @(i == Model.CurrentPage ? "disabled" : "")>
+                        @i
+                    </button>
+                }
+
+                @if (Model.CurrentPage < Model.TotalPages - 2)
+                {
+                    <span class="px-2 select-none">...</span>
+                }
+
+                <button name="currentPage" value="@Model.TotalPages"
+                        class="px-3 py-1 rounded-full @(Model.CurrentPage == Model.TotalPages ? "bg-purple-700 text-white" : "bg-white border border-purple-300 text-purple-700 hover:bg-purple-100") text-sm ajaxPageBtn"
+                        @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")>
+                    @Model.TotalPages
+                </button>
+
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <button name="currentPage" value="@(Model.CurrentPage + 1)"
+                            class="px-3 py-1 rounded-full bg-purple-700 text-white text-sm hover:bg-purple-800 ajaxPageBtn">
+                        &gt;
+                    </button>
+                }
+            </form>
+        </div>
+    }
+}
+else
+{
+    <p class="text-center text-gray-500 text-lg mt-16">No records found.</p>
+}

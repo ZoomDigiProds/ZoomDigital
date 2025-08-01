@@ -1,4 +1,4 @@
-﻿@model IEnumerable<InternalProj.ViewModel.WorkOrderSummaryViewModel>
+﻿@* @model IEnumerable<InternalProj.ViewModel.WorkOrderSummaryViewModel>
 
 <table class="table table-bordered table-striped table-sm">
     <thead class="table-light">
@@ -29,4 +29,61 @@
             </tr>
         }
     </tbody>
-</table>
+</table> *@
+
+
+
+
+
+@model IEnumerable<InternalProj.ViewModel.WorkOrderSummaryViewModel>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 divide-y divide-gray-200 table-auto">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
+                    Work Order No
+                </th>
+                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
+                    Studio Name
+                </th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
+                    Advance
+                </th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 whitespace-nowrap">
+                    SubTotal
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-900 text-sm">
+                            @item.WorkOrderNo
+                        </td>
+                        <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">
+                            @item.StudioName
+                        </td>
+                        <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">
+                            @item.Advance.ToString("N2")
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm text-right">
+                            @item.SubTotal.ToString("N2")
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="px-4 py-3 text-center text-gray-500 text-sm">
+                        No work orders found.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

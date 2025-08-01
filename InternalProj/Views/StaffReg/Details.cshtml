@@ -4,230 +4,167 @@
     ViewData["Title"] = "Staff Details";
 }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<!-- Tailwind CSS CDN (if not already globally loaded) -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 
-<style>
-    body {
-        background-color: #f2f4f8;
-    }
-
-    .details-wrapper {
-        max-width: 1100px;
-        margin: 40px auto;
-        background-color: #ffffff;
-        padding: 40px 30px;
-        border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    }
-
-    .details-heading {
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 40px;
-        color: #333;
-    }
-
-    .four-col-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-        gap: 20px 25px;
-    }
-
-    .detail-box {
-        background-color: #f9fafc;
-        border-radius: 8px;
-        padding: 16px 18px;
-        border: 1px solid #e0e6ed;
-        transition: 0.2s;
-    }
-
-        .detail-box:hover {
-            background-color: #eef2f7;
-            border-color: #d6dbe3;
-        }
-
-    .detail-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #555;
-        margin-bottom: 4px;
-    }
-
-    .detail-value {
-        font-size: 14px;
-        color: #222;
-        font-weight: 500;
-    }
-
-    .action-buttons {
-        margin-top: 40px;
-        text-align: center;
-    }
-
-        .action-buttons .btn {
-            min-width: 120px;
-            margin: 0 10px;
-            border-radius: 30px;
-            padding: 8px 18px;
-        }
-</style>
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success text-center" id="success">
+    <div class="bg-green-100 text-green-800 rounded p-3 text-center font-medium mb-4" id="success">
         @TempData["SuccessMessage"]
     </div>
 }
 
 <script>
     setTimeout(() => {
-        $('#success').fadeOut('slow');
+        document.getElementById('success')?.classList.add('hidden');
     }, 5000);
 </script>
 
-<div class="container details-wrapper">
-    <div class="details-heading">Staff Details</div>
+<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">@Model.UserName</h3>
 
-    <div class="four-col-grid">
-        @if (!string.IsNullOrWhiteSpace(Model.FirstName))
-        {
-            <div class="detail-box">
-                <div class="detail-label">First Name</div>
-                <div class="detail-value">@Model.FirstName</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.LastName))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Last Name</div>
-                <div class="detail-value">@Model.LastName</div>
-            </div>
-        }
-        @if (Model.DOB != null)
-        {
-            <div class="detail-box">
-                <div class="detail-label">DOB</div>
-                <div class="detail-value">@Model.DOB?.ToString("yyyy-MM-dd")</div>
-            </div>
-        }
-        @if (Model.DOJ != null)
-        {
-            <div class="detail-box">
-                <div class="detail-label">DOJ</div>
-                <div class="detail-value">@Model.DOJ?.ToString("yyyy-MM-dd")</div>
-            </div>
-        }
-        @if (Model.BranchId != null && Model.Branches?.FirstOrDefault(b => b.BranchId == Model.BranchId) != null)
-        {
-            <div class="detail-box">
-                <div class="detail-label">Branch</div>
-                <div class="detail-value">@Model.Branches.FirstOrDefault(b => b.BranchId == Model.BranchId)?.BranchName</div>
-            </div>
-        }
+<div class="min-h-screen bg-gradient-to-br from-gray-100 to-purple-100 py-10 px-2 flex items-start justify-center">
 
-        @if (!string.IsNullOrWhiteSpace(Model.UserName))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Username</div>
-                <div class="detail-value">@Model.UserName</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Address1))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Address 1</div>
-                <div class="detail-value">@Model.Address1</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Address2))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Address 2</div>
-                <div class="detail-value">@Model.Address2</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Phone1))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Phone 1</div>
-                <div class="detail-value">@Model.Phone1</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Phone2))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Phone 2</div>
-                <div class="detail-value">@Model.Phone2</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Whatsapp))
-        {
-            <div class="detail-box">
-                <div class="detail-label">WhatsApp</div>
-                <div class="detail-value">@Model.Whatsapp</div>
-            </div>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Email))
-        {
-            <div class="detail-box">
-                <div class="detail-label">Email</div>
-                <div class="detail-value">@Model.Email</div>
-            </div>
-        }
-        @if (Model.PhoneTypeId != null && Model.PhoneTypes?.FirstOrDefault(p => p.PhoneTypeId == Model.PhoneTypeId) != null)
-        {
-            <div class="detail-box">
-                <div class="detail-label">Phone Type</div>
-                <div class="detail-value">@Model.PhoneTypes.FirstOrDefault(p => p.PhoneTypeId == Model.PhoneTypeId)?.PhoneTypeName</div>
-            </div>
-        }
+    <!-- Main Wrapper -->
+    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-8">
 
-        @* <div class="detail-box"> *@
-        @*     <div class="detail-label">Category</div> *@
-        @*     <div class="detail-value">@Model.CustomerCategories.FirstOrDefault(c => c.CategoryId == Model.CategoryId)?.CategoryName</div> *@
-        @* </div> *@
-        @* <div class="detail-box"> *@
-        @*     <div class="detail-label">Remarks</div> *@
-        @*     <div class="detail-value">@Model.Remarks</div> *@
-        @* </div> *@
-
-        @if (Model.SelectedDesignationIds?.Any() == true)
-        {
-            <div class="detail-box">
-                <div class="detail-label">Designations</div>
-                <div class="detail-value">
-                    @foreach (var desigId in Model.SelectedDesignationIds)
-                    {
-                        var desig = Model.Designations.FirstOrDefault(d => d.DesignationId == desigId);
-                        if (desig != null)
-                        {
-                            <div>@desig.Name</div>
-                        }
-                    }
-                </div>
+        <!-- Profile Card -->
+        <div class="flex-shrink-0 w-full lg:max-w-xs bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center">
+            <div class="mb-4">
+                <span class="inline-block bg-purple-100 text-purple-700 rounded-full p-5 text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 3a9 9 0 016.879 14.804A4.992 4.992 0 0012 21a4.992 4.992 0 00-6.879-3.196z" /></svg>
+                </span>
             </div>
-        }
-
-        @if (Model.SelectedDeptIds?.Any() == true)
-        {
-            <div class="detail-box">
-                <div class="detail-label">Departments</div>
-                <div class="detail-value">
+            <div class="text-xl font-bold text-gray-900 mb-1">
+                @Model.FirstName @Model.LastName
+            </div>
+            <div class="text-sm text-gray-500 mb-3">@Model.UserName</div>
+            @if (Model.BranchId != null && Model.Branches?.FirstOrDefault(b => b.BranchId == Model.BranchId) != null)
+            {
+                <div class="text-sm bg-purple-50 text-purple-700 rounded-full px-3 py-1 font-medium mb-1">@Model.Branches.FirstOrDefault(b => b.BranchId == Model.BranchId)?.BranchName</div>
+            }
+            <div>
+            @if (Model.SelectedDeptIds?.Any() == true)
+            {
+                <div class="flex flex-wrap gap-2 justify-center mt-2">
                     @foreach (var deptId in Model.SelectedDeptIds)
                     {
                         var dept = Model.Departments.FirstOrDefault(d => d.DeptId == deptId);
                         if (dept != null)
                         {
-                            <div>@dept.Name</div>
+                            <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-sky-700 text-xs font-semibold">@dept.Name</span>
                         }
                     }
                 </div>
+            }
             </div>
-        }
-    </div>
+            <br/>
+            <div>
+                @if (Model.SelectedDesignationIds?.Any() == true)
+                {
+                    <div class="flex flex-wrap gap-2 justify-center mt-3">
+                        @foreach (var desigId in Model.SelectedDesignationIds)
+                        {
+                            var desig = Model.Designations.FirstOrDefault(d => d.DesignationId == desigId);
+                            if (desig != null)
+                            {
+                                <span class="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">@desig.Name</span>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
 
-    <div class="action-buttons">
-        <a asp-action="Edit" asp-route-id="@Model.StaffRegId" class="btn btn-primary">Edit</a>
-        <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+        <!-- Details Section -->
+        <div class="flex-1 bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-2xl font-bold text-purple-900 mb-8 text-center lg:text-left">Staff Details</div>
+            <dl class="space-y-5">
+
+                @if (Model.DOB != null)
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Date of Birth</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.DOB?.ToString("yyyy-MM-dd")</dd>
+                    </div>
+                }
+                @if (Model.DOJ != null)
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Date of Joining</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.DOJ?.ToString("yyyy-MM-dd")</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Address1))
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Address 1</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.Address1</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Address2))
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Address 2</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.Address2</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Phone1))
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Phone 1</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.Phone1</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Phone2))
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Phone 2</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.Phone2</dd>
+                    </div>
+                }
+                @* @if (Model.SelectedDesignationIds?.Any() == true)
+                {
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-indigo-50 transition">
+                        <div class="text-xs font-semibold text-gray-600 mb-1">Designations</div>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            @foreach (var desigId in Model.SelectedDesignationIds)
+                            {
+                                var desig = Model.Designations.FirstOrDefault(d => d.DesignationId == desigId);
+                                if (desig != null)
+                                {
+                                    <span class="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold">@desig.Name</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                } *@
+                @if (!string.IsNullOrWhiteSpace(Model.Whatsapp))
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">WhatsApp</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.Whatsapp</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Email))
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Email</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.Email</dd>
+                    </div>
+                }
+                @if (Model.PhoneTypeId != null && Model.PhoneTypes?.FirstOrDefault(p => p.PhoneTypeId == Model.PhoneTypeId) != null)
+                {
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+                        <dt class="text-gray-500 font-semibold">Phone Type</dt>
+                        <dd class="text-gray-900 font-medium text-sm">@Model.PhoneTypes.FirstOrDefault(p => p.PhoneTypeId == Model.PhoneTypeId)?.PhoneTypeName</dd>
+                    </div>
+                }
+            </dl>
+
+            <div class="flex flex-wrap justify-center gap-6 mt-10">
+                <a asp-action="Edit" asp-route-id="@Model.StaffRegId" class="inline-block min-w-[120px] px-5 py-2 rounded-full bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 text-center transition">Edit</a>
+                <a asp-action="Index" class="inline-block min-w-[120px] px-5 py-2 rounded-full bg-white text-gray-700 border border-gray-400 font-semibold shadow hover:bg-gray-100 text-center transition">Back</a>
+            </div>
+        </div>
     </div>
 </div>

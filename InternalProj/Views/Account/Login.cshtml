@@ -1,4 +1,4 @@
-﻿@{
+﻿@* @{
     ViewData["Title"] = "Login";
 }
 
@@ -140,6 +140,137 @@
     function togglePassword() {
         const passwordInput = document.getElementById('password');
         const toggleIcon = document.querySelector('.password-toggle');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    function validateForm() {
+        let valid = true;
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const usernameError = document.getElementById('usernameError');
+        const passwordError = document.getElementById('passwordError');
+
+        usernameError.textContent = '';
+        passwordError.textContent = '';
+
+        if (username.value.trim().length < 3) {
+            usernameError.textContent = 'Username must be at least 3 characters';
+            valid = false;
+        }
+
+        if (password.value.trim().length < 6) {
+            passwordError.textContent = 'Password must be at least 6 characters';
+            valid = false;
+        }
+
+        return valid;
+    }
+</script> *@
+
+
+
+
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!-- Tailwind CSS CDN for quick setup -->
+@* <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
+
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .password-toggle:focus {
+        outline: none;
+    }
+</style>
+
+<div class="fixed inset-0 flex items-center justify-center bg-gradient-to-r from-gray-100">
+    <div class="bg-white rounded-xl shadow-xl p-10 sm:p-12 w-full max-w-md">
+        <h3 class="text-2xl font-extrabold text-center text-gray-800 mb-8">Login</h3>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div id="success" class="bg-green-100 text-green-800 px-4 py-3 rounded mb-6 relative" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="bg-red-100 text-red-800 px-4 py-3 rounded mb-6" role="alert">@ViewBag.Error</div>
+        }
+
+        <form asp-action="Login" method="post" onsubmit="return validateForm()">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-6">
+                <label for="username" class="block text-gray-700 font-semibold mb-2 text-sm">Username</label>
+                <input type="text"
+                       id="username"
+                       name="username"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                       required />
+                <span id="usernameError" class="text-red-600 text-xs mt-1 block"></span>
+            </div>
+
+            <div class="mb-6 relative">
+                <label for="password" class="block text-gray-700 font-semibold mb-2 text-sm">Password</label>
+                <input type="password"
+                       id="password"
+                       name="password"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                       required />
+                <button type="button"
+                        class="absolute top-9 right-3 text-gray-400 hover:text-gray-700 focus:outline-none password-toggle"
+                        onclick="togglePassword()"
+                        aria-label="Toggle password visibility"
+                        tabindex="0">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+                <span id="passwordError" class="text-red-600 text-xs mt-1 block"></span>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-900 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition-colors duration-300">
+                Login
+            </button>
+
+            <a asp-action="ForgotPassword" class="block mt-3 text-right text-blue-900 text-xs hover:underline">
+                Forgot Password?
+            </a>
+        </form>
+    </div>
+</div>
+
+<script>
+    setTimeout(() => {
+        const msg = document.getElementById("success");
+        if (msg) {
+            msg.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => msg.remove(), 600);
+        }
+    }, 3000);
+
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.querySelector('.password-toggle i');
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             toggleIcon.classList.remove('fa-eye');
