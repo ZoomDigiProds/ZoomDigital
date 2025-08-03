@@ -24,6 +24,8 @@ namespace InternalProj.Data
         public DbSet<StaffCredentials> StaffCredentials { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<StaffPasswordHistory> StaffPasswordHistories { get; set; }
+        public DbSet<LoginLogs> LoginLogs { get; set; }
 
         // Many-to-many for staff
         public DbSet<StaffDepartment> StaffDepartments { get; set; }

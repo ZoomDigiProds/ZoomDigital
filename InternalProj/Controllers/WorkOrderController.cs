@@ -1,4 +1,5 @@
 ﻿using InternalProj.Data;
+using InternalProj.Filters;
 using InternalProj.Models;
 using InternalProj.Service;
 using InternalProj.ViewModel;
@@ -9,7 +10,9 @@ using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
 namespace InternalProj.Controllers
+
 {
+    [DepartmentAuthorize()]
     public class WorkOrderController : Controller
     {
         private readonly ApplicationDbContext _context;
