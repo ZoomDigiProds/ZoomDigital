@@ -1,13 +1,17 @@
 ﻿using InternalProj.Data;
+using InternalProj.Filters;
 using InternalProj.Models;
 using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
+ 
+[DepartmentAuthorize()]
+
 public class ReceiptController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _context;  
 
     public ReceiptController(ApplicationDbContext context)
     {

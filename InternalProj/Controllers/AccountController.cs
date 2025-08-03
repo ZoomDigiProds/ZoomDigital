@@ -10,6 +10,9 @@ using MimeKit.Text;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace InternalProj.Controllers
 {
@@ -17,6 +20,7 @@ namespace InternalProj.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly EmailSettings _emailSettings;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         public AccountController(ApplicationDbContext context, IOptions<EmailSettings> emailSettings)
         {
@@ -33,6 +37,25 @@ namespace InternalProj.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            var sessionLoginId = HttpContext.Session.GetInt32("LoginHistoryId");
+            var cookieLoginId = Request.Cookies["LoginHistoryId"];
+
+            if (sessionLoginId == null && !string.IsNullOrEmpty(cookieLoginId))
+            {
+                if (int.TryParse(cookieLoginId, out int loginId))
+                {
+                    var loginRecord = _context.LoginLogs.FirstOrDefault(l => l.Id == loginId);
+                    if (loginRecord != null && loginRecord.LogoutTime == null)
+                    {
+                        loginRecord.LogoutTime = DateTime.UtcNow;
+                        loginRecord.Reason = "Session expired";
+                        _context.SaveChanges();
+                    }
+
+                    Response.Cookies.Delete("LoginHistoryId");
+                }
+            }
+
             if (HttpContext.Session.GetString("UserName") != null)
             {
                 return RedirectToAction("Index", "StaffReg");
@@ -43,7 +66,7 @@ namespace InternalProj.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(string username, string password)
+        public async Task<IActionResult> Login(string username, string password)
         {
             var user = _context.StaffCredentials.FirstOrDefault(u => u.UserName == username && u.Active == "Y");
             if (user != null)
@@ -52,6 +75,31 @@ namespace InternalProj.Controllers
                 var result = hasher.VerifyHashedPassword(user, user.Password, password);
                 if (result == PasswordVerificationResult.Success)
                 {
+                    string localIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+                    string publicIp = await GetPublicIpAddressAsync();
+                    string location = await GetLocationFromIpAsync(publicIp);
+
+                    var loginHistory = new LoginLogs
+                    {
+                        StaffId = user.StaffId,
+                        LoginTime = DateTime.UtcNow,
+                        Local_IPAddres = localIp,
+                        Public_IPAddress = publicIp,
+                        Location = location,
+                        LogoutTime = null
+                    };
+                    _context.LoginLogs.Add(loginHistory);
+                    _context.SaveChanges();
+
+                    HttpContext.Session.SetInt32("LoginHistoryId", loginHistory.Id);
+                    Response.Cookies.Append("LoginHistoryId", loginHistory.Id.ToString(), new CookieOptions
+                    {
+                        Expires = DateTimeOffset.UtcNow.AddMinutes(30),
+                        HttpOnly = true
+                    });
+
+
                     HttpContext.Session.SetString("UserName", user.UserName);
                     HttpContext.Session.SetString("StaffId", user.StaffId.ToString());
 
@@ -65,7 +113,7 @@ namespace InternalProj.Controllers
 
                     if (user.IsFirstLogin == true)
                     {
-                        HttpContext.Session.SetString("IsFirstLogin", "true"); // ✅ set to true
+                        HttpContext.Session.SetString("IsFirstLogin", "true");
                         return RedirectToAction("ResetPassword", "Account", new { staffId = user.StaffId });
                     }
                     else
@@ -75,7 +123,6 @@ namespace InternalProj.Controllers
                     }
                 }
             }
-
             ViewBag.Error = "Invalid username or password.";
             return View();
         }
@@ -221,7 +268,6 @@ namespace InternalProj.Controllers
 
             var passwordHasher = new PasswordHasher<StaffCredentials>();
 
-            //  Combine current and last 3 password hashes
             var lastPasswords = _context.StaffPasswordHistories
                 .Where(p => p.StaffId == staffUser.StaffId)
                 .OrderByDescending(p => p.ChangedOn)
@@ -242,7 +288,6 @@ namespace InternalProj.Controllers
                 }
             }
 
-            // Save current password to history
             _context.StaffPasswordHistories.Add(new StaffPasswordHistory
             {
                 StaffId = staffUser.StaffId,
@@ -250,7 +295,6 @@ namespace InternalProj.Controllers
                 ChangedOn = DateTime.UtcNow
             });
 
-            // Update with new password
             staffUser.Password = passwordHasher.HashPassword(staffUser, newPassword);
             _context.SaveChanges();
 
@@ -258,11 +302,59 @@ namespace InternalProj.Controllers
             return RedirectToAction("Index", "Dashboard");
         }
 
-        public IActionResult Logout()
+        public IActionResult Logout(string? reason = "Manually Logout")
         {
+            var loginHistoryId = HttpContext.Session.GetInt32("LoginHistoryId");
+            if (loginHistoryId != null)
+            {
+                var loginRecord = _context.LoginLogs.FirstOrDefault(l => l.Id == loginHistoryId);
+                if (loginRecord != null && loginRecord.LogoutTime == null)
+                {
+                    loginRecord.LogoutTime = DateTime.UtcNow;
+                    loginRecord.Reason = reason;
+                    _context.SaveChanges();
+                }
+            }
+
             TempData["SuccessMessage"] = "You have been logged out successfully.";
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");
+        }
+
+        private async Task<string> GetPublicIpAddressAsync()
+        {
+            try
+            {
+                string publicIp = await _httpClient.GetStringAsync("https://api.ipify.org");
+                return publicIp.Trim();
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+
+        private async Task<string> GetLocationFromIpAsync(string ip)
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync($"http://ip-api.com/json/{ip}");
+                dynamic locationData = JsonConvert.DeserializeObject(response);
+
+                if (locationData?.status == "success")
+                {
+                    string city = locationData.city ?? "";
+                    string region = locationData.regionName ?? "";
+                    string country = locationData.country ?? "";
+                    return $"{city}, {region}, {country}".Trim(' ', ',');
+                }
+
+                return "Unknown Location";
+            }
+            catch
+            {
+                return "Unknown Location";
+            }
         }
     }
 }

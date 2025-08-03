@@ -1,4 +1,5 @@
 ﻿using InternalProj.Data;
+using InternalProj.Filters;
 using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using System.Linq;
 
 namespace InternalProj.Controllers
 {
+   [DepartmentAuthorize()]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;

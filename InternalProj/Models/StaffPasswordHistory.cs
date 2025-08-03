@@ -12,7 +12,6 @@ namespace InternalProj.Models
 
         [Required]
         public string HashedPassword { get; set; } = null!;
-
         public DateTime ChangedOn { get; set; } = DateTime.UtcNow;
     }
 }
