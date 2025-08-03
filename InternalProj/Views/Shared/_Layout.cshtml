@@ -85,7 +85,7 @@
             align-items: center;
             padding-left: 0;
             padding-right: 3rem;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         /* Hide horizontal nav on small screens */
@@ -252,17 +252,17 @@
         </header>
 
         <nav class="horizontal-nav fixed w-full border-b border-gray-200 z-10" aria-label="Main Navigation Horizontal">
-            <a asp-controller="Dashboard" asp-action="Index" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("Dashboard", "Index")">Home</a>
+            <a asp-controller="Dashboard" asp-action="Index" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("Dashboard", "Index")">Home</a>
 
             @if (isAdmin)
             {
-                <a asp-controller="Receipt" asp-action="Create" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("Receipt", "Create")">Receipt</a>
-                <a asp-controller="CustomerReg" asp-action="Create" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("CustomerReg", "Create")">Customer Registration</a>
-                <a asp-controller="StaffReg" asp-action="Index" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("StaffReg", "Index")">Staff Registration</a>
-                <a asp-controller="WorkOrder" asp-action="Create" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("WorkOrder", "Create")">Work Order</a>
-                <a asp-controller="ViewWork" asp-action="Index" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("ViewWork", "Index")">Reports</a>
-                <a asp-controller="StudioCallLogs" asp-action="Index" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("StudioCallLogs", "Index")">CallLogs</a>
-                <a asp-controller="Invoice" asp-action="CreateInvoice" class="px-4 py-2 rounded hover:bg-purple-800 @isActive("Invoice", "CreateInvoice")">Invoice</a>
+                <a asp-controller="Receipt" asp-action="Create" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("Receipt", "Create")">Receipt</a>
+                <a asp-controller="CustomerReg" asp-action="Create" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("CustomerReg", "Create")">Customer Registration</a>
+                <a asp-controller="StaffReg" asp-action="Index" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("StaffReg", "Index")">Staff Registration</a>
+                <a asp-controller="WorkOrder" asp-action="Create" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("WorkOrder", "Create")">Work Order</a>
+                <a asp-controller="ViewWork" asp-action="Index" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("ViewWork", "Index")">Reports</a>
+                <a asp-controller="StudioCallLogs" asp-action="Index" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("StudioCallLogs", "Index")">CallLogs</a>
+                <a asp-controller="Invoice" asp-action="CreateInvoice" class="px-2 py-2 rounded hover:bg-purple-800 @isActive("Invoice", "CreateInvoice")">Invoice</a>
             }
             @if (menuItems.Any(item => isAdmin || item.AllowedDepts.Any(dep => departments.Contains(dep))))
             {
@@ -331,7 +331,7 @@
                         Departments
                         <svg id="deptArrow" class="inline ml-2 transition-transform" width="16" height="16" fill="none" stroke="currentColor"><path d="M6 10l4-4" /></svg>
                     </button>
-                    <div id="deptTreeSubnav" class="pl-4 mt-1" style="display: none;">
+                    <div id="deptTreeSubnav" class="pl-4 mt-1">
                         @foreach (var item in menuItems)
                         {
                             if (isAdmin || item.AllowedDepts.Any(dep => departments.Contains(dep)))
