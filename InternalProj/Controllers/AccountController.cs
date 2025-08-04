@@ -101,7 +101,7 @@ namespace InternalProj.Controllers
 
 
                     HttpContext.Session.SetString("UserName", user.UserName);
-                    HttpContext.Session.SetInt32("StaffId", user.StaffId);
+                    HttpContext.Session.SetString("StaffId", user.StaffId.ToString());
 
                     var userDepartments = _context.StaffDepartments
                         .Where(sd => sd.StaffId == user.StaffId)

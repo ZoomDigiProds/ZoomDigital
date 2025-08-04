@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ZoomColorLab.Controllers
 {
-    //[DepartmentAuthorize()]
+    [DepartmentAuthorize()]
     public class StaffRegController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -279,8 +279,8 @@ namespace ZoomColorLab.Controllers
                 int BranchId,
                 string Phone1, string? Phone2, string? Whatsapp, string Email,
                 int PhoneTypeId,
-            //int CategoryId,
-            //string Remarks,
+                //int CategoryId,
+                //string Remarks,
                 DateTimeOffset? DOB, DateTimeOffset? DOJ,
                 string Active,
                  string UserName, string Password)
