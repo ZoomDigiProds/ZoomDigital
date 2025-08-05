@@ -1,0 +1,208 @@
+﻿@{
+    ViewData["Title"] = "Settings Layout";
+}
+
+<style>
+
+    .setting-link {
+        display: block;
+        background-color: #1e3a8a; 
+        color: white;
+        text-decoration: none;
+        padding: 0.3rem 0;
+        transition: background 0.2s;
+        border-radius: 4px;
+    }
+
+        .setting-link:hover {
+            background-color: #1d4ed8;
+            cursor: pointer;
+            color: white;
+        }
+
+        .setting-link:active {
+            outline: none;
+            box-shadow: 0 0 0 2px #2563eb;
+        }
+
+    .expand-toggle {
+        display: block;
+        color: white;
+        cursor: pointer;
+        padding: 0.5rem 0;
+    }
+
+    .submenu li {
+        color: #ddd;
+        margin-left: 0.5rem;
+    }
+
+</style>
+
+<!-- Top Navbar -->
+@* <nav style="background-color: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+    <button onclick="toggleSidebar()" style="background: none; border: none; color: white; font-size: 1rem;">Settings</button>
+</nav> *@
+
+<!-- Layout with Sidebar and Content -->
+<div style="display: flex; height: calc(90vh - 65px);">
+
+    <!-- Sidebar -->
+    <div id="sidebar" style="width: 250px; background-color: #1e3a8a; color: white; padding: 1rem;">
+        <h3>Settings</h3>
+        <ul style="list-style: none; padding-left: 0;">
+
+            <!-- General Settings Section -->
+            <li>
+                <a href="#" class="expand-toggle setting-link" onclick="toggleGeneralSettings()">General Settings</a>
+                <ul id="general-settings-submenu" class="submenu" style="list-style:none; padding-left: 1rem; display: none;">
+                    <li><a href="#" class="setting-link" data-url="/Settings/Pagination">Pagination</a></li>
+                    <li><a href="#" class="setting-link" data-url="/Settings/Scheduler">Scheduler Settings</a></li>
+                    <li><a href="#" class="setting-link" data-url="/Settings/PasswordPolicy">Password Policy</a></li>
+                    <li><a href="#" class="setting-link" data-url="/Settings/SmsContent">SMS Content</a></li>
+                </ul>
+            </li>
+
+
+            <!-- Dynamic Dictionary Section -->
+            <li>
+                <a href="#" class="expand-toggle setting-link" onclick="loadDictionary()">Dictionary</a>
+                <div id="dictionary-tree-container" style="margin-top: 0.5rem; padding-left: 1rem;"></div>
+            </li>
+
+            
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="content-area" style="flex: 1; padding: 2rem;">
+        <h1>Main Page</h1>
+        <p>This is the main content area.</p>
+    </div>
+</div>
+
+<script src="~/js/dictionarySettings.js"></script>
+
+<script>
+    let sidebarVisible = true;
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.style.display = sidebarVisible ? "none" : "block";
+        sidebarVisible = !sidebarVisible;
+    }
+
+    function toggleGeneralSettings() {
+        const submenu = document.getElementById("general-settings-submenu");
+        if (submenu.style.display === "block") {
+            submenu.style.display = "none";
+        } else {
+            submenu.style.display = "block";
+        }
+    }
+
+    function attachLinkHandlers() {
+        document.querySelectorAll(".setting-link").forEach(link => {
+            link.addEventListener("click", function (e) {
+                // Don't handle clicks on expand-toggle elements that toggle submenu (except Dictionary which is handled separately)
+                if (this.classList.contains("expand-toggle") && !this.hasAttribute("data-url")) {
+                    e.preventDefault();
+                    return; // Let toggleGeneralSettings or loadDictionary handle it
+                }
+
+                e.preventDefault();
+                const url = this.getAttribute("data-url");
+
+                if (!url) return; // No url to load
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Network error");
+                        return response.text();
+                    })
+                    .then(html => {
+                        const contentArea = document.getElementById("content-area");
+                        contentArea.innerHTML = html;
+
+                        // Execute inline scripts in fetched HTML
+                        const scripts = contentArea.querySelectorAll("script");
+                        scripts.forEach(script => {
+                            const newScript = document.createElement("script");
+                            if (script.src) {
+                                newScript.src = script.src;
+                                document.head.appendChild(newScript);
+                            } else {
+                                try {
+                                    new Function(script.textContent)();
+                                } catch (e) {
+                                    console.error("Script error:", e);
+                                }
+                            }
+                        });
+
+                        bindChildLinks(); // Rebind dictionary child links if relevant
+                    })
+                    .catch(() => {
+                        document.getElementById("content-area").innerHTML = "<h2>Dictionary Settings</h2>";
+                    });
+            });
+        });
+    }
+
+    function loadDictionary() {
+        const container = document.getElementById("dictionary-tree-container");
+        const contentArea = document.getElementById("content-area");
+
+        if (container.style.display === "block") {
+            container.style.display = "none";
+            return;
+        }
+
+        if (container.innerHTML.trim() !== "") {
+            container.style.display = "block";
+            return;
+        }
+
+        // Show loading in content-area
+        contentArea.innerHTML = `
+            <div style="text-align:center; margin-top:2rem;">
+                <div class="spinner" style="margin-bottom:1rem;"></div>
+                <p>Loading dictionary tree...</p>
+            </div>
+        `;
+
+        fetch("/Settings/Dictionary")
+            .then(response => response.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.display = "block";
+
+                // Load and run scripts from fetched content
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = html;
+                const scripts = tempDiv.querySelectorAll("script");
+
+                scripts.forEach(script => {
+                    if (script.src) {
+                        const newScript = document.createElement("script");
+                        newScript.src = script.src;
+                        document.body.appendChild(newScript);
+                    } else {
+                        try {
+                            new Function(script.textContent)();
+                        } catch (e) {
+                            console.error("Script error:", e);
+                        }
+                    }
+                });
+
+                bindChildLinks();
+                contentArea.innerHTML = `<h2>Dictionary Settings</h2>`;
+            })
+            .catch(err => {
+                contentArea.innerHTML = `<div style="color:red;">Error loading dictionary: ${err.message}</div>`;
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", attachLinkHandlers);
+</script>

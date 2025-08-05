@@ -1,0 +1,38 @@
+﻿@model List<InternalProj.ViewModels.DictionaryTree>
+
+<style>
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li {
+        margin: 0.3rem 0;
+    }
+
+    .children {
+        margin-left: 1rem;
+    }
+</style>
+
+@{
+    var root = Model.FirstOrDefault(); // only one dictionary group
+}
+
+@if (root != null)
+{
+    <ul>
+        <li>
+            @* <span class="toggle" onclick="toggleChildren(this)">@root.Title</span> *@
+            <ul class="children">
+                @foreach (var child in root.Children)
+                {
+                    <li>
+                        <span class="child-link" data-type="@child.Name">@child.Name</span>
+                    </li>
+                }
+            </ul>
+        </li>
+    </ul>
+}

@@ -1,5 +1,8 @@
 ﻿using InternalProj.Models;
 using Microsoft.EntityFrameworkCore;
+using Mono.TextTemplating;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace InternalProj.Data
 {
@@ -55,6 +58,12 @@ namespace InternalProj.Data
         public DbSet<OutstandingAmount> OutstandingAmounts { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
         public DbSet<StudioCallLog> StudioCallLogs { get; set; }
+
+        //settings
+        public DbSet<Dictionary> Dictionary { get; set; }
+        public DbSet<Models.Region> Region { get; set; }
+        public DbSet<Models.Size> Size { get; set; }
+        public DbSet<Models.State> State { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

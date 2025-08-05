@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ZoomColorLab.Controllers
 {
-    [DepartmentAuthorize()]
+    //[DepartmentAuthorize()]
     public class StaffRegController : Controller
     {
         private readonly ApplicationDbContext _context;

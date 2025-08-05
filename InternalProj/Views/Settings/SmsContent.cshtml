@@ -1,0 +1,77 @@
+﻿<style>
+    
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+
+   
+    #save-btn,
+    #cancel-btn {
+        display: none;
+    }
+
+    #loading-indicator {
+        display: none;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    #smsContent-input {
+        width: 100%;
+        height: auto;
+        min-height: 300px;
+        max-height: 100%;
+        resize: vertical;
+        padding: 0.5rem;
+        box-sizing: border-box;
+    }
+
+    .close-btn {
+        float: right;
+        cursor: pointer;
+        font-weight: bold;
+    }
+</style>
+
+<div id="sms-content-container">
+    <div class="header-row">
+        <h2>SMS Content Settings</h2>
+        <div>
+            <button id="edit-btn" class="btn btn-primary">Edit</button>
+            <button id="save-btn" class="btn btn-primary">Save</button>
+            <button id="cancel-btn" class="btn btn-danger">Cancel</button>
+        </div>
+    </div>
+
+    <div id="loading-indicator">
+        <div>Loading...</div>
+    </div>
+
+    <label for="smsContent-input">SMS Content:</label>
+    <textarea id="smsContent-input" disabled>
+Subject: Order Confirmation – Thank You for Your Order!
+
+Dear [Client's Name],
+
+Thank you for your order with [Your Photo Lab Name]. We're pleased to let you know that we've received your request and have started processing it.
+
+We truly appreciate your trust in our services and look forward to delivering high-quality results for you. If we need any additional details, we will contact you shortly.
+
+Should you have any questions or specific instructions regarding your order, feel free to reply to this email.
+
+Thank you once again!
+
+Best regards,
+
+[Your Full Name]
+[Your Position, e.g., Studio Manager]
+[Your Photo Lab Name]
+[Phone Number] | [Email Address] | [Website or Social Media if any]
+    </textarea>
+</div>
+
+<script src="~/js/smsSettings.js" asp-append-version="true"></script>

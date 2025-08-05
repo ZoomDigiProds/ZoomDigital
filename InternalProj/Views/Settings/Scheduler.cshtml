@@ -1,0 +1,102 @@
+﻿<style>
+    #add-form {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        z-index: 1051;
+        width: 400px;
+        border-radius: 10px;
+    }
+
+    #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 1050;
+    }
+
+    .scrollable-table {
+        max-height: 80%;
+        overflow-y: auto;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+    }
+
+        .scrollable-table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 1;
+        }
+</style>
+
+<h2>Scheduler Settings</h2>
+
+<button onclick="openAddForm()" class="btn btn-success mb-3">Add Job</button>
+
+<div class="scrollable-table">
+    <table class="table table-bordered table-hover text-center">
+        <thead class="thead-dark">
+            <tr>
+                <th>S.No</th>
+                <th>Action</th>
+                <th>Job Name</th>
+                <th>Occurence</th>
+                <th>Time</th>
+                <th> </th>
+            </tr>
+        </thead>
+        <tbody id="scheduler-body">
+            <!-- Populated by JS -->
+        </tbody>
+    </table>
+</div>
+
+<div id="overlay"></div>
+
+<div id="add-form">
+    <h3>Add New Job</h3>
+    <label>Job Name:</label>
+    <input type="text" id="new-job-name" class="form-control mb-2" />
+    <label>Occurence:</label>
+    <select id="new-job-occurence" class="form-control mb-2">
+        <option>Everyday</option>
+        <option>Weekly</option>
+        <option>Quarterly</option>
+        <option>Monthly</option>
+        <option>Yearly</option>
+    </select>
+    <label>Time:</label>
+    <div id="new-job-time-container" class="mb-3"></div>
+
+
+    <div class="text-end">
+        <button onclick="addJob()" class="btn btn-primary">Add</button>
+        <button onclick="closeAddForm()" class="btn btn-danger">Cancel</button>
+    </div>
+</div>
+
+<script>
+    if (!document.querySelector('script[src="/js/schedulerSettings.js"]')) {
+        const script = document.createElement("script");
+        script.src = "/js/schedulerSettings.js";
+        script.onload = () => {
+            if (typeof renderTable === "function") renderTable();
+        };
+        document.body.appendChild(script);
+    } else {
+        if (typeof renderTable === "function") renderTable();
+    }
+</script>
+
