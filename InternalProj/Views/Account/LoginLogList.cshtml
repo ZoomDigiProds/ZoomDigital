@@ -1,0 +1,41 @@
+﻿@model List<InternalProj.Models.LoginLogs>
+
+@{
+    ViewData["Title"] = "Login History";
+}
+<div class="mt-0 pt-0">
+<h2>Login History</h2>
+
+@if (Model!=null && Model.Count>0)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>SlNo</th>
+                <th>Staff Id</th>
+                <th>Login Time</th>
+                <th>Local Ip</th>
+                <th>Public IP</th>
+                <th>Location</th>
+                <th>Logout Time</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@(i+1)</td>
+                    <td>@Model[i].StaffId</td>
+                    <td>@Model[i].LoginTime.ToString()</td>
+                    <td>@Model[i].Local_IPAddres</td>
+                    <td>@Model[i].Public_IPAddress</td>
+                    <td>@Model[i].Location</td>
+                    <td>@(Model[i].LogoutTime?.ToString())</td>
+                    <td>@Model[i].Reason</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+</div>

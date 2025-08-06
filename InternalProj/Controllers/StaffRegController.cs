@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ZoomColorLab.Controllers
 {
-    //[DepartmentAuthorize()]
+    [DepartmentAuthorize()]
     public class StaffRegController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -96,7 +96,6 @@ namespace ZoomColorLab.Controllers
                 return View(model);
             }
 
-            // 🔒 Uniqueness & pattern validations
             if (await _context.StaffCredentials.AnyAsync(u => u.UserName.ToLower() == UserName.ToLower()))
             {
                 TempData["ErrorMessage"] = "Username already exists.";
@@ -434,7 +433,7 @@ namespace ZoomColorLab.Controllers
                     await SessionHelper.SetStaffSessionAsync(HttpContext, _context, staff.StaffId);
                 }
 
-                return RedirectToAction("Details", new { id = staff.StaffId });
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
@@ -496,50 +495,50 @@ namespace ZoomColorLab.Controllers
 
 
         // GET: StaffReg/Details/5
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            var staff = await _context.StaffRegs
-                .Include(s => s.Addresses)
-                .Include(s => s.Contacts)
-                .Include(s => s.StaffDepartments)
-                .Include(s => s.StaffDesignations)
-                .FirstOrDefaultAsync(s => s.StaffId == id);
+        //    [HttpGet]
+        //    public async Task<IActionResult> Details(int id)
+        //    {
+        //        var staff = await _context.StaffRegs
+        //            .Include(s => s.Addresses)
+        //            .Include(s => s.Contacts)
+        //            .Include(s => s.StaffDepartments)
+        //            .Include(s => s.StaffDesignations)
+        //            .FirstOrDefaultAsync(s => s.StaffId == id);
 
-            if (staff == null)
-                return NotFound();
+        //        if (staff == null)
+        //            return NotFound();
 
-            var credentials = await _context.StaffCredentials.FirstOrDefaultAsync(c => c.StaffId == id);
+        //        var credentials = await _context.StaffCredentials.FirstOrDefaultAsync(c => c.StaffId == id);
 
-            var model = new StaffRegViewModel
-            {
-                StaffRegId = staff.StaffId,
-                FirstName = staff.FirstName,
-                LastName = staff.LastName,
-                DOB = staff.DOB,
-                DOJ = staff.DOJ,
-                BranchId = staff.BranchId,
-                //CategoryId = staff.CategoryId,
-                //Remarks = staff.Remarks,
-                UserName = credentials?.UserName,
-                Address1 = staff.Addresses?.FirstOrDefault()?.Address1,
-                Address2 = staff.Addresses?.FirstOrDefault()?.Address2,
-                Phone1 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone1),
-                Phone2 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone2),
-                Whatsapp = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Whatsapp),
-                Email = staff.Contacts?.FirstOrDefault()?.Email,
-                PhoneTypeId = staff.Contacts?.FirstOrDefault()?.PhoneTypeId ?? 0,
-                SelectedDeptIds = staff.StaffDepartments.Select(sd => sd.DeptId).ToList(),
-                SelectedDesignationIds = staff.StaffDesignations.Select(sd => sd.DesignationId).ToList(),
-                Departments = await _context.DeptMasters.Where(d => d.Active == "Y").ToListAsync(),
-                Designations = await _context.DesignationMasters.Where(d => d.Active == "Y").ToListAsync(),
-                Branches = await _context.Branches.Where(b => b.Active == "Y").ToListAsync(),
-                PhoneTypes = await _context.PhoneTypes.Where(p => p.Active == "Y").ToListAsync(),
-                //CustomerCategories = await _context.CustomerCategories.Where(c => c.Active == "Y").ToListAsync()
-            };
+        //        var model = new StaffRegViewModel
+        //        {
+        //            StaffRegId = staff.StaffId,
+        //            FirstName = staff.FirstName,
+        //            LastName = staff.LastName,
+        //            DOB = staff.DOB,
+        //            DOJ = staff.DOJ,
+        //            BranchId = staff.BranchId,
+        //            //CategoryId = staff.CategoryId,
+        //            //Remarks = staff.Remarks,
+        //            UserName = credentials?.UserName,
+        //            Address1 = staff.Addresses?.FirstOrDefault()?.Address1,
+        //            Address2 = staff.Addresses?.FirstOrDefault()?.Address2,
+        //            Phone1 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone1),
+        //            Phone2 = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Phone2),
+        //            Whatsapp = EncryptionHelper.Decrypt(staff.Contacts?.FirstOrDefault()?.Whatsapp),
+        //            Email = staff.Contacts?.FirstOrDefault()?.Email,
+        //            PhoneTypeId = staff.Contacts?.FirstOrDefault()?.PhoneTypeId ?? 0,
+        //            SelectedDeptIds = staff.StaffDepartments.Select(sd => sd.DeptId).ToList(),
+        //            SelectedDesignationIds = staff.StaffDesignations.Select(sd => sd.DesignationId).ToList(),
+        //            Departments = await _context.DeptMasters.Where(d => d.Active == "Y").ToListAsync(),
+        //            Designations = await _context.DesignationMasters.Where(d => d.Active == "Y").ToListAsync(),
+        //            Branches = await _context.Branches.Where(b => b.Active == "Y").ToListAsync(),
+        //            PhoneTypes = await _context.PhoneTypes.Where(p => p.Active == "Y").ToListAsync(),
+        //            //CustomerCategories = await _context.CustomerCategories.Where(c => c.Active == "Y").ToListAsync()
+        //        };
 
-            return View(model);
-        }
+        //        return View(model);
+        //    }
 
         private async Task ReloadDropdowns(StaffRegViewModel model)
         {

@@ -2,26 +2,23 @@
 
 @{
     ViewData["Title"] = "Customer Registration";
+    var staffName = Context.Session.GetString("StaffId");
 }
 
-@{
-    var staffName = Context.Session.GetString("UserName");
-}
-
-<div class="min-h-screen flex flex-col justify-center items-center py-10 px-4 bg-gray-50">
-    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-7xl">
-        <h3 class="text-2xl font-extrabold text-gray-900">Customer Registration</h3>
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">Customer Registration</h3>
 
          @if (TempData["SuccessMessage"] != null)
         {
-            <div id="success" class="bg-green-100 text-green-800 rounded-lg p-4 text-center mb-6">
+            <div id="success" class="bg-green-100 text-green-800 rounded-lg p-2 text-center mb-3">
                 @TempData["SuccessMessage"]
             </div>
         } 
 
         @if (TempData["ErrorMessage"] != null)
         {
-            <div id="error" class="bg-red-100 text-red-800 rounded-lg p-4 text-center mb-6">
+            <div id="error" class="bg-red-100 text-red-800 rounded-lg p-2 text-center mb-3">
                 @TempData["ErrorMessage"]
             </div>
         }
@@ -29,13 +26,13 @@
         <script>
             setTimeout(() => {
                 $('#success').fadeOut('slow');
-            }, 5000);
+            }, 1500);
 
             setTimeout(() => {
                 const error = document.getElementById('error');
                 if (error) error.classList.add('opacity-0', 'transition-opacity', 'duration-500');
                 setTimeout(() => error?.remove(), 600);
-            }, 5000);
+            }, 1500);
         </script>
 
         <div class="custom-form-wrapper">

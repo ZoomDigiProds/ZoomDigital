@@ -1,4 +1,5 @@
-﻿.common-btn {
+﻿/*common save/submit buttons etc*/
+.common-btn {
     background-color: #1e3a8a;
     color: #fff;
     font-weight: 600;
@@ -18,3 +19,47 @@
         outline: none;
         box-shadow: 0 0 0 2px #2563eb; 
     }
+
+/*outer page common styling*/
+.common-pages-layout {
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    align-items:center;
+    width: 100%;
+/*    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;*/
+/*    padding-left: 0.75rem;*/
+    padding: 1.2rem;
+    background-color: #f9fafb;
+}
+
+/*inner page common styling*/
+.common-inner-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; 
+    width: 90%; 
+    background-color: #ffffff; 
+    padding: 1rem;
+    border-top-width: 4px;
+    border-top-color: #1e3a8a; 
+    border-radius: 1rem; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+    @media (min-width: 768px) {
+        .common-inner-container {
+            padding: 2rem;
+        }
+    }
+
+.page-heading {
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 2rem; /* line height for text-2xl */
+    font-weight: 700; /* font-bold */
+    color: #111827; /* text-gray-900 */
+}
+
+

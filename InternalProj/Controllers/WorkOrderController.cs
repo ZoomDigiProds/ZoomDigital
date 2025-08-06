@@ -226,7 +226,7 @@ namespace InternalProj.Controllers
                     detail.WorkOrderId = model.WorkOrder.WorkOrderId;
                     detail.GTotal = detail.Qty * detail.Rate;
 
-                    subTotal += detail.GTotal;
+                    //subTotal += detail.GTotal;
 
                     var subHeadName = await _context.SubHeads
                         .Where(s => s.SubHeadId == detail.SubheadId)

@@ -29,6 +29,12 @@ namespace InternalProj.Controllers
         }
         //for invalid user who tries to accesspage without authorization
 
+        [HttpGet]
+        public IActionResult LoginLogList() {
+            var logs= _context.LoginLogs.ToList();
+            return View(logs);
+        }
+
         public IActionResult AccessDenied()
         {
             return View();
@@ -103,12 +109,21 @@ namespace InternalProj.Controllers
                     HttpContext.Session.SetString("UserName", user.UserName);
                     HttpContext.Session.SetString("StaffId", user.StaffId.ToString());
 
+                    //gettting current staff related departments
                     var userDepartments = _context.StaffDepartments
                         .Where(sd => sd.StaffId == user.StaffId)
                         .Select(sd => sd.Department.Name)
                         .ToList();
-
                     HttpContext.Session.SetString("UserDepartments", string.Join(",", userDepartments));
+
+                    //gettting current staff related branch
+                    var userBranch = _context.StaffRegs
+                        .Where(sd => sd.StaffId == user.StaffId)
+                        .Select(sd => sd.BranchId.ToString())
+                        .FirstOrDefault();
+                    HttpContext.Session.SetString("BranchId", userBranch.ToString());
+                    
+                    
                     TempData["SuccessMessage"] = "Login successful!";
 
                     if (user.IsFirstLogin == true)

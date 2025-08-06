@@ -317,9 +317,10 @@
 }
 
 @* <h1 class="text-center text-4xl font-extrabold tracking-tight mb-10 text-blue-900">Invoice</h1> *@
-<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Invoice</h3>
-
-<form asp-controller="Invoice" asp-action="CreateInvoice" method="post" class="space-y-12 max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-2xl border-t-4 border-blue-900">
+<div class="common-pages-layout">
+    @* <div class="common-inner-container"> *@
+    <form asp-controller="Invoice" asp-action="CreateInvoice" method="post" class="common-inner-container">
+        <h3 class="page-heading">Invoice</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
         <!-- Left panel -->
@@ -499,6 +500,9 @@
         </button>
     </div>
 </form>
+</div>
+</div>
+
 
 @section Scripts {
     <script>

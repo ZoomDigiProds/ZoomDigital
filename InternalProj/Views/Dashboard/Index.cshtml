@@ -4,8 +4,11 @@
     ViewData["Title"] = "Zoom Digital Press";
 }
 
-<link rel="stylesheet" href="~/css/LayoutPage.css" asp-append-version="true" />
+@* <link rel="stylesheet" href="~/css/LayoutPage.css" asp-append-version="true" /> *@
 
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">Dashboard Overview</h3>
 @if (TempData["ErrorMessage"] != null)
 {
     <div id="editError" class="bg-red-100 text-red-800 rounded-lg p-3 text-center mb-4">
@@ -22,8 +25,6 @@
         }
     }, 5000);
 </script>
-
-<h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Dashboard Overview</h3>
 
 <div class="container mx-auto px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -82,6 +83,9 @@
         </div>
     </div>
 </div>
+</div>
+</div>
+
 
 @section Scripts {
     <script>
