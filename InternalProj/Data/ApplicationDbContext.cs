@@ -59,6 +59,12 @@ namespace InternalProj.Data
         public DbSet<Receipt> Receipts { get; set; }
         public DbSet<StudioCallLog> StudioCallLogs { get; set; }
 
+        // WorkFlow
+        public DbSet<Job> Jobs { get; set; }
+        public DbSet<JobStage> JobStages { get; set; }
+        public DbSet<JobStageTemplate> JobStageTemplates { get; set; }
+        public DbSet<DeptStageTemplate> DeptStageTemplates { get; set; }
+
         //settings
         public DbSet<Dictionary> Dictionary { get; set; }
         public DbSet<Models.Region> Region { get; set; }

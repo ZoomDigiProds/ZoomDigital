@@ -1,7 +1,9 @@
-using InternalProj.Data;
+﻿using InternalProj.Data;
 using InternalProj.Models;
 using InternalProj.Service;
+using InternalProj.Workflow;
 using Microsoft.EntityFrameworkCore;
+using WorkflowCore.Interface;
 
 namespace InternalProj
 {
@@ -10,6 +12,14 @@ namespace InternalProj
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Workflow 
+
+            // Register the workflow
+            builder.Services.AddTransient<JobWorkflow>();
+
+            //     builder.Services.AddWorkflow<JobWorkflow>();
+
 
             builder.Services.AddControllersWithViews();
 
@@ -43,6 +53,8 @@ namespace InternalProj
 
             //builder.WebHost.UseUrls("http://192.168.1.62:5190");
 
+            //Workflow
+
 
             app.UseStaticFiles();
 
@@ -61,3 +73,5 @@ namespace InternalProj
         }
     }
 }
+
+
