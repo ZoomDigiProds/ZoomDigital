@@ -4,85 +4,62 @@
     ViewData["Title"] = "Create";
 }
 
+<h1>Create</h1>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white py-8 px-2">
-    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
-        <h3 class="page-heading">Create Call Log</h3>
+<h4>Studio Call Log</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <div class="flex items-center mb-6">
-            @* <div class="bg-indigo-100 p-3 rounded-full mr-4">
-                <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a1 1 0 001 1h2l2 4v1a5 5 0 005 5h1l2-4h2a1 1 0 001-1V4z" />
-                </svg>
-            </div> *@
-            <div>
-                @* <h1 class="text-2xl font-extrabold text-indigo-700">Create Call Log</h1> *@
-                @* <p class="text-gray-500">Document a new studio call event</p> *@
-            </div>
-        </div>
-
-        <form asp-action="Create" class="space-y-5">
-
-            <div asp-validation-summary="ModelOnly" class="text-red-600 text-sm mb-3"></div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                    <label asp-for="CustomerId" class="block text-sm font-semibold mb-1 text-gray-700">Customer</label>
-                    <select asp-for="CustomerId"
-                            class="w-full border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-indigo-300 transition px-3 py-2"
-                            asp-items="ViewBag.CustomerId" id="customerSelect">
-                        <option value="">-- Select Customer --</option>
-                    </select>
-                </div>
-                <div>
-                    <label asp-for="CallTime" class="block text-sm font-semibold mb-1 text-gray-700">Call Time</label>
-                    <input asp-for="CallTime"
-                           class="w-full border border-gray-300 rounded-lg shadow-sm px-3 py-2 focus:ring focus:ring-indigo-300" />
-                </div>
+            <div class="form-group">
+                <label asp-for="CustomerId" class="control-label">Customer Name</label>
+                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId" id="customerSelect" style="width: 200px;">
+                    <option value="">-- Select Customer --</option>
+                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                </select>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                    <label asp-for="StudioName" class="block text-sm font-semibold mb-1 text-gray-700">Studio Name</label>
-                    <input asp-for="StudioName" readonly
-                           class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-600" />
-                </div>
-                <div>
-                    <label asp-for="Phone" class="block text-sm font-semibold mb-1 text-gray-700">Phone</label>
-                    <input asp-for="Phone" readonly
-                           class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-600" />
-                </div>
+            <div class="form-group">
+                <label asp-for="StudioName" class="control-label"></label>
+                <input asp-for="StudioName" class="form-control" style="width: 200px;" readonly />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                    <label asp-for="Region" class="block text-sm font-semibold mb-1 text-gray-700">Address (Region)</label>
-                    <input asp-for="Region" readonly
-                           class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-gray-600" />
-                </div>
-                <div>
-                    <label asp-for="UpdatedCallTime" class="block text-sm font-semibold mb-1 text-gray-700">Updated Call Time</label>
-                    <input asp-for="UpdatedCallTime"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-indigo-300" />
-                </div>
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" style="width: 200px;" readonly />
             </div>
 
-            <div>
-                <label asp-for="Description" class="block text-sm font-semibold mb-1 text-gray-700">Description</label>
-                <textarea asp-for="Description" rows="4"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring focus:ring-indigo-300"></textarea>
+
+            <div class="form-group">
+                <label asp-for="Region" class="control-label">Address</label>
+                <input asp-for="Region" class="form-control" style="width: 200px;" readonly />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CallTime" class="control-label"></label>
+                <input asp-for="CallTime" class="form-control" style="width: 200px;" id="callTimeInput" />
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control" style="width: 200px;"></textarea>
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="UpdatedCallTime" class="control-label"></label>
+                <input asp-for="UpdatedCallTime" class="form-control" style="width: 200px;" id="updatedCallTimeInput" />
+
             </div>
 
             <input type="hidden" asp-for="Active" value="Y" />
 
-            <div class="flex items-center justify-end space-x-4 mt-4">
-                <input type="submit"
-                       value="Create"
-                       class="common-btn" />
-                <a asp-action="Index"
-                   class="common-btn">
-                    Cancel
-                </a>
+            <div class="form-group mt-3">
+                <input type="submit" value="Create" class="btn btn-primary" style="width: 100px;" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
@@ -91,8 +68,34 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <script>
         $(document).ready(function () {
+
+            const now = new Date();
+            const maxCallTime = now.toISOString().slice(0, 16);
+            const minCallTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000)).toISOString().slice(0, 16);
+            $('#callTimeInput').attr('min', minCallTime).attr('max', maxCallTime);
+
+            $('#updatedCallTimeInput').prop('disabled', true);
+
+            $('#callTimeInput').on('change', function () {
+                const selectedCallTime = new Date($(this).val());
+                if (!isNaN(selectedCallTime)) {
+
+                    $('#updatedCallTimeInput').prop('disabled', false);
+
+                    const minUpdate = selectedCallTime.toISOString().slice(0, 16);
+                    const maxUpdateDate = new Date(selectedCallTime.getTime() + (30 * 24 * 60 * 60 * 1000));
+                    const maxUpdate = maxUpdateDate.toISOString().slice(0, 16);
+
+                    $('#updatedCallTimeInput').attr('min', minUpdate).attr('max', maxUpdate);
+                } else {
+
+                    $('#updatedCallTimeInput').val('').prop('disabled', true);
+                }
+            });
+
             $('#customerSelect').change(function () {
                 const customerId = $(this).val();
                 if (customerId) {
@@ -112,7 +115,6 @@
                         }
                     });
                 } else {
-                    // Clear all fields
                     $('[name="StudioName"], [name="Phone"], [name="Address1"], [name="Address2"], [name="State"], [name="Region"]').val('');
                 }
             });
