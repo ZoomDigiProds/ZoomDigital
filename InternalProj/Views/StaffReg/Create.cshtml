@@ -4,16 +4,85 @@
     ViewData["Title"] = "Staff Registration";
 }
 
-<!-- Tailwind CSS CDN -->
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 <!-- Flatpickr CSS -->
 <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
 
+<style>
 
+    .label {
+        display: block;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
 
-@* <div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
-    <div class="bg-white shadow-xl rounded-lg w-full max-w-5xl p-10">
-        <h3 class="text-2xl font-extrabold mt-8 mb-8 text-gray-900">Staff Registration</h3> *@
+    /* Input Fields */
+    .input-field {
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input-field:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5);
+        }
+
+    /* Validation Error */
+    .validation-error {
+        font-size: 0.75rem;
+        color: #ef4444;
+        margin-top: 0.25rem;
+    }
+
+    /* Multi-Checkbox Dropdown */
+    .multi-checkbox-dropdown {
+        position: relative;
+    }
+
+        .multi-checkbox-dropdown .selected-items {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .multi-checkbox-dropdown .checkbox-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 0.125rem;
+        }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .form-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+</style>
 
 <div class="common-pages-layout">
     <div class="common-inner-container">
@@ -21,201 +90,158 @@
 
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="bg-green-100 text-green-800 rounded p-4 text-center font-semibold mb-6" id="success">
-                @TempData["SuccessMessage"]
-            </div>
+            <div class="alert alert-success" id="success">@TempData["SuccessMessage"]</div>
         }
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="bg-red-100 text-red-800 rounded p-4 text-center font-semibold mb-6" id="error">
-                @TempData["ErrorMessage"]
-            </div>
+            <div class="alert alert-error" id="error">@TempData["ErrorMessage"]</div>
         }
 
         <script>
-            setTimeout(() => { document.getElementById('success')?.classList.add('hidden'); }, 5000);
-            setTimeout(() => { document.getElementById('error')?.classList.add('hidden'); }, 5000);
+            setTimeout(() => { document.getElementById('success')?.classList.add('hidden'); }, 1500);
+            setTimeout(() => { document.getElementById('error')?.classList.add('hidden'); }, 1500);
         </script>
 
         <form id="staffForm" asp-action="Create" class="p-4" method="post" novalidate>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- First Name -->
+            <div class="form-grid">
                 <div>
-                    <label for="FirstName" class="block text-sm font-semibold text-gray-700 mb-1">First Name <span class="text-red-600">*</span></label>
-                    <input id="FirstName" name="FirstName" type="text" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">First Name is required</p>
+                    <label for="FirstName" class="label required-label">First Name</label>
+                    <input id="FirstName" name="FirstName" type="text" required class="input-field" />
+                    <p class="validation-error hidden">First Name is required</p>
                 </div>
 
-                <!-- Last Name -->
                 <div>
-                    <label for="LastName" class="block text-sm font-semibold text-gray-700 mb-1">Last Name <span class="text-red-600">*</span></label>
-                    <input id="LastName" name="LastName" type="text" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Last Name is required</p>
+                    <label for="LastName" class="label required-label">Last Name</label>
+                    <input id="LastName" name="LastName" type="text" required class="input-field" />
+                    <p class="validation-error hidden">Last Name is required</p>
                 </div>
 
-                <!-- Address 1 -->
                 <div>
-                    <label for="Address1" class="block text-sm font-semibold text-gray-700 mb-1">Address 1 <span class="text-red-600">*</span></label>
-                    <input id="Address1" name="Address1" type="text" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Address 1 is required</p>
+                    <label for="Address1" class="label required-label">Address 1</label>
+                    <input id="Address1" name="Address1" type="text" required class="input-field" />
+                    <p class="validation-error hidden">Address 1 is required</p>
                 </div>
 
-                <!-- Address 2 -->
                 <div>
-                    <label for="Address2" class="block text-sm font-semibold text-gray-700 mb-1">Address 2</label>
-                    <input id="Address2" name="Address2" type="text"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="Address2" class="label">Address 2</label>
+                    <input id="Address2" name="Address2" type="text" class="input-field" />
                 </div>
 
-                <!-- DOB -->
                 <div>
-                    <label for="DOB" class="block text-sm font-semibold text-gray-700 mb-1">DOB <span class="text-red-600">*</span></label>
-                    <input id="DOB" name="DOB" type="text" placeholder="yyyy-MM-dd" required pattern="^\d{4}-\d{2}-\d{2}$"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Valid DOB (yyyy-MM-dd) required and must be 18+ years</p>
+                    <label for="DOB" class="label required-label">DOB</label>
+                    <input id="DOB" name="DOB" type="text" placeholder="yyyy-MM-dd" required pattern="^\d{4}-\d{2}-\d{2}$" class="input-field placeholder-gray-400" />
+                    <p class="validation-error hidden">Valid DOB (yyyy-MM-dd) required and must be 18+ years</p>
                 </div>
 
-                <!-- DOJ -->
                 <div>
-                    <label for="DOJ" class="block text-sm font-semibold text-gray-700 mb-1">DOJ <span class="text-red-600">*</span></label>
-                    <input id="DOJ" name="DOJ" type="text" placeholder="yyyy-MM-dd" required pattern="^\d{4}-\d{2}-\d{2}$"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Valid DOJ (yyyy-MM-dd) is required</p>
+                    <label for="DOJ" class="label required-label">DOJ</label>
+                    <input id="DOJ" name="DOJ" type="text" placeholder="yyyy-MM-dd" required pattern="^\d{4}-\d{2}-\d{2}$" class="input-field placeholder-gray-400" />
+                    <p class="validation-error hidden">Valid DOJ (yyyy-MM-dd) is required</p>
                 </div>
 
-                <!-- Phone 1 -->
                 <div>
-                    <label for="Phone1" class="block text-sm font-semibold text-gray-700 mb-1">Phone 1 <span class="text-red-600">*</span></label>
-                    <input id="Phone1" name="Phone1" type="text" required pattern="^\+?[0-9]{10}$"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Valid Phone 1 is required</p>
+                    <label for="Phone1" class="label required-label">Phone 1</label>
+                    <input id="Phone1" name="Phone1" type="text" required pattern="^\+?[0-9]{10}$" class="input-field" />
+                    <p class="validation-error hidden">Valid Phone 1 is required</p>
                 </div>
 
-                <!-- Phone 2 -->
                 <div>
-                    <label for="Phone2" class="block text-sm font-semibold text-gray-700 mb-1">Phone 2</label>
-                    <input id="Phone2" name="Phone2" type="text" pattern="^\+?[0-9]{10}$"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Invalid Phone 2 format</p>
+                    <label for="Phone2" class="label">Phone 2</label>
+                    <input id="Phone2" name="Phone2" type="text" pattern="^\+?[0-9]{10}$" class="input-field" />
+                    <p class="validation-error hidden">Invalid Phone 2 format</p>
                 </div>
 
-                <!-- WhatsApp -->
                 <div>
-                    <label for="Whatsapp" class="block text-sm font-semibold text-gray-700 mb-1">WhatsApp</label>
-                    <input id="Whatsapp" name="Whatsapp" type="text" pattern="^\+?[0-9]{10}$"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Invalid WhatsApp format</p>
+                    <label for="Whatsapp" class="label">WhatsApp</label>
+                    <input id="Whatsapp" name="Whatsapp" type="text" pattern="^\+?[0-9]{10}$" class="input-field" />
+                    <p class="validation-error hidden">Invalid WhatsApp format</p>
                 </div>
 
-                <!-- Email -->
                 <div>
-                    <label for="Email" class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-600">*</span></label>
-                    <input id="Email" name="Email" type="email" required title="Enter a valid email address"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Valid Email is required</p>
+                    <label for="Email" class="label required-label">Email</label>
+                    <input id="Email" name="Email" type="email" required class="input-field" />
+                    <p class="validation-error hidden">Valid Email is required</p>
                 </div>
 
-                <!-- Phone Type -->
                 <div>
-                    <label for="PhoneTypeId" class="block text-sm font-semibold text-gray-700 mb-1">Phone Type <span class="text-red-600">*</span></label>
-                    <select id="PhoneTypeId" name="PhoneTypeId" required
-                            class="w-full rounded border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                    <label for="PhoneTypeId" class="label required-label">Phone Type</label>
+                    <select id="PhoneTypeId" name="PhoneTypeId" required class="input-field bg-white">
                         <option value="">-- Select Phone Type --</option>
                         @foreach (var type in Model.PhoneTypes)
                         {
                             <option value="@type.PhoneTypeId">@type.PhoneTypeName</option>
                         }
                     </select>
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Phone Type is required</p>
+                    <p class="validation-error hidden">Phone Type is required</p>
                 </div>
 
-                <!-- Branch -->
                 <div>
-                    <label for="BranchId" class="block text-sm font-semibold text-gray-700 mb-1">Branch <span class="text-red-600">*</span></label>
-                    <select id="BranchId" name="BranchId" required
-                            class="w-full rounded border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                    <label for="BranchId" class="label required-label">Branch</label>
+                    <select id="BranchId" name="BranchId" required class="input-field bg-white">
                         <option value="">-- Select Branch --</option>
                         @foreach (var branch in Model.Branches)
                         {
                             <option value="@branch.BranchId">@branch.BranchName</option>
                         }
                     </select>
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Branch is required</p>
+                    <p class="validation-error hidden">Branch is required</p>
                 </div>
 
-                <!-- Designation (multi-checkbox dropdown) -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Designation <span class="text-red-600">*</span></label>
-                    <div class="multi-checkbox-dropdown relative w-full" id="designationDropdown">
-                        <div tabindex="0"
-                             class="selected-items border border-gray-300 rounded px-3 py-2 bg-white cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                            Select Designation(s)
-                        </div>
-                        <div class="checkbox-list absolute left-0 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-gray-300 rounded shadow-md hidden z-50 text-sm">
+                    <label class="label required-label">Designation</label>
+                    <div class="multi-checkbox-dropdown" id="designationDropdown">
+                        <div tabindex="0" class="selected-items">Select Designation(s)</div>
+                        <div class="checkbox-list hidden">
                             @foreach (var designation in Model.Designations)
                             {
                                 var isChecked = Model.SelectedDesignationIds != null && Model.SelectedDesignationIds.Contains(designation.DesignationId);
                                 <label class="block px-2 py-1 hover:bg-gray-100 cursor-pointer">
-                                    <input type="checkbox" name="SelectedDesignationIds" value="@designation.DesignationId"
-                                           @(isChecked ? "checked" : "") class="mr-2 align-middle" />
+                                    <input type="checkbox" name="SelectedDesignationIds" value="@designation.DesignationId" @(isChecked ? "checked" : "") class="mr-2" />
                                     @designation.Name
                                 </label>
                             }
                         </div>
                     </div>
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">At least one Designation is required</p>
+                    <p class="validation-error hidden">At least one Designation is required</p>
                 </div>
 
                 <input type="hidden" name="Active" value="Y" />
 
-                <!-- Department (multi-checkbox dropdown) -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Department <span class="text-red-600">*</span></label>
-                    <div class="multi-checkbox-dropdown relative w-full" id="departmentDropdown">
-                        <div tabindex="0"
-                             class="selected-items border border-gray-300 rounded px-3 py-2 bg-white cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                            Select Department(s)
-                        </div>
-                        <div class="checkbox-list absolute left-0 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-gray-300 rounded shadow-md hidden z-50 text-sm">
+                    <label class="label required-label">Department</label>
+                    <div class="multi-checkbox-dropdown" id="departmentDropdown">
+                        <div tabindex="0" class="selected-items">Select Department(s)</div>
+                        <div class="checkbox-list hidden">
                             @foreach (var department in Model.Departments)
                             {
                                 var isChecked = Model.SelectedDeptIds != null && Model.SelectedDeptIds.Contains(department.DeptId);
                                 <label class="block px-2 py-1 hover:bg-gray-100 cursor-pointer">
-                                    <input type="checkbox" name="SelectedDeptIds" value="@department.DeptId"
-                                           @(isChecked ? "checked" : "") class="mr-2 align-middle" />
+                                    <input type="checkbox" name="SelectedDeptIds" value="@department.DeptId" @(isChecked ? "checked" : "") class="mr-2" />
                                     @department.Name
                                 </label>
                             }
                         </div>
                     </div>
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">At least one Department is required</p>
+                    <p class="validation-error hidden">At least one Department is required</p>
                 </div>
 
-                <!-- Username -->
                 <div>
-                    <label for="UserName" class="block text-sm font-semibold text-gray-700 mb-1">Username <span class="text-red-600">*</span></label>
-                    <input id="UserName" name="UserName" type="text" pattern="^[a-zA-Z0-9_]{4,20}$" required
-                           title="Username must be 4-20 characters and contain only letters, numbers, and underscores"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Valid Username is required (no #,$ etc)</p>
+                    <label for="UserName" class="label required-label">Username</label>
+                    <input id="UserName" name="UserName" type="text" pattern="^[a-zA-Z0-9_]{4,20}$" required class="input-field" />
+                    <p class="validation-error hidden">Valid Username is required</p>
                 </div>
 
-                <!-- Password -->
                 <div>
-                    <label for="Password" class="block text-sm font-semibold text-gray-700 mb-1">Password <span class="text-red-600">*</span></label>
-                    <input id="Password" name="Password" type="password" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    <p class="validation-error text-xs text-red-500 mt-1 hidden">Password is required</p>
+                    <label for="Password" class="label required-label">Password</label>
+                    <input id="Password" name="Password" type="password" required class="input-field" />
+                    <p class="validation-error hidden">Password is required</p>
                 </div>
             </div>
 
             <div class="flex justify-center pt-10">
-                <button type="submit"
-                        class="common-btn">
-                    Register
+                <button type="submit" 
+                    class="common-btn">
+                Register
                 </button>
             </div>
         </form>
@@ -223,9 +249,7 @@
 </div>
 
 @section Scripts {
-    <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
     <script>
         function yearsAgo(years) {
             const d = new Date();
@@ -239,7 +263,7 @@
             allowInput: true,
             altInput: true,
             altFormat: "F j, Y",
-            defaultDate: null,
+            defaultDate: "today",
             disableMobile: "true"
         });
         flatpickr("#DOJ", {
@@ -248,18 +272,16 @@
             allowInput: true,
             altInput: true,
             altFormat: "F j, Y",
-            defaultDate: null,
+            defaultDate: "today",
             disableMobile: "true"
         });
 
-        function setupMultiCheckboxDropdown(dropdownId, errorSelector) {
+        function setupMultiCheckboxDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
             const selectedItemsDiv = dropdown.querySelector(".selected-items");
             const checkboxList = dropdown.querySelector(".checkbox-list");
             const checkboxes = checkboxList.querySelectorAll("input[type=checkbox]");
-            const errorDiv = dropdown.parentElement.querySelector(errorSelector);
 
-            // Toggle dropdown on click or keyboard enter/space
             selectedItemsDiv.addEventListener("click", () => {
                 checkboxList.classList.toggle("hidden");
             });
@@ -269,44 +291,34 @@
                     checkboxList.classList.toggle("hidden");
                 }
             });
-
-            // Close dropdown on outside click
             document.addEventListener("click", (e) => {
                 if (!dropdown.contains(e.target)) {
                     checkboxList.classList.add("hidden");
                 }
             });
-
-            // Update selected text display
             function updateSelectedText() {
-                const selected = [];
-                checkboxes.forEach((cb) => {
-                    if (cb.checked) selected.push(cb.parentElement.textContent.trim());
-                });
+                const selected = Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.parentElement.textContent.trim());
                 selectedItemsDiv.textContent = selected.length
                     ? selected.join(", ")
                     : dropdownId === "departmentDropdown"
-                    ? "Select Department(s)"
-                    : "Select Designation(s)";
+                        ? "Select Department(s)"
+                        : "Select Designation(s)";
             }
-
-            checkboxes.forEach((cb) => {
-                cb.addEventListener("change", updateSelectedText);
-            });
-
+            checkboxes.forEach(cb => cb.addEventListener("change", updateSelectedText));
             updateSelectedText();
         }
-
-        setupMultiCheckboxDropdown("departmentDropdown", ".validation-error");
-        setupMultiCheckboxDropdown("designationDropdown", ".validation-error");
+        setupMultiCheckboxDropdown("departmentDropdown");
+        setupMultiCheckboxDropdown("designationDropdown");
 
         document.getElementById("staffForm").addEventListener("submit", function (e) {
             e.preventDefault();
             let form = this;
             let isValid = true;
-            form.querySelectorAll(".validation-error").forEach((div) => div.classList.add("hidden"));
+            form.querySelectorAll(".validation-error").forEach(div => div.classList.add("hidden"));
 
-            form.querySelectorAll('input:not([name="SelectedDeptIds"]):not([name="SelectedDesignationIds"]), select, textarea').forEach((input) => {
+            form.querySelectorAll('input:not([name="SelectedDeptIds"]):not([name="SelectedDesignationIds"]), select, textarea').forEach(input => {
                 if (input.hasAttribute("required") && !input.value.trim()) {
                     showError(input, true);
                     isValid = false;
@@ -323,14 +335,11 @@
                 }
             });
 
-            const deptCheckboxes = document.querySelectorAll('input[name="SelectedDeptIds"]:checked');
-            if (deptCheckboxes.length === 0) {
+            if (document.querySelectorAll('input[name="SelectedDeptIds"]:checked').length === 0) {
                 document.querySelector("#departmentDropdown").parentElement.querySelector(".validation-error").classList.remove("hidden");
                 isValid = false;
             }
-
-            const desigCheckboxes = document.querySelectorAll('input[name="SelectedDesignationIds"]:checked');
-            if (desigCheckboxes.length === 0) {
+            if (document.querySelectorAll('input[name="SelectedDesignationIds"]:checked').length === 0) {
                 document.querySelector("#designationDropdown").parentElement.querySelector(".validation-error").classList.remove("hidden");
                 isValid = false;
             }

@@ -75,7 +75,7 @@ namespace InternalProj.Controllers
         {
             if (ModelState.IsValid)
             {
-                var staffId = HttpContext.Session.GetInt32("StaffId");
+                var staffId = HttpContext.Session.GetString("StaffId");
                 var staffName = HttpContext.Session.GetString("UserName");
 
                 if (staffId == null || string.IsNullOrEmpty(staffName))
@@ -83,6 +83,8 @@ namespace InternalProj.Controllers
                     TempData["ErrorMessage"] = "Staff session expired. Please log in again.";
                     return RedirectToAction("Login", "Account");
                 }
+
+                int parsedStaffId = int.Parse(staffId); // Or use int.TryParse for safety
 
                 var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
 
@@ -97,7 +99,7 @@ namespace InternalProj.Controllers
                     CategoryId = model.CategoryId,
                     BranchId = model.BranchId,
                     RateTypeId = model.RateTypeId,
-                    StaffId = staffId.Value
+                    StaffId = parsedStaffId
                 };
 
                 _context.CustomerRegs.Add(newCustomer);

@@ -40,7 +40,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem; 
-    width: 90%; 
+    width: 90%;
+    height: 80%;
     background-color: #ffffff; 
     padding: 1rem;
     border-top-width: 4px;
@@ -55,11 +56,30 @@
         }
     }
 
+/*    page headings */
 .page-heading {
-    font-size: 1.5rem; /* text-2xl */
-    line-height: 2rem; /* line height for text-2xl */
-    font-weight: 700; /* font-bold */
-    color: #111827; /* text-gray-900 */
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: #111827;
 }
+
+/*success command failures alert */
+.alert {
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
 
