@@ -43,7 +43,7 @@
                     <td>@Html.DisplayFor(modelItem => item.Region)</td>
                     <td>@item.CallTime.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</td>
                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                    <td>@(item.UpdatedCallTime.HasValue ? item.UpdatedCallTime.Value.ToLocalTime().ToString("dd MMM yyyy, h:mm tt") : "")</td>
+                    <td>@(item.UpdatedCallTime.HasValue ? item.UpdatedCallTime.Value.ToLocalTime().ToString("dd MMM yyyy") : "")</td>
                 </tr>
             }
         }

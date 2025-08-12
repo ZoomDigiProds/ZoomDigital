@@ -63,17 +63,17 @@ namespace InternalProj.Controllers
             const int pageSize = 10;
 
             var query = _context.WorkOrders
-    .Include(w => w.Customer)
-    .Include(w => w.WorkType)
-    .Where(w => w.Active == "Y" &&
-                w.BranchId == branchId &&
-                w.Customer != null &&
-                w.Customer.BranchId == branchId);
+                .Include(w => w.Customer)
+                .Include(w => w.WorkType)
+                .Where(w => w.Active == "Y" &&
+                            w.BranchId == branchId &&
+                            w.Customer != null &&
+                            w.Customer.BranchId == branchId);
 
 
             if (!string.IsNullOrEmpty(studio))
             {
-                query = query.Where(w => w.Customer != null && w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
+                query = query.Where(w => w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
             }
 
             if (fromDate.HasValue)
@@ -122,7 +122,7 @@ namespace InternalProj.Controllers
 
             return View(viewModel);
         }
-
+    
         [HttpPost]
         public IActionResult DownloadExcel(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId)
         {
@@ -135,11 +135,14 @@ namespace InternalProj.Controllers
             var query = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
-                .Where(w => w.Active == "Y" && w.BranchId == branchId);
+                .Where(w => w.Active == "Y" && w.BranchId == branchId && w.Customer != null && w.Customer.BranchId == branchId);
+
 
             if (!string.IsNullOrEmpty(studio))
             {
-                query = query.Where(w => w.Customer != null && w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
+                query = query.Where(w => w.Customer != null &&
+                                             w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower() &&
+                                             w.Customer.BranchId == branchId);
             }
 
             if (fromDate.HasValue)
@@ -174,7 +177,6 @@ namespace InternalProj.Controllers
             string toStr = toDate?.ToString("dd-MM-yyyy") ?? "N/A";
             ws.Cell(2, 1).Value = $"Date Range: {fromStr} to {toStr}";
             ws.Range(2, 1, 2, 8).Merge().Style
-                //.Font.SetItalic().Font.SetFontSize(12)
                 .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
             ws.Cell(3, 1).Value = "Sl No";
@@ -218,11 +220,21 @@ namespace InternalProj.Controllers
             var query = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
-                .Where(w => w.Active == "Y" && w.BranchId == branchId);
+                .Where(w => w.Active == "Y" && w.BranchId == branchId && w.Customer != null && w.Customer.BranchId == branchId);
+
+
+            var studioList = _context.CustomerRegs
+                .Where(c => c.BranchId == branchId)
+                .Select(c => c.StudioName)
+                .Distinct()
+                .ToList();
 
             if (!string.IsNullOrEmpty(studio))
             {
-                query = query.Where(w => w.Customer != null && w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
+                query = query.Where(w => w.Customer != null &&
+                             w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower() &&
+                             w.Customer.BranchId == branchId);
+
             }
 
             if (fromDate.HasValue)

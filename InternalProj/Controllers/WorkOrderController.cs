@@ -28,6 +28,9 @@ namespace InternalProj.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            var branchIdStr = HttpContext.Session.GetString("BranchId");
+            int.TryParse(branchIdStr, out int branchId);
+
             var viewModel = new WorkOrderViewModel
             {
                 WorkOrder = new WorkOrderMaster(),
@@ -36,7 +39,12 @@ namespace InternalProj.Controllers
                 DeliveryModes = _context.DeliveryModes.Where(s => s.Active == "Y").ToList(),
                 OrderVias = _context.OrderVias.Where(s => s.Active == "Y").ToList(),
                 WorkTypes = _context.WorkTypes.Where(s => s.Active == "Y").ToList(),
-                Customers = _context.CustomerRegs.Where(a => a.Active == "Y").ToList(),
+                //Customers = _context.CustomerRegs.Where(a => a.Active == "Y").ToList(),
+                
+                Customers = _context.CustomerRegs
+                        .Where(a => a.Active == "Y" && a.BranchId == branchId)
+                        .ToList(),
+
                 Branches = _context.Branches.Where(s => s.Active == "Y").ToList(),
                 StaffRegs = _context.StaffRegs.Where(s => s.Active == "Y").ToList(),
                 MainHeads = _context.MainHeads.Include(m => m.SubHeads)
@@ -68,8 +76,6 @@ namespace InternalProj.Controllers
 
             return Json(customer);
         }
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(WorkOrderViewModel model)
@@ -90,7 +96,6 @@ namespace InternalProj.Controllers
             }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
-
             try
             {
                 var isEdit = model.WorkOrder.WorkOrderId > 0;
@@ -112,7 +117,6 @@ namespace InternalProj.Controllers
                 }
 
                 List<WorkDetails> existingDetails = [];
-
                 if (isEdit)
                 {
                     var existingOrder = await _context.WorkOrders
@@ -125,8 +129,6 @@ namespace InternalProj.Controllers
                         .Include(w => w.WorkDetails)
                             .ThenInclude(d => d.MainHead)
                         .FirstOrDefaultAsync(w => w.WorkOrderId == model.WorkOrder.WorkOrderId);
-
-
                     if (existingOrder == null)
                     {
                         TempData["ErrorMessage"] = "Work order not found.";
@@ -134,14 +136,10 @@ namespace InternalProj.Controllers
                     }
 
                     model.WorkOrder.WorkOrderNo = existingOrder.WorkOrderNo;
-
                     existingOrder.Ddate = model.WorkOrder.Ddate;
                     existingOrder.SubTotal = model.WorkOrder.SubTotal;
                     existingOrder.Balance = model.WorkOrder.Balance;
                     existingOrder.Advance = model.WorkOrder.Advance;
-
-
-
                     existingDetails = existingOrder.WorkDetails.ToList();
 
                     var deletedIds = Request.Form["DeletedDetailIds"]
@@ -157,17 +155,6 @@ namespace InternalProj.Controllers
                     // New work order
                     model.WorkOrder.Wdate = DateTime.UtcNow;
                     model.WorkOrder.Active = "Y";
-
-                    //model.WorkOrder.SubTotal = Math.Round(subTotal, 2);
-
-                    //if ((model.WorkOrder.Advance ?? 0) > model.WorkOrder.SubTotal)
-                    //{
-                    //    //ModelState.AddModelError("WorkOrder.Advance", "Advance cannot be greater than the SubTotal.");
-                    //    TempData["ErrorMessage"] = $"Advance amount cannot exceed SubTotal.";
-                    //    PopulateDropdowns(model);
-                    //    return View(model);
-                    //}
-
                     subTotal = 0;
 
                     if (model.WorkDetailsList != null)
@@ -187,17 +174,11 @@ namespace InternalProj.Controllers
                         PopulateDropdowns(model);
                         return View(model);
                     }
-
-
                     model.WorkOrder.Balance = model.WorkOrder.SubTotal
                         - (model.WorkOrder.Advance ?? 0)
                         - totalPaid;
-
                     if (model.WorkOrder.Balance < 0)
                         model.WorkOrder.Balance = 0;
-
-
-
                     _context.WorkOrders.Add(model.WorkOrder);
                     await _context.SaveChangesAsync();
                 }
@@ -286,11 +267,7 @@ namespace InternalProj.Controllers
                         }
                     }
                 }
-
                 await _context.SaveChangesAsync();
-
-
-
                 model.WorkOrder.SubTotal = Math.Round(subTotal, 2);
 
                 if (isEdit)
@@ -310,11 +287,8 @@ namespace InternalProj.Controllers
                 if (model.WorkOrder.Balance < 0)
                     model.WorkOrder.Balance = 0;
 
-
                 await _context.SaveChangesAsync();
-
                 await _workOrderService.UpdateWorkOrderBalance(model.WorkOrder.WorkOrderId);
-
                 await transaction.CommitAsync();
 
                 // SMS logic (if applicable)
@@ -362,16 +336,23 @@ namespace InternalProj.Controllers
                 return View(model);
             }
         }
-
         private void PopulateDropdowns(WorkOrderViewModel model)
         {
+            var branchIdStr = HttpContext.Session.GetString("BranchId");
+            int.TryParse(branchIdStr, out int branchId);
+
             model.Machines = _context.Machines.Where(s => s.Active == "Y").ToList();
             model.DeliveryMasters = _context.DeliveryMasters.Where(s => s.Active == "Y").ToList();
             model.DeliveryModes = _context.DeliveryModes.Where(s => s.Active == "Y").ToList();
             model.OrderVias = _context.OrderVias.Where(s => s.Active == "Y").ToList();
             model.WorkTypes = _context.WorkTypes.Where(s => s.Active == "Y").ToList();
             model.Albums = _context.Albums.Where(s => s.Active == "Y").ToList();
-            model.Customers = _context.CustomerRegs.Where(s => s.Active == "Y").ToList();
+
+            // Filter customers by branch
+            model.Customers = _context.CustomerRegs
+                .Where(s => s.Active == "Y" && s.BranchId == branchId)
+                .ToList();
+
             model.Branches = _context.Branches.Where(s => s.Active == "Y").ToList();
             model.StaffRegs = _context.StaffRegs.Where(s => s.Active == "Y").ToList();
             model.MainHeads = _context.MainHeads.Where(s => s.Active == "Y").ToList();
@@ -418,7 +399,6 @@ namespace InternalProj.Controllers
 
             return Json(subHeads);
         }
-
         [HttpGet]
         public IActionResult GetChildSubHeads(int subHeadId, int sizeId)
         {
@@ -431,7 +411,6 @@ namespace InternalProj.Controllers
                 .FirstOrDefault();
 
             Console.WriteLine($"Fetched Rate: {rate}");
-
             // Fetch child subheads based on subHeadId
             var childSubHeads = _context.ChildSubHeads
                 .Where(c => c.SubHeadId == subHeadId)
@@ -450,36 +429,29 @@ namespace InternalProj.Controllers
                         .FirstOrDefault()
                 })
                 .ToList();
-
             return Json(childSubHeads);
         }
-
         public IActionResult GetWorkOrderDetails(int id)
         {
             var workOrder = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
                 .FirstOrDefault(w => w.WorkOrderId == id);
-
             if (workOrder == null)
                 return NotFound();
-
             var details = _context.WorkDetails
                 .Include(d => d.SubHead)
                 .Include(d => d.Size)
                 .Include(d => d.ChildSubHead)
                 .Where(d => d.WorkOrderId == id)
                 .ToList();
-
             // Fetch total paid from Receipts
             double totalPaid = _context.Receipts
                 .Where(r => r.WorkOrderId == id)
                 .Sum(r => (double?)r.CurrentAmount) ?? 0;
-
             // Calculate balance
             double advance = workOrder.Advance ?? 0;
             double balance = Math.Max(0, workOrder.SubTotal - advance - totalPaid);
-
             var viewModel = new WorkOrderViewModel
             {
                 WorkOrder = workOrder,
@@ -488,7 +460,6 @@ namespace InternalProj.Controllers
                 Balance = balance,
                 SubTotal = workOrder.SubTotal
             };
-
             return PartialView("_WorkOrderDetailsPartial", viewModel);
         }
 
@@ -500,13 +471,11 @@ namespace InternalProj.Controllers
                 return BadRequest("Invalid Work Type");
 
             var prefix = workType.TypeName.Substring(0, 1).ToUpper();
-
             var latestOrder = _context.WorkOrders
                 .Where(w => w.WorkOrderNo.StartsWith(prefix + "-"))
                 .OrderByDescending(w => w.WorkOrderId)
                 .Select(w => w.WorkOrderNo)
                 .FirstOrDefault();
-
             int nextNumber = 1;
             if (!string.IsNullOrEmpty(latestOrder))
             {
@@ -516,11 +485,9 @@ namespace InternalProj.Controllers
                     nextNumber = lastNum + 1;
                 }
             }
-
             string newOrderNo = $"{prefix}-{nextNumber:D3}";
             return Json(new { workOrderNo = newOrderNo });
         }
-
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -532,7 +499,6 @@ namespace InternalProj.Controllers
 
             if (workOrder == null)
                 return NotFound();
-
             var totalPaid = _context.Receipts
                 .Where(r => r.WorkOrderId == id)
                 .Sum(r => (double?)r.CurrentAmount) ?? 0;
@@ -563,7 +529,6 @@ namespace InternalProj.Controllers
                 SubTotal = workOrder.SubTotal,
                 //Balance = Math.Max(0, workOrder.SubTotal - (workOrder.Advance ?? 0) - totalPaid)
                 Balance = workOrder.Balance ?? 0
-
             };
 
             return View("Create", viewModel);
