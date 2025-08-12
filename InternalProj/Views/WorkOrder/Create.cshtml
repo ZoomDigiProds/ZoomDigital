@@ -14,26 +14,26 @@
     <div class="common-inner-container">
         <h3 class="page-heading">Work Order</h3>
 
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div id="success" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-center" role="alert">
-                @TempData["SuccessMessage"]
-            </div>
-        }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div id="success" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-center" role="alert">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
 
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div id="error" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center" role="alert">
-                @TempData["ErrorMessage"]
-            </div>
-        }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div id="error" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
 
-        <script>
-            setTimeout(() => {
-                document.getElementById('success')?.classList.add('hidden');
-                document.getElementById('error')?.classList.add('hidden');
-            }, 1500);
-        </script>
+                <script>
+                    setTimeout(() => {
+                        document.getElementById('success')?.classList.add('hidden');
+                        document.getElementById('error')?.classList.add('hidden');
+                    }, 1500);
+                </script>
 
         <div class="custom-form-wrapper">
             <form id="workOrderForm" asp-action="Create" asp-controller="WorkOrder" method="post" class="space-y-6">
@@ -72,11 +72,10 @@
                         <input asp-for="WorkOrder.Mobile" readonly
                                class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" id="mobileNumber" />
                     </div>
-
+                  
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-
                     <div>
                         <label asp-for="WorkOrder.NoOfSheets" class="block font-medium text-gray-700 required-label mb-1">No Of Sheets</label>
                         <input asp-for="WorkOrder.NoOfSheets" type="number" min="1" max="100" required
@@ -184,22 +183,22 @@
                 <div class="overflow-auto max-h-[400px] border border-gray-300 rounded shadow-sm">
                     <table id="workOrderTable" class="min-w-full text-sm text-left text-gray-700">
                         <thead class="bg-purple-600 text-white sticky top-0">
-                            <tr>
+                        <tr>
                                 <th class="px-4 py-2">Main Head</th>
                                 <th class="px-4 py-2">Subhead</th>
                                 <th class="px-4 py-2 w-24">Qty</th>
                                 <th class="px-4 py-2 w-28">Rate</th>
                                 <th class="px-4 py-2 w-28">GTotal</th>
                                 <th class="px-4 py-2 w-20">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mainHeadBody" class="overflow-y-auto">
+                        </tr>
+                    </thead>
+                    <tbody id="mainHeadBody" class="overflow-y-auto">
 
-                            <input type="hidden" asp-for="WorkOrder.WorkOrderId" />
-                            <input type="hidden" name="WorkOrder.WorkOrderId" value="@Model.WorkOrder?.WorkOrderId" />
+                        <input type="hidden" asp-for="WorkOrder.WorkOrderId" />
+                        <input type="hidden" name="WorkOrder.WorkOrderId" value="@Model.WorkOrder?.WorkOrderId" />
 
-                            @foreach (var mainHead in Model.MainHeads)
-                            {
+                        @foreach (var mainHead in Model.MainHeads)
+                        {
                                 <tr class="mainhead-row cursor-pointer hover:bg-purple-50" data-mainhead-id="@mainHead.MainHeadId" data-mainhead-name="@mainHead.MainHeadName">
                                     <td class="px-4 py-2">@mainHead.MainHeadName</td>
                                     <td class="px-4 py-2"></td>
@@ -207,24 +206,24 @@
                                     <td class="px-4 py-2"></td>
                                     <td class="px-4 py-2"></td>
                                     <td class="px-4 py-2"></td>
-                                </tr>
-                            }
+                            </tr>
+                        }
 
-                            @if (Model.WorkDetailsList != null && Model.WorkDetailsList.Any())
+                        @if (Model.WorkDetailsList != null && Model.WorkDetailsList.Any())
+                        {
+                            var i = 0;
+                            foreach (var detail in Model.WorkDetailsList)
                             {
-                                var i = 0;
-                                foreach (var detail in Model.WorkDetailsList)
-                                {
-                                    var mainHeadName = Model.MainHeads.FirstOrDefault(m => m.MainHeadId == detail.MainHeadId)?.MainHeadName ?? "-";
-                                    var subHeadName = Model.SubHeads.FirstOrDefault(s => s.SubHeadId == detail.SubheadId)?.SubHeadName ?? "-";
-                                    var sizeName = Model.Albums.FirstOrDefault(s => s.SizeId == detail.SizeId)?.Size ?? "-";
-                                    var childSubName = detail.ChildSubheadId.HasValue
-                                    ? Model.ChildSubHeads.FirstOrDefault(c => c.ChildSubHeadId == detail.ChildSubheadId)?.ChildSubHeadName ?? "-"
-                                    : "";
+                                var mainHeadName = Model.MainHeads.FirstOrDefault(m => m.MainHeadId == detail.MainHeadId)?.MainHeadName ?? "-";
+                                var subHeadName = Model.SubHeads.FirstOrDefault(s => s.SubHeadId == detail.SubheadId)?.SubHeadName ?? "-";
+                                var sizeName = Model.Albums.FirstOrDefault(s => s.SizeId == detail.SizeId)?.Size ?? "-";
+                                var childSubName = detail.ChildSubheadId.HasValue
+                                ? Model.ChildSubHeads.FirstOrDefault(c => c.ChildSubHeadId == detail.ChildSubheadId)?.ChildSubHeadName ?? "-"
+                                : "";
 
-                                    var combinedName = string.IsNullOrWhiteSpace(childSubName)
-                                    ? $"{subHeadName} - {sizeName}"
-                                    : $"{subHeadName} - {sizeName} - {childSubName}";
+                                var combinedName = string.IsNullOrWhiteSpace(childSubName)
+                                ? $"{subHeadName} - {sizeName}"
+                                : $"{subHeadName} - {sizeName} - {childSubName}";
 
                                     <tr data-mainhead-id="@detail.MainHeadId" data-mainhead-name="@mainHeadName" class="hover:bg-purple-50">
                                         <td class="px-4 py-2 font-medium mainhead-name" data-mainhead-id="@detail.MainHeadId">@mainHeadName</td>
@@ -242,54 +241,58 @@
                                                    class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-100 cursor-not-allowed gtotal-input" />
                                         </td>
 
-                                        <input type="hidden" name="WorkDetailsList[@i].MainHeadId" value="@detail.MainHeadId" />
-                                        <input type="hidden" name="WorkDetailsList[@i].SubHeadId" value="@detail.SubheadId" />
-                                        <input type="hidden" name="WorkDetailsList[@i].ChildSubHeadId" value="@detail.ChildSubheadId" />
-                                        <input type="hidden" name="WorkDetailsList[@i].Tax" value="@detail.Tax" />
-                                        <input type="hidden" name="WorkDetailsList[@i].Cess" value="@detail.Cess" />
-                                        <input type="hidden" name="WorkDetailsList[@i].SizeId" value="@detail.SizeId" />
-                                        <input type="hidden" name="WorkDetailsList[@i].Details" value="@combinedName" />
-                                        <input type="hidden" name="WorkDetailsList[@i].Active" value="@detail.Active" />
-                                        <input type="hidden" name="WorkDetailsList[@i].WorkDetailsId" value="@detail.WorkDetailsId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].MainHeadId" value="@detail.MainHeadId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].SubHeadId" value="@detail.SubheadId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].ChildSubHeadId" value="@detail.ChildSubheadId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Tax" value="@detail.Tax" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Cess" value="@detail.Cess" />
+                                    <input type="hidden" name="WorkDetailsList[@i].SizeId" value="@detail.SizeId" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Details" value="@combinedName" />
+                                    <input type="hidden" name="WorkDetailsList[@i].Active" value="@detail.Active" />
+                                    <input type="hidden" name="WorkDetailsList[@i].WorkDetailsId" value="@detail.WorkDetailsId" />
 
                                         <td class="px-4 py-2 w-20">
                                             <button type="button" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700 delete-btn">Delete</button>
                                         </td>
-                                    </tr>
-                                    i++;
-                                }
+                                </tr>
+                                i++;
                             }
-                        </tbody>
-                        <input type="hidden" id="deletedDetailIds" name="DeletedDetailIds" />
+                        }
+                    </tbody>
+                    <input type="hidden" id="deletedDetailIds" name="DeletedDetailIds" />
                         <tfoot id="subtotalFooter" class="bg-gray-100 font-semibold">
-                            <tr>
+                        <tr>
                                 <td colspan="4" class="text-right px-4 py-2">Subtotal</td>
                                 <td class="px-4 py-2">
                                     <input type="text" id="subtotalField" name="WorkOrder.SubTotal" value="@(Model.WorkOrder?.SubTotal ?? 0)" readonly
                                            class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-100 cursor-not-allowed" />
-                                </td>
+                            </td>
                                 <td></td>
-                            </tr>
-                            <tr>
+                        </tr>
+                        <tr>
                                 <td colspan="4" class="text-right px-4 py-2">Advance</td>
                                 <td class="px-4 py-2">
-                                    <input type="number" id="advanceField" name="WorkOrder.Advance" value="@(Model.WorkOrder?.Advance ?? 0.00)" step="0.01"
-                                           @(Model.WorkOrder?.WorkOrderId > 0 ? "readonly" : "")
-                                           class="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-purple-600" />
-                                </td>
+                                <input type="number"
+                                       id="advanceField"
+                                       name="WorkOrder.Advance"
+                                       class="form-control"
+                                       value="@(Model.WorkOrder?.Advance ?? 0.00)"
+                                       step="1"
+                                       @(Model.WorkOrder?.WorkOrderId > 0 ? "readonly" : "") />
+                            </td>
                                 <td></td>
-                            </tr>
-                            <tr>
+                        </tr>
+                        <tr>
                                 <td colspan="4" class="text-right px-4 py-2">Balance</td>
                                 <td class="px-4 py-2">
                                     <input type="text" id="balanceField" name="WorkOrder.Balance" value="@(Model.WorkOrder?.Balance ?? 0)" readonly
                                            class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-100 cursor-not-allowed" />
-                                    <input type="hidden" id="totalPaidField" value="@Model.TotalPaid" />
+                            <input type="hidden" id="totalPaidField" value="@Model.TotalPaid" />
                                 </td>
                                 <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                        </tr>
+                    </tfoot>
+                </table>
                 </div>
 
                 <span id="sheetsFormValidation" class="text-red-600 hidden mt-2 block">All sheets must be assigned before submitting.</span>
