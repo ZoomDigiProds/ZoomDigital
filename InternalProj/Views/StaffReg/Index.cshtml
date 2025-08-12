@@ -4,9 +4,6 @@
     ViewData["Title"] = "Staff List";
 }
 
-<!-- Tailwind CSS CDN -->
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="max-w-5xl mx-auto bg-green-100 text-green-800 rounded p-3 text-center font-semibold mb-6 shadow" id="success">
@@ -81,15 +78,29 @@
                                                @(staff.Active == "Y" ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-gray-300 text-gray-400 cursor-not-allowed pointer-events-none")">
                                     Details
                                 </a> *@
-                                <form asp-action="ChangeStatus" method="post" class="inline-block">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@staff.StaffRegId" />
-                                    <input type="hidden" name="status" value="@(staff.Active == "Y" ? "N" : "Y")" />
-                                    <button type="submit" class="px-3 py-1 mb-1 sm:mb-0 rounded-full text-xs font-semibold shadow transition
-                                                @(staff.Active == "Y" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-green-600 hover:bg-green-700 text-white")">
-                                        @(staff.Active == "Y" ? "Deactivate" : "Activate")
-                                    </button>
-                                </form>
+                                @if (staff.Departments != null &&
+                                                        !staff.Departments.Any(d =>
+                                                        !string.IsNullOrEmpty(d.Name) &&
+                                                        d.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    <form asp-action="ChangeStatus" method="post" class="inline-block">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@staff.StaffRegId" />
+                                        <input type="hidden" name="status" value="@(staff.Active == "Y" ? "N" : "Y")" />
+                                        <button type="submit" class="px-3 py-1 mb-1 sm:mb-0 rounded-full text-xs font-semibold shadow transition
+                            @(staff.Active == "Y" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-green-600 hover:bg-green-700 text-white")">
+                                            @(staff.Active == "Y" ? "Deactivate" : "Activate")
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    @* <span class="text-gray-400 italic">Admin – Cannot Modify</span> *@
+                                        <button type="button" disabled
+                                                class="px-3 py-1 mb-1 sm:mb-0 rounded-full text-xs font-semibold shadow bg-gray-300 text-gray-400 cursor-not-allowed">
+                                            @(staff.Active == "Y" ? "Deactivate" : "Activate")
+                                        </button>
+                                }
                             </td>
                         </tr>    
                         index++;
