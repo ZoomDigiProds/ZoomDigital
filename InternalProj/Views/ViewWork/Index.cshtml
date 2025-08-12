@@ -29,9 +29,7 @@
                         }
 
                     </select>
-
                 </div>
-
 
                 <div class="form-group">
                     <label for="fromDate">From Date:</label>
@@ -48,37 +46,15 @@
                     <select asp-for="WorkTypeFilter" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))" name="workTypeId">
                         <option value="">-- Select Work Type --</option>
                     </select>
-
                 </div>
-
-
                 <div class="button-cont" style="display: flex; gap: 20px; align-items: center;">
                     <button type="submit">Search</button>
                     <a href="@Url.Action("Index", "ViewWork")" class="btn-refresh">Refresh</a>
                 </div>
-
             </form>
 
             @if (Model.Results != null && Model.Results.Any())
             {
-                <div class="export-buttons mb-3" style="display: flex; gap: 15px; justify-content: flex-end;">
-                    <form method="post" asp-action="DownloadPdf" asp-controller="ViewWork" target="_blank">
-                        <input type="hidden" name="studio" value="@Model.StudioFilter" />
-                        <input type="hidden" name="fromDate" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
-                        <input type="hidden" name="toDate" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
-                        <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
-                        <button type="submit" class="btn btn-danger">Download PDF</button>
-                    </form>
-
-                    <form method="post" asp-action="DownloadExcel" asp-controller="ViewWork" target="_blank">
-                        <input type="hidden" name="studio" value="@Model.StudioFilter" />
-                        <input type="hidden" name="fromDate" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
-                        <input type="hidden" name="toDate" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
-                        <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
-                        <button type="submit" class="btn btn-success">Download Excel</button>
-                    </form>
-                </div>
-
                 <table class="workorder-table">
                     <thead>
                         <tr>
@@ -114,6 +90,25 @@
                         }
                     </tbody>
                 </table>
+                   <div class="export-dropdown mt-3" style="display: flex; justify-content: flex-end;">
+                        <form method="post" asp-controller="ViewWork" target="_blank" id="downloadForm">
+                            <input type="hidden" name="studio" value="@Model.StudioFilter" />
+                            <input type="hidden" name="fromDate" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
+                            <input type="hidden" name="toDate" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
+                            <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
+                            <input type="hidden" name="format" id="downloadFormat" value="" />
+
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Download
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
+                                    <li><a class="dropdown-item" href="#" data-format="pdf">Download PDF</a></li>
+                                    <li><a class="dropdown-item" href="#" data-format="excel">Download Excel</a></li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
 
                 @if (Model.TotalPages > 1)
                 {
@@ -160,13 +155,11 @@
                         </form>
                     </div>
                 }
-
             }
             else
             {
                 <p>No records found.</p>
             }
-
         </div>
     </div>
 </div>
@@ -222,6 +215,24 @@
     });
 </script>
 
+<script>
+    $(document).ready(function () {
+        $('.dropdown-item').on('click', function (e) {
+            e.preventDefault();
+            var format = $(this).data('format');
+            $('#downloadFormat').val(format);
+
+            // Set the form action depending on selection
+            if (format === 'pdf') {
+                $('#downloadForm').attr('action', '@Url.Action("DownloadPdf", "ViewWork")');
+            } else if (format === 'excel') {
+                $('#downloadForm').attr('action', '@Url.Action("DownloadExcel", "ViewWork")');
+            }
+
+            $('#downloadForm').submit();
+        });
+    });
+</script>
 
 <style>
     /* Global page styles */
