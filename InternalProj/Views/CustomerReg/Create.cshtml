@@ -4,21 +4,41 @@
     ViewData["Title"] = "Customer Registration";
     var staffName = Context.Session.GetString("StaffId");
 }
+<style>
+    .label{
+        display: block;
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
 
+    .input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+    }
+
+        .input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #2563eb;
+        }
+
+</style>
 <div class="common-pages-layout">
     <div class="common-inner-container">
         <h3 class="page-heading">Customer Registration</h3>
 
          @if (TempData["SuccessMessage"] != null)
         {
-            <div id="success" class="bg-green-100 text-green-800 rounded-lg p-2 text-center mb-3">
+            <div id="success" class="alert alert-success">
                 @TempData["SuccessMessage"]
             </div>
         } 
 
         @if (TempData["ErrorMessage"] != null)
         {
-            <div id="error" class="bg-red-100 text-red-800 rounded-lg p-2 text-center mb-3">
+            <div id="error" class="alert alert-error">
                 @TempData["ErrorMessage"]
             </div>
         }
@@ -39,46 +59,46 @@
             <form asp-action="Create" method="post" class="custom-form">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <div>
-                        <label asp-for="FirstName" class="block text-gray-700 font-semibold mb-1 required-label"></label>
-                        <input asp-for="FirstName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <label asp-for="FirstName" class="label required-label"></label>
+                        <input asp-for="FirstName" class="input" />
                         <span asp-validation-for="FirstName" class="text-red-600 text-sm"></span>
                     </div>
 
                     <div>
-                        <label asp-for="LastName" class="block text-gray-700 font-semibold mb-1 required-label"></label>
-                        <input asp-for="LastName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <label asp-for="LastName" class="label"></label>
+                        <input asp-for="LastName" class="input" />
                         <span asp-validation-for="LastName" class="text-red-600 text-sm"></span>
                     </div>
 
                     <div>
-                        <label asp-for="Studio" class="block text-gray-700 font-semibold mb-1 required-label"></label>
-                        <input asp-for="Studio" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <label asp-for="Studio" class="label required-label"></label>
+                        <input asp-for="Studio" class="input" />
                         <span asp-validation-for="Studio" class="text-red-600 text-sm"></span>
                     </div>
 
                     <div>
-                        <label for="Discount" class="block text-gray-700 font-semibold mb-1">Discount</label>
+                        <label for="Discount" class="label required-label">Discount</label>
                         <input type="number" name="Discount" min="0" max="100" step="0.01" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                               class="input" />
                         <span asp-validation-for="Discount" class="text-red-600 text-sm"></span>
                     </div>
 
                     <div>
-                        <label asp-for="Address1" class="block text-gray-700 font-semibold mb-1 required-label"></label>
-                        <input asp-for="Address1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <label asp-for="Address1" class="label required-label"></label>
+                        <input asp-for="Address1" class="input" />
                         <span asp-validation-for="Address1" class="text-red-600 text-sm"></span>
                     </div>
 
                     <div>
-                        <label asp-for="Address2" class="block text-gray-700 font-semibold mb-1"></label>
-                        <input asp-for="Address2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                        <label asp-for="Address2" class="label"></label>
+                        <input asp-for="Address2" class="input" />
                         <span asp-validation-for="Address2" class="text-red-600 text-sm"></span>
                     </div>
 
                     <div>
-                        <label for="StateId" class="block text-gray-700 font-semibold mb-1 required-label">State</label>
+                        <label for="StateId" class="label required-label">State</label>
                         <select id="StateId" name="StateId" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                class="input">
                             <option value="">-- Select State --</option>
                             @foreach (var state in Model.StateMasterRegs)
                             {
@@ -89,9 +109,9 @@
                     </div>
 
                     <div>
-                        <label for="RegionId" class="block text-gray-700 font-semibold mb-1 required-label">Region</label>
+                        <label for="RegionId" class="label required-label">Region</label>
                         <select id="RegionId" name="RegionId" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                class="input">
                             <option value="">-- Select Region --</option>
                             @foreach (var region in Model.RegionMasterRegs)
                             {
@@ -102,33 +122,33 @@
                     </div>
 
                     <div>
-                        <label for="Phone1" class="block text-gray-700 font-semibold mb-1 required-label">Phone 1</label>
+                        <label for="Phone1" class="label required-label">Phone 1</label>
                         <input type="text" name="Phone1" required pattern="^\+?[0-9]{7,15}$"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                               class="input" />
                     </div>
 
                     <div>
-                        <label for="Phone2" class="block text-gray-700 font-semibold mb-1">Phone 2</label>
+                        <label for="Phone2" class="label">Phone 2</label>
                         <input type="text" name="Phone2" pattern="^\+?[0-9]{7,15}$"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                               class="input" />
                     </div>
 
                     <div>
-                        <label for="Whatsapp" class="block text-gray-700 font-semibold mb-1">WhatsApp</label>
+                        <label for="Whatsapp" class="label">WhatsApp</label>
                         <input type="text" name="Whatsapp" pattern="^\+?[0-9]{7,15}$"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                               class="input" />
                     </div>
 
                     <div>
-                        <label for="Email" class="block text-gray-700 font-semibold mb-1 required-label">Email</label>
+                        <label for="Email" class="label required-label">Email</label>
                         <input type="email" name="Email"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" />
+                               class="input" />
                     </div>
 
                     <div>
-                        <label for="PhoneTypeId" class="block text-gray-700 font-semibold mb-1 required-label">Phone Type</label>
+                        <label for="PhoneTypeId" class="label required-label">Phone Type</label>
                         <select name="PhoneTypeId" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                class="input">
                             <option value="">-- Select Phone Type --</option>
                             @foreach (var type in Model.PhoneTypes)
                             {
@@ -138,9 +158,9 @@
                     </div>
 
                     <div>
-                        <label for="CategoryId" class="block text-gray-700 font-semibold mb-1 required-label">Customer Category</label>
+                        <label for="CategoryId" class="label required-label">Customer Category</label>
                         <select name="CategoryId" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                class="input">
                             <option value="">-- Select Category --</option>
                             @foreach (var category in Model.CustomerCategories)
                             {
@@ -150,9 +170,9 @@
                     </div>
 
                     <div>
-                        <label for="BranchId" class="block text-gray-700 font-semibold mb-1 required-label">Branch</label>
+                        <label for="BranchId" class="label required-label">Branch</label>
                         <select name="BranchId" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                class="input">
                             <option value="">-- Select Branch --</option>
                             @foreach (var branch in Model.Branches)
                             {
@@ -162,9 +182,9 @@
                     </div>
 
                     <div>
-                        <label for="RateTypeId" class="block text-gray-700 font-semibold mb-1 required-label">Rate Type</label>
+                        <label for="RateTypeId" class="label required-label">Rate Type</label>
                         <select name="RateTypeId" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                class="input">
                             <option value="">-- Select RateType --</option>
                             @foreach (var type in Model.RateTypes)
                             {
@@ -200,19 +220,19 @@
                 </div>
                 <div class="modal-body space-y-4">
                     <div>
-                        <label for="newStateName" class="block font-semibold mb-1">State Name</label>
-                        <input type="text" id="newStateName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required />
+                        <label for="newStateName" class="label">State Name</label>
+                        <input type="text" id="newStateName" class="input" required />
                     </div>
                     <div>
-                        <label for="newStateActive" class="block font-semibold mb-1">Active</label>
-                        <select id="newStateActive" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <label for="newStateActive" class="label">Active</label>
+                        <select id="newStateActive" class="input">
                             <option value="Y">Yes</option>
                             <option value="N">No</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer mt-6 text-right">
-                    <button type="submit" class="px-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-300">Add State</button>
+                    <button type="submit" class="common-btn">Add State</button>
                 </div>
             </div>
         </form>
@@ -229,12 +249,12 @@
                 </div>
                 <div class="modal-body space-y-4">
                     <div>
-                        <label for="newRegionName" class="block font-semibold mb-1">Region Name</label>
-                        <input type="text" id="newRegionName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required />
+                        <label for="newRegionName" class="label">Region Name</label>
+                        <input type="text" id="newRegionName" class="input" required />
                     </div>
                     <div>
-                        <label for="newRegionStateId" class="block font-semibold mb-1">State</label>
-                        <select id="newRegionStateId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                        <label for="newRegionStateId" class="label">State</label>
+                        <select id="newRegionStateId" class="input" required>
                             <option value="">-- Select State --</option>
                             @foreach (var state in Model.StateMasterRegs)
                             {
@@ -243,15 +263,15 @@
                         </select>
                     </div>
                     <div>
-                        <label for="newRegionActive" class="block font-semibold mb-1">Active</label>
-                        <select id="newRegionActive" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <label for="newRegionActive" class="label">Active</label>
+                        <select id="newRegionActive" class="input">
                             <option value="Y">Yes</option>
                             <option value="N">No</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer mt-6 text-right">
-                    <button type="submit" class="px-4 py-2 bg-blue-900 hover:bg-blue-700 text-white rounded-md transition-colors duration-300">Add Region</button>
+                    <button type="submit" class="common-btn">Add Region</button>
                 </div>
             </div>
         </form>

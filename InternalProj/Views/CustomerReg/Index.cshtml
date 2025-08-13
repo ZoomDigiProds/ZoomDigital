@@ -3,68 +3,86 @@
     ViewData["Title"] = "Customer List";
 }
 
+<style>
+    .table-headings{
+        padding: 8px 16px;
+        text-align: left;
+        font: 600 14px sans-serif;
+        color: #374151;
+        border-right: 1px solid #d1d5db;
+    }
+
+    .table-content{
+        padding: 12px 16px;
+        white-space: nowrap;
+        border-right: 1px solid #d1d5db;
+        color: #111827;
+        font-size: 14px;
+    }
+</style>
 <div class="common-pages-layout">
     <div class="common-inner-container">
         <h3 class="page-heading">Customer Registrations</h3>
-
-    <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
-        <thead class="bg-gray-100">
-            <tr>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Name</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Studio Name</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Discount</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Category</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Branch</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Rate Type</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Staff</th>
-                <th scope="col" class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Contacts</th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-            @foreach (var customer in Model.CustomerRegs)
-            {
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-900 text-sm font-medium">
-                        @customer.FirstName @customer.LastName
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
-                        @customer.StudioName
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
-                        @customer.Discount?.ToString("0.##")
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
-                        @customer.CustomerCategory?.CategoryName
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
-                        @customer.Branch?.BranchName
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
-                        @customer.RateTypeMaster?.RateTypeName
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap border-r border-gray-300 text-gray-700 text-sm">
-                        @customer.StaffReg?.FirstName @customer.StaffReg?.LastName
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm max-w-xs">
-                        @if (customer.Contacts != null && customer.Contacts.Any())
-                        {
-                            <ul class="list-disc list-inside space-y-1">
-                                @foreach (var contact in customer.Contacts)
-                                {
-                                    <li>
-                                        <span class="font-semibold">@contact.PhoneType?.PhoneTypeName:</span> @contact.Phone1
-                                    </li>
-                                }
-                            </ul>
+            <div style="overflow-x: auto;">
+                <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+                     <thead class="bg-gray-100">
+                        <tr>
+                            <th scope="col" class="table-headings">Name</th>
+                            <th scope="col" class="table-headings">Studio Name</th>
+                            <th scope="col" class="table-headings">Discount</th>
+                            <th scope="col" class="table-headings">Category</th>
+                            <th scope="col" class="table-headings">Branch</th>
+                            <th scope="col" class="table-headings">Rate Type</th>
+                            <th scope="col" class="table-headings">Staff</th>
+                            <th scope="col" class="table-headings">Contacts</th>
+                        </tr>
+                     </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                         @foreach (var customer in Model.CustomerRegs)
+                          {
+                            <tr class="hover:bg-gray-50">
+                            <td class="table-content font-medium">
+                                    @customer.FirstName @customer.LastName
+                                </td>
+                            <td class="table-content">
+                                    @customer.StudioName
+                                </td>
+                            <td class="table-content">
+                                    @customer.Discount?.ToString("0.##")
+                                </td>
+                                <td class="table-content">
+                                    @customer.CustomerCategory?.CategoryName
+                                </td>
+                                <td class="table-content">
+                                    @customer.Branch?.BranchName
+                                </td>
+                                <td class="table-content">
+                                    @customer.RateTypeMaster?.RateTypeName
+                                </td>
+                                <td class="table-content">
+                                    @customer.StaffReg?.FirstName @customer.StaffReg?.LastName
+                                </td>
+                                <td class="table-content">
+                                    @if (customer.Contacts != null && customer.Contacts.Any())
+                                    {
+                                        <ul class="list-disc list-inside space-y-1">
+                                            @foreach (var contact in customer.Contacts)
+                                            {
+                                                <li>
+                                                    <span class="font-semibold">@contact.PhoneType?.PhoneTypeName:</span> @contact.Phone1
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <em class="italic text-gray-400">No Contacts</em>
+                                    }
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <em class="italic text-gray-400">No Contacts</em>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+                    </tbody>
+              </table>
+        </div>
+    </div>
 </div>

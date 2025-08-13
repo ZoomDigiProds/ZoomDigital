@@ -1,38 +1,135 @@
 ﻿@model InternalProj.Models.StaffRegViewModel
-
 @{
     ViewData["Title"] = "Edit Staff";
 }
 
-<!-- Tailwind CSS CDN -->
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+<style>
 
-@* <h3 class="text-center text-2xl font-extrabold mt-8 mb-8 text-gray-900">Edit Staff Details</h3> *@
+    .label {
+        display: block;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
 
-@* <div class="min-h-screen bg-gray-100 py-8 px-4 flex justify-center">
-    <div class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-8">
-        <h3 class="text-2xl font-extrabold mb-8 text-gray-900">Edit Staff Details</h3> *@
+    /* Input Fields */
+    .input-field {
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input-field:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5);
+        }
+
+    /* Alerts */
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 0.75rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+    }
+
+
+    /* Form container */
+    .form-container {
+        padding: 1rem;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Grid Layout */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.5rem;
+    }
+    @@media (min-width: 768px) {
+        .form-grid
+
+    {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    }
+
+    /* Error messages */
+    .error-message {
+        color: red;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Multi-select dropdown */
+    .multi-checkbox-dropdown {
+        position: relative;
+    }
+
+        .multi-checkbox-dropdown .selected-items {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .multi-checkbox-dropdown .checkbox-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 160px;
+            overflow-y: auto;
+            z-index: 50;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 0.125rem;
+            padding: 0.5rem;
+        }
+
+        .multi-checkbox-dropdown label {
+            display: block;
+            font-size: 0.85rem;
+            padding: 0.25rem 0;
+        }
+
+    /* Buttons */
+    .form-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+</style>
 
 <div class="common-pages-layout">
     <div class="common-inner-container">
         <h3 class="page-heading">Edit Staff Details</h3>
+
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="bg-green-100 text-green-800 rounded p-3 text-center font-semibold mb-6" id="success">
-                @TempData["SuccessMessage"]
-            </div>
+            <div class="alert-success" id="success">@TempData["SuccessMessage"]</div>
         }
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="bg-red-100 text-red-800 rounded p-3 text-center font-semibold mb-6" id="error">
-                @TempData["ErrorMessage"]
-            </div>
+            <div class="alert-error" id="error">@TempData["ErrorMessage"]</div>
         }
-
         @if (!ViewData.ModelState.IsValid)
         {
-            <div class="bg-red-100 text-red-800 rounded p-4 mb-6">
-                <ul class="list-disc list-inside">
+            <div class="alert-danger">
+                <ul>
                     @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
                         <li>@error.ErrorMessage</li>
@@ -41,75 +138,66 @@
             </div>
         }
 
-        <script>
-            setTimeout(() => { document.getElementById('success')?.classList.add('hidden'); }, 5000);
-            setTimeout(() => { document.getElementById('error')?.classList.add('hidden'); }, 5000);
-        </script>
-
-        @* <h2 class="text-center text-2xl font-bold mb-8">Edit Staff Details</h2> *@
-
-        <form asp-action="Edit" method="post" id="editForm" class="p-4" novalidate>
+        <form asp-action="Edit" method="post" id="editForm" class="form-container" novalidate>
             @Html.AntiForgeryToken()
             <input type="hidden" name="StaffRegId" value="@Model.StaffRegId" />
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="form-grid">
+                <!-- Basic Info -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="FirstName">First Name</label>
-                    <input id="FirstName" name="FirstName" type="text" value="@Model.FirstName" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="UserName" class="label required-label">Username</label>
+                    <input id="UserName" name="UserName" type="text" value="@Model.UserName" class="input-field" readonly />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="LastName">Last Name</label>
-                    <input id="LastName" name="LastName" type="text" value="@Model.LastName" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="FirstName" class="label required-label">First Name</label>
+                    <input id="FirstName" name="FirstName" type="text" value="@Model.FirstName" class="input-field" required />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Address1">Address 1</label>
-                    <input id="Address1" name="Address1" type="text" value="@Model.Address1" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="LastName" class="label required-label">Last Name</label>
+                    <input id="LastName" name="LastName" type="text" value="@Model.LastName" class="input-field" required />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Address2">Address 2</label>
-                    <input id="Address2" name="Address2" type="text" value="@Model.Address2"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="Address1" class="label required-label">Address 1</label>
+                    <input id="Address1" name="Address1" type="text" value="@Model.Address1" class="input-field" required />
                 </div>
 
+                <!-- Address & Dates -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="DOB">DOB</label>
-                    <input id="DOB" name="DOB" type="date" value="@Model.DOB?.ToString("yyyy-MM-dd")" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="Address2" class="label">Address 2</label>
+                    <input id="Address2" name="Address2" type="text" value="@Model.Address2" class="input-field" />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="DOJ">DOJ</label>
-                    <input id="DOJ" name="DOJ" type="date" value="@Model.DOJ?.ToString("yyyy-MM-dd")" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="DOB" class="label required-label">DOB</label>
+                    <input id="DOB" name="DOB" type="date" value="@Model.DOB?.ToString("yyyy-MM-dd")" class="input-field" required />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Phone1">Phone 1</label>
-                    <input id="Phone1" name="Phone1" type="text" value="@Model.Phone1" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Phone2">Phone 2</label>
-                    <input id="Phone2" name="Phone2" type="text" value="@Model.Phone2"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="DOJ" class="label required-label">DOJ</label>
+                    <input id="DOJ" name="DOJ" type="date" value="@Model.DOJ?.ToString("yyyy-MM-dd")" class="input-field" required />
                 </div>
 
+                <!-- Contact -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Whatsapp">WhatsApp</label>
-                    <input id="Whatsapp" name="Whatsapp" type="text" value="@Model.Whatsapp"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="Phone1" class="label required-label">Phone 1</label>
+                    <input id="Phone1" name="Phone1" type="text" value="@Model.Phone1" class="input-field" required />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Email">Email</label>
-                    <input id="Email" name="Email" type="email" value="@Model.Email" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    @Html.ValidationMessage("Email", "", new { @class = "text-red-600 text-xs mt-1 block" })
+                    <label for="Phone2" class="label">Phone 2</label>
+                    <input id="Phone2" name="Phone2" type="text" value="@Model.Phone2" class="input-field" />
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="PhoneTypeId">Phone Type</label>
-                    <select id="PhoneTypeId" name="PhoneTypeId" required
-                            class="w-full rounded border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                    <label for="Whatsapp" class="label">WhatsApp</label>
+                    <input id="Whatsapp" name="Whatsapp" type="text" value="@Model.Whatsapp" class="input-field" />
+                </div>
+                <div>
+                    <label for="Email" class="label required-label">Email</label>
+                    <input id="Email" name="Email" type="email" value="@Model.Email" class="input-field" required />
+                    @Html.ValidationMessage("Email", "", new { @class = "error-message" })
+                </div>
+
+                <!-- Dropdowns -->
+                <div>
+                    <label for="PhoneTypeId" class="label required-label">Phone Type</label>
+                    <select id="PhoneTypeId" name="PhoneTypeId" class="input-field" required>
                         <option value="">-- Select --</option>
                         @foreach (var type in Model.PhoneTypes)
                         {
@@ -120,9 +208,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="BranchId">Branch</label>
-                    <select id="BranchId" name="BranchId" required
-                            class="w-full rounded border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+                    <label for="BranchId" class="label required-label">Branch</label>
+                    <select id="BranchId" name="BranchId" class="input-field" required>
                         <option value="">-- Select --</option>
                         @foreach (var branch in Model.Branches)
                         {
@@ -133,20 +220,18 @@
                     </select>
                 </div>
 
+                <!-- Multi-select -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Designation</label>
-                    <div id="designationDropdown" class="multi-checkbox-dropdown relative w-full">
-                        <div tabindex="0"
-                             class="selected-items border border-gray-300 rounded px-3 py-2 bg-white cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                            Select Designation(s)
-                        </div>
-                        <div class="checkbox-list absolute left-0 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-gray-300 rounded shadow-md hidden z-50 text-sm">
+                    <label class="label required-label">Designation</label>
+                    <div id="designationDropdown" class="multi-checkbox-dropdown">
+                        <div tabindex="0" class="selected-items">Select Designation(s)</div>
+                        <div class="checkbox-list hidden">
                             @foreach (var desig in Model.Designations)
                             {
                                 var isChecked = Model.SelectedDesignationIds?.Contains(desig.DesignationId) ?? false;
-                                <label class="block px-2 py-1 hover:bg-gray-100 cursor-pointer">
+                                <label>
                                     <input type="checkbox" name="SelectedDesignationIds" value="@desig.DesignationId"
-                                           @(isChecked ? "checked" : "") class="mr-2 align-middle" />
+                                           @(isChecked ? "checked" : "") />
                                     @desig.Name
                                 </label>
                             }
@@ -155,21 +240,17 @@
                 </div>
 
                 <input type="hidden" name="Active" value="Y" />
-
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Department</label>
-                    <div id="departmentDropdown" class="multi-checkbox-dropdown relative w-full">
-                        <div tabindex="0"
-                             class="selected-items border border-gray-300 rounded px-3 py-2 bg-white cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                            Select Department(s)
-                        </div>
-                        <div class="checkbox-list absolute left-0 mt-1 w-full max-h-52 overflow-y-auto bg-white border border-gray-300 rounded shadow-md hidden z-50 text-sm">
+                    <label class="label required-label">Department</label>
+                    <div id="departmentDropdown" class="multi-checkbox-dropdown">
+                        <div tabindex="0" class="selected-items">Select Department(s)</div>
+                        <div class="checkbox-list hidden">
                             @foreach (var dept in Model.Departments)
                             {
                                 var isChecked = Model.SelectedDeptIds?.Contains(dept.DeptId) ?? false;
-                                <label class="block px-2 py-1 hover:bg-gray-100 cursor-pointer">
+                                <label>
                                     <input type="checkbox" name="SelectedDeptIds" value="@dept.DeptId"
-                                           @(isChecked ? "checked" : "") class="mr-2 align-middle" />
+                                           @(isChecked ? "checked" : "") />
                                     @dept.Name
                                 </label>
                             }
@@ -177,31 +258,17 @@
                     </div>
                 </div>
 
+                <!-- Password -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="UserName">Username</label>
-                    <input id="UserName" name="UserName" type="text" value="@Model.UserName" required
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
-                    @Html.ValidationMessage("UserName", "", new { @class = "text-red-600 text-xs mt-1 block" })
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1" for="Password">
-                        Password (Leave blank to keep unchanged)
-                    </label>
-                    <input id="Password" name="Password" type="password"
-                           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+                    <label for="Password" class="label">Password (Leave blank to keep unchanged)</label>
+                    <input id="Password" name="Password" type="password" class="input-field" />
                 </div>
             </div>
 
+            <!-- Actions -->
             <div class="flex justify-center mt-8 gap-1">
-                <button type="submit"
-                        class="common-btn px-3">
-                    Update
-                </button>
-                <button asp-action="Index"
-                    class="common-btn ml-3 px-4">
-                    Back
-                </button>
+                <button type="submit" class="common-btn px-3">Update</button>
+                <a asp-action="Index" class="common-btn px-4">Back</a>
             </div>
         </form>
     </div>
@@ -209,15 +276,16 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
     <script>
-                function setupMultiCheckboxDropdown(id) {
+        setTimeout(() => { document.getElementById('success')?.classList.add('hidden'); }, 1500);
+        setTimeout(() => { document.getElementById('error')?.classList.add('hidden'); }, 1500);
+
+        function setupMultiCheckboxDropdown(id) {
             const dropdown = document.getElementById(id);
             const display = dropdown.querySelector('.selected-items');
             const checkboxList = dropdown.querySelector('.checkbox-list');
             const checkboxes = checkboxList.querySelectorAll('input[type=checkbox]');
 
-            // Toggle dropdown visibility by toggling 'hidden' class on checkboxList
             display.addEventListener('click', () => {
                 checkboxList.classList.toggle('hidden');
             });
@@ -227,8 +295,6 @@
                     checkboxList.classList.toggle('hidden');
                 }
             });
-
-            // Close dropdown when clicking outside
             document.addEventListener('click', e => {
                 if (!dropdown.contains(e.target)) {
                     checkboxList.classList.add('hidden');
@@ -241,13 +307,10 @@
                     .map(cb => cb.parentElement.textContent.trim());
                 display.textContent = selected.length ? selected.join(', ') : 'Select';
             }
-
             checkboxes.forEach(cb => cb.addEventListener('change', updateText));
             updateText();
         }
-
         setupMultiCheckboxDropdown('designationDropdown');
         setupMultiCheckboxDropdown('departmentDropdown');
-
     </script>
 }
