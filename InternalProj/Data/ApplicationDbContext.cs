@@ -61,9 +61,6 @@ namespace InternalProj.Data
 
         //settings
         public DbSet<Dictionary> Dictionary { get; set; }
-        public DbSet<Models.Region> Region { get; set; }
-        public DbSet<Models.Size> Size { get; set; }
-        public DbSet<Models.State> State { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

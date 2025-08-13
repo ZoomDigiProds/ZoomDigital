@@ -134,6 +134,7 @@
                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Work Type</th>
                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Date</th>
                 <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">SubTotal</th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Size</th>
                 <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Advance</th>
                 <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 whitespace-nowrap">Balance</th>
             </tr>
@@ -151,6 +152,7 @@
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.WorkTypeName</td>
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.Wdate?.ToString("dd MMM yyyy")</td>
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.SubTotal.ToString("N2")</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.Size</td>
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.Advance.ToString("N2")</td>
                     <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm text-right">@order.Balance.ToString("N2")</td>
                 </tr>

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace InternalProj.Controllers
 {
-   //[DepartmentAuthorize()]
+   [DepartmentAuthorize()]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,6 +22,7 @@ namespace InternalProj.Controllers
             var summary = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
+                .Include(w => w.AlbumSize)
                 .OrderByDescending(w => w.Wdate)
                 .Take(5)
                 .ToList()
@@ -37,6 +38,7 @@ namespace InternalProj.Controllers
                         WorkOrderNo = w.WorkOrderNo,
                         StudioName = w.Customer?.StudioName,
                         Advance = w.Advance ?? 0,
+                        Size = w.AlbumSize?.Size ?? "-",
                         SubTotal = w.SubTotal,
                         TotalPaid = totalPaid,
                         //Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
@@ -60,6 +62,7 @@ namespace InternalProj.Controllers
                     .AsNoTracking()
                     .Include(w => w.Customer)
                     .Include(w => w.WorkType)
+                    .Include(w => w.AlbumSize)
                     .OrderByDescending(w => w.Wdate)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -77,6 +80,7 @@ namespace InternalProj.Controllers
                         WorkOrderNo = w.WorkOrderNo,
                         StudioName = w.Customer?.StudioName,
                         Advance = w.Advance ?? 0,
+                        Size = w.AlbumSize?.Size ?? "-",
                         SubTotal = w.SubTotal,
                         TotalPaid = totalPaid,
                         //Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
@@ -165,6 +169,7 @@ namespace InternalProj.Controllers
             var summary = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
+                .Include(w => w.AlbumSize)
                 .OrderByDescending(w => w.Wdate)
                 .Take(5)
                 .ToList()
@@ -180,6 +185,7 @@ namespace InternalProj.Controllers
                         WorkOrderNo = w.WorkOrderNo,
                         StudioName = w.Customer?.StudioName,
                         Advance = w.Advance ?? 0,
+                        Size = w.AlbumSize?.Size ?? "-",
                         SubTotal = w.SubTotal,
                         TotalPaid = totalPaid,
                         //Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
