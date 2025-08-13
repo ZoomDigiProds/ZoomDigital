@@ -19,24 +19,37 @@ namespace InternalProj.Controllers
             _context = context;
         }
 
-        // GET: StudioCallLogs with Pagination
         public async Task<IActionResult> Index(int page = 1)
         {
-            var totalItems = await _context.StudioCallLogs.CountAsync();
-            var logs = await _context.StudioCallLogs
-                .Include(s => s.Customer)
-                .OrderByDescending(s => s.CallTime)
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
+            int pageSize = PageSize;
+
+            var today = DateTime.Today; // Local date
+            var now = DateTime.Now;
+
+            // Fetch all records
+            var query = _context.StudioCallLogs.AsQueryable();
+
+            // Ordering logic:
+            var sortedQuery = query
+                .OrderByDescending(c =>
+                    c.UpdatedCallTime.HasValue &&
+                    c.UpdatedCallTime.Value.ToLocalTime().Date == today)
+                .ThenByDescending(c => c.UpdatedCallTime)
+                .ThenByDescending(c => c.CallTime);
+
+            int totalItems = await sortedQuery.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            var pagedData = await sortedQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+            ViewBag.TotalPages = totalPages;
 
-            return View(logs);
+            return View(pagedData);
         }
-
-        // GET: StudioCallLogs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -50,14 +63,12 @@ namespace InternalProj.Controllers
             return View(studioCallLog);
         }
 
-        // GET: StudioCallLogs/Create
         public IActionResult Create()
         {
             ViewData["CustomerId"] = new SelectList(_context.CustomerRegs, "Id", "StudioName");
             return View();
         }
 
-        // POST: StudioCallLogs/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CustomerId,CallTime,Description,UpdatedCallTime,Active,StudioName,Phone,Address1,Address2,State,Region")] StudioCallLog studioCallLog)
@@ -79,8 +90,12 @@ namespace InternalProj.Controllers
                     studioCallLog.StudioName = customer.StudioName;
                     studioCallLog.Phone = customer.Contacts.FirstOrDefault()?.Phone1 ?? "";
                     studioCallLog.Region = customer.Address?.Region?.Name ?? "";
-                    studioCallLog.CallTime = DateTime.UtcNow;
-                    studioCallLog.UpdatedCallTime = studioCallLog.UpdatedCallTime?.ToUniversalTime();
+
+                    // Convert to UTC before saving
+                    studioCallLog.CallTime = DateTime.SpecifyKind(studioCallLog.CallTime, DateTimeKind.Local).ToUniversalTime();
+                    studioCallLog.UpdatedCallTime = studioCallLog.UpdatedCallTime.HasValue
+                        ? DateTime.SpecifyKind(studioCallLog.UpdatedCallTime.Value, DateTimeKind.Local).ToUniversalTime()
+                        : (DateTime?)null;
 
                     try
                     {
@@ -108,6 +123,17 @@ namespace InternalProj.Controllers
             var studioCallLog = await _context.StudioCallLogs.FindAsync(id);
             if (studioCallLog == null) return NotFound();
 
+            // Convert UTC to local time for display
+            studioCallLog.CallTime = DateTime.SpecifyKind(studioCallLog.CallTime, DateTimeKind.Utc).ToLocalTime();
+
+            if (studioCallLog.UpdatedCallTime.HasValue)
+            {
+                studioCallLog.UpdatedCallTime = DateTime.SpecifyKind(
+                    studioCallLog.UpdatedCallTime.Value,
+                    DateTimeKind.Utc
+                ).ToLocalTime();
+            }
+
             ViewData["CustomerId"] = new SelectList(_context.CustomerRegs, "Id", "StudioName", studioCallLog.CustomerId);
             return View(studioCallLog);
         }
@@ -115,40 +141,47 @@ namespace InternalProj.Controllers
         // POST: StudioCallLogs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CallId,CustomerId,StudioName,Phone,Address1,Address2,State,Region,CallTime,Description,UpdatedCallTime,Active")] StudioCallLog studioCallLog)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id != studioCallLog.CallId) return NotFound();
+            var existingLog = await _context.StudioCallLogs.FindAsync(id);
+            if (existingLog == null)
+                return NotFound();
 
-            if (ModelState.IsValid)
+            if (await TryUpdateModelAsync(
+                existingLog,
+                "",
+                s => s.CallTime,
+                s => s.Description,
+                s => s.UpdatedCallTime
+            ))
             {
+                // Convert LocalTime (from form) to UTC before saving
+                existingLog.CallTime = DateTime.SpecifyKind(existingLog.CallTime, DateTimeKind.Local).ToUniversalTime();
+
+                if (existingLog.UpdatedCallTime.HasValue)
+                {
+                    existingLog.UpdatedCallTime = DateTime.SpecifyKind(
+                        existingLog.UpdatedCallTime.Value,
+                        DateTimeKind.Local
+                    ).ToUniversalTime();
+                }
+
                 try
                 {
-                    studioCallLog.CallTime = DateTime.SpecifyKind(studioCallLog.CallTime, DateTimeKind.Utc);
-
-                    if (studioCallLog.UpdatedCallTime.HasValue)
-                    {
-                        studioCallLog.UpdatedCallTime = DateTime.SpecifyKind(
-                            studioCallLog.UpdatedCallTime.Value,
-                            DateTimeKind.Utc
-                        );
-                    }
-
-                    _context.Update(studioCallLog);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StudioCallLogExists(studioCallLog.CallId))
+                    if (!StudioCallLogExists(id))
                         return NotFound();
                     else
                         throw;
                 }
-
-                return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CustomerId"] = new SelectList(_context.CustomerRegs, "Id", "StudioName", studioCallLog.CustomerId);
-            return View(studioCallLog);
+            ViewData["CustomerId"] = new SelectList(_context.CustomerRegs, "Id", "StudioName", existingLog.CustomerId);
+            return View(existingLog);
         }
 
         // GET: StudioCallLogs/Delete/5
@@ -165,7 +198,6 @@ namespace InternalProj.Controllers
             return View(studioCallLog);
         }
 
-        // POST: StudioCallLogs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -180,7 +212,6 @@ namespace InternalProj.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: StudioCallLogs/GetCustomerDetails/5 (AJAX)
         [HttpGet]
         public async Task<IActionResult> GetCustomerDetails(int id)
         {
@@ -201,7 +232,6 @@ namespace InternalProj.Controllers
 
             return Json(result);
         }
-
         private bool StudioCallLogExists(int id)
         {
             return _context.StudioCallLogs.Any(e => e.CallId == id);
