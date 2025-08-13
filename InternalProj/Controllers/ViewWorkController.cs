@@ -190,8 +190,13 @@ namespace InternalProj.Controllers
             ws.Range(3, 1, 3, 8).Style.Font.SetBold();
 
             int row = 4, slno = 1;
+            decimal totalBalance = 0;
+
             foreach (var item in results)
             {
+                decimal balance = (decimal)item.SubTotal - (decimal)(item.Advance ?? 0);
+                totalBalance += balance;
+
                 ws.Cell(row, 1).Value = slno++;
                 ws.Cell(row, 2).Value = item.WorkOrderNo ?? "";
                 ws.Cell(row, 3).Value = item.Customer?.StudioName ?? "";
@@ -199,13 +204,20 @@ namespace InternalProj.Controllers
                 ws.Cell(row, 5).Value = item.Wdate?.ToLocalTime().ToString("dd-MM-yyyy") ?? "";
                 ws.Cell(row, 6).Value = item.SubTotal;
                 ws.Cell(row, 7).Value = item.Advance ?? 0;
-                ws.Cell(row, 8).Value = item.SubTotal - (item.Advance ?? 0);
+                ws.Cell(row, 8).Value = balance;
                 row++;
             }
 
+            // Add total row
+            ws.Cell(row, 7).Value = "Total:";
+            ws.Cell(row, 7).Style.Font.SetBold();
+            ws.Cell(row, 8).Value = totalBalance;
+            ws.Cell(row, 8).Style.Font.SetBold();
+
             using var ms = new MemoryStream();
             wb.SaveAs(ms);
-            return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "WorkOrders.xlsx");
+            string fileName = $"WorkOrders_{DateTime.Now:dd-MM-yyyy}.xlsx";
+            return File(ms.ToArray(),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",fileName);
         }
 
         [HttpPost]
@@ -222,33 +234,22 @@ namespace InternalProj.Controllers
                 .Include(w => w.WorkType)
                 .Where(w => w.Active == "Y" && w.BranchId == branchId && w.Customer != null && w.Customer.BranchId == branchId);
 
-
-            var studioList = _context.CustomerRegs
-                .Where(c => c.BranchId == branchId)
-                .Select(c => c.StudioName)
-                .Distinct()
-                .ToList();
-
             if (!string.IsNullOrEmpty(studio))
             {
-                query = query.Where(w => w.Customer != null &&
-                             w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower() &&
-                             w.Customer.BranchId == branchId);
-
+                query = query.Where(w => w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
             }
 
             if (fromDate.HasValue)
             {
-                var fromUtc = DateTime.SpecifyKind(fromDate.Value, DateTimeKind.Utc);
+                var fromUtc = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
                 query = query.Where(w => w.Wdate >= fromUtc);
             }
 
             if (toDate.HasValue)
             {
-                var toUtc = DateTime.SpecifyKind(toDate.Value, DateTimeKind.Utc);
+                var toUtc = DateTime.SpecifyKind(toDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
                 query = query.Where(w => w.Wdate <= toUtc);
             }
-
 
             if (workTypeId.HasValue && workTypeId.Value > 0)
             {
@@ -265,27 +266,39 @@ namespace InternalProj.Controllers
             var boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
             var normalFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 
-            doc.Add(new Paragraph("Work Order Report").SetFont(boldFont).SetFontSize(16).SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER).SetMarginBottom(10));
+            doc.Add(new Paragraph("Work Order Report")
+                .SetFont(boldFont)
+                .SetFontSize(16)
+                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                .SetMarginBottom(10));
 
-            string rangeText = fromDate.HasValue || toDate.HasValue
-                ? $"From: {fromDate?.ToString("dd-MM-yyyy") ?? "N/A"} To: {toDate?.ToString("dd-MM-yyyy") ?? "N/A"}"
-                : "";
+            //Date Range
+            string fromStr = fromDate?.ToString("dd-MM-yyyy") ?? "N/A";
+            string toStr = toDate?.ToString("dd-MM-yyyy") ?? "N/A";
+            doc.Add(new Paragraph($"Date Range: {fromStr} to {toStr}")
+                .SetFont(normalFont)
+                .SetFontSize(12)
+                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                .SetMarginBottom(20));
 
-            if (!string.IsNullOrEmpty(rangeText))
-            {
-                doc.Add(new Paragraph(rangeText).SetFont(normalFont).SetFontSize(12).SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER).SetMarginBottom(20));
-            }
-
-            Table table = new Table(8).UseAllAvailableWidth();
+            // Table header
+            var table = new Table(8).UseAllAvailableWidth();
             string[] headers = { "Sl No", "Work Order No", "Studio", "Work Type", "Date", "Amount", "Advance", "Balance" };
             foreach (var h in headers)
             {
                 table.AddHeaderCell(new Cell().Add(new Paragraph(h).SetFont(boldFont)));
             }
 
+            // Table rows
             int slno = 1;
+            decimal totalBalance = 0;
+
             foreach (var item in results)
             {
+                decimal balance = (decimal)item.SubTotal - (decimal)(item.Advance ?? 0);
+                totalBalance += balance;
+
+
                 table.AddCell(new Paragraph((slno++).ToString()).SetFont(normalFont));
                 table.AddCell(new Paragraph(item.WorkOrderNo ?? "").SetFont(normalFont));
                 table.AddCell(new Paragraph(item.Customer?.StudioName ?? "").SetFont(normalFont));
@@ -293,13 +306,20 @@ namespace InternalProj.Controllers
                 table.AddCell(new Paragraph(item.Wdate?.ToLocalTime().ToString("dd-MM-yyyy") ?? "").SetFont(normalFont));
                 table.AddCell(new Paragraph(item.SubTotal.ToString("N2")).SetFont(normalFont));
                 table.AddCell(new Paragraph(item.Advance?.ToString("N2") ?? "0.00").SetFont(normalFont));
-                table.AddCell(new Paragraph((item.SubTotal - (item.Advance ?? 0)).ToString("N2")).SetFont(normalFont));
+                table.AddCell(new Paragraph(balance.ToString("N2")).SetFont(normalFont));
             }
+
+            // Add total row
+            table.AddCell(new Cell(1, 7) // merge 7 cells
+                .Add(new Paragraph("Total:").SetFont(boldFont))
+                .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT));
+            table.AddCell(new Paragraph(totalBalance.ToString("N2")).SetFont(boldFont));
 
             doc.Add(table);
             doc.Close();
 
-            return File(ms.ToArray(), "application/pdf", "WorkOrders.pdf");
+            string fileName = $"WorkOrders_{DateTime.Now:dd-MM-yyyy}.pdf";
+            return File(ms.ToArray(), "application/pdf", fileName);
         }
     }
 }
