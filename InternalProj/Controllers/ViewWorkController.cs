@@ -101,12 +101,12 @@ namespace InternalProj.Controllers
             const int pageSize = 10;
 
             bool hasAnyFilter = !string.IsNullOrEmpty(studio) || fromDate.HasValue || toDate.HasValue || (workTypeId.HasValue && workTypeId.Value > 0);
-
             bool shouldShowResults = isSearch || hasAnyFilter;
 
             var query = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
+                .Include(w => w.AlbumSize)
                 .Where(w => w.Active == "Y");
 
             if (shouldShowResults)
@@ -131,35 +131,46 @@ namespace InternalProj.Controllers
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
+            var results = query
+                .OrderBy(w => w.Wdate)
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList()
+                .Select(w =>
+                {
+                    var partialPayments = _context.Receipts
+                        .Where(r => r.WorkOrderId == w.WorkOrderId)
+                        .OrderBy(r => r.ReceiptDate)
+                        .Select(r => new PartialPaymentDto
+                        {
+                            ReceiptDate = r.ReceiptDate,
+                            Amount = r.CurrentAmount
+                        })
+                        .ToList();
+
+                    double totalPaid = partialPayments.Sum(p => p.Amount);
+
+                    return new WorkOrderSummaryViewModel
+                    {
+                        WorkOrderId = w.WorkOrderId,
+                        WorkOrderNo = w.WorkOrderNo,
+                        StudioName = w.Customer?.StudioName,
+                        Size = w.AlbumSize?.Size ?? "N/A",
+                        Advance = w.Advance ?? 0,
+                        SubTotal = w.SubTotal,
+                        TotalPaid = totalPaid,
+                        Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
+                        WorkTypeName = w.WorkType?.TypeName,
+                        Wdate = w.Wdate,
+                        PartialPayments = partialPayments
+                    };
+                }).ToList();
+
             var viewModel = new WorkOrderViewModel
             {
                 StudioList = _context.CustomerRegs.Select(c => c.StudioName).Distinct().ToList(),
                 WorkTypes = _context.WorkTypes.ToList(),
-                ResultsSummary = query
-                    .OrderBy(w => w.Wdate)
-                    .Skip((currentPage - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList()
-                    .Select(w =>
-                    {
-                        var totalPaid = _context.Receipts
-                            .Where(r => r.WorkOrderId == w.WorkOrderId)
-                            .Sum(r => (double?)r.CurrentAmount) ?? 0;
-
-                        return new WorkOrderSummaryViewModel
-                        {
-                            WorkOrderId = w.WorkOrderId,
-                            WorkOrderNo = w.WorkOrderNo,
-                            StudioName = w.Customer?.StudioName,
-                            Advance = w.Advance ?? 0,
-                            SubTotal = w.SubTotal,
-                            TotalPaid = totalPaid,
-                            Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
-                            WorkTypeName = w.WorkType?.TypeName,
-                            Wdate = w.Wdate
-                        };
-                    }).ToList(),
-
+                ResultsSummary = results,
                 CurrentPage = currentPage,
                 TotalPages = totalPages,
                 StudioFilter = studio,
@@ -175,7 +186,6 @@ namespace InternalProj.Controllers
 
             return View(viewModel);
         }
-
 
 
         [HttpPost]

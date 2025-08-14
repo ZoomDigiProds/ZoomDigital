@@ -1,5 +1,6 @@
 ﻿using InternalProj.Data;
 using InternalProj.Filters;
+using InternalProj.Models;
 using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,9 +29,13 @@ namespace InternalProj.Controllers
                 .ToList()
                 .Select(w =>
                 {
-                    var totalPaid = _context.Receipts
+                    var receipts = _context.Receipts
                         .Where(r => r.WorkOrderId == w.WorkOrderId)
-                        .Sum(r => (double?)r.CurrentAmount) ?? 0;
+                        .OrderByDescending(r => r.ReceiptDate)
+                        .ToList();
+
+                    var totalPaid = receipts.Sum(r => r.CurrentAmount);
+                    var lastReceiptDate = receipts.FirstOrDefault()?.ReceiptDate;
 
                     return new WorkOrderSummaryViewModel
                     {
@@ -41,10 +46,16 @@ namespace InternalProj.Controllers
                         Size = w.AlbumSize?.Size ?? "-",
                         SubTotal = w.SubTotal,
                         TotalPaid = totalPaid,
-                        //Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
                         Balance = w.Balance ?? 0,
                         WorkTypeName = w.WorkType?.TypeName,
-                        Wdate = w.Wdate
+                        Wdate = w.Wdate,
+                        LastReceiptDate = lastReceiptDate,
+                        PartialPayments = receipts
+                            .Select(r => new PartialPaymentDto
+                            {
+                                ReceiptDate = r.ReceiptDate,
+                                Amount = r.CurrentAmount
+                            }).ToList()
                     };
                 })
                 .ToList();
@@ -70,9 +81,13 @@ namespace InternalProj.Controllers
 
                 var viewModelList = workOrders.Select(w =>
                 {
-                    var totalPaid = _context.Receipts
+                    var receipts = _context.Receipts
                         .Where(r => r.WorkOrderId == w.WorkOrderId)
-                        .Sum(r => (double?)r.CurrentAmount) ?? 0;
+                        .OrderByDescending(r => r.ReceiptDate)
+                        .ToList();
+
+                    var totalPaid = receipts.Sum(r => r.CurrentAmount);
+                    var lastReceiptDate = receipts.FirstOrDefault()?.ReceiptDate;
 
                     return new WorkOrderSummaryViewModel
                     {
@@ -83,10 +98,16 @@ namespace InternalProj.Controllers
                         Size = w.AlbumSize?.Size ?? "-",
                         SubTotal = w.SubTotal,
                         TotalPaid = totalPaid,
-                        //Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
                         Balance = w.Balance ?? 0,
                         WorkTypeName = w.WorkType?.TypeName,
-                        Wdate = w.Wdate
+                        Wdate = w.Wdate,
+                        LastReceiptDate = lastReceiptDate,
+                        PartialPayments = receipts
+                            .Select(r => new PartialPaymentDto
+                            {
+                                ReceiptDate = r.ReceiptDate,
+                                Amount = r.CurrentAmount
+                            }).ToList()
                     };
                 }).ToList();
 
@@ -175,9 +196,13 @@ namespace InternalProj.Controllers
                 .ToList()
                 .Select(w =>
                 {
-                    var totalPaid = _context.Receipts
+                    var receipts = _context.Receipts
                         .Where(r => r.WorkOrderId == w.WorkOrderId)
-                        .Sum(r => (double?)r.CurrentAmount) ?? 0;
+                        .OrderByDescending(r => r.ReceiptDate)
+                        .ToList();
+
+                    var totalPaid = receipts.Sum(r => r.CurrentAmount);
+                    var lastReceiptDate = receipts.FirstOrDefault()?.ReceiptDate;
 
                     return new WorkOrderSummaryViewModel
                     {
@@ -188,10 +213,16 @@ namespace InternalProj.Controllers
                         Size = w.AlbumSize?.Size ?? "-",
                         SubTotal = w.SubTotal,
                         TotalPaid = totalPaid,
-                        //Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
                         Balance = w.Balance ?? 0,
                         WorkTypeName = w.WorkType?.TypeName,
-                        Wdate = w.Wdate
+                        Wdate = w.Wdate,
+                        LastReceiptDate = lastReceiptDate,
+                        PartialPayments = receipts
+                            .Select(r => new PartialPaymentDto
+                            {
+                                ReceiptDate = r.ReceiptDate,
+                                Amount = r.CurrentAmount
+                            }).ToList()
                     };
                 })
                 .ToList();

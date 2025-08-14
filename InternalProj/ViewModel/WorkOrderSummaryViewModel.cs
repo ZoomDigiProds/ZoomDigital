@@ -12,5 +12,13 @@
         public double Balance { get; set; }
         public string WorkTypeName { get; set; }
         public DateTime? Wdate { get; set; }
+        public DateTime? LastReceiptDate { get; set; }
+        public List<PartialPaymentDto> PartialPayments { get; set; } = new();
+    }
+
+    public class PartialPaymentDto
+    {
+        public DateTime ReceiptDate { get; set; }
+        public double Amount { get; set; }
     }
 }
