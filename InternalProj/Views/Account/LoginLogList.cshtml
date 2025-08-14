@@ -11,8 +11,7 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>SlNo</th>
-                <th>Staff Id</th>
+                <th>Staff Name</th>
                 <th>Login Time</th>
                 <th>Local Ip</th>
                 <th>Public IP</th>
@@ -21,21 +20,20 @@
                 <th>Reason</th>
             </tr>
         </thead>
-        <tbody>
-            @for (int i = 0; i < Model.Count; i++)
-            {
-                <tr>
-                    <td>@(i+1)</td>
-                    <td>@Model[i].StaffId</td>
-                    <td>@Model[i].LoginTime.ToString()</td>
-                    <td>@Model[i].Local_IPAddres</td>
-                    <td>@Model[i].Public_IPAddress</td>
-                    <td>@Model[i].Location</td>
-                    <td>@(Model[i].LogoutTime?.ToString())</td>
-                    <td>@Model[i].Reason</td>
-                </tr>
-            }
-        </tbody>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>@Model[i].StaffName</td>
+                        <td>@Model[i].LoginTime.ToString("yyyy-MM-dd")</td>
+                        <td>@Model[i].Local_IPAddres</td>
+                        <td>@Model[i].Public_IPAddress</td>
+                        <td>@Model[i].Location</td>
+                        <td>@(Model[i].LogoutTime?.ToString("yyyy-MM-dd"))</td>
+                        <td>@Model[i].Reason</td>
+                    </tr>
+                }
+            </tbody>=
     </table>
 }
 </div>

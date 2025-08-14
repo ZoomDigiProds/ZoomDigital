@@ -88,7 +88,7 @@ namespace InternalProj.Controllers
 
                     var loginHistory = new LoginLogs
                     {
-                        StaffId = user.StaffId,
+                        StaffName = user.UserName,
                         LoginTime = DateTime.UtcNow,
                         Local_IPAddres = localIp,
                         Public_IPAddress = publicIp,
