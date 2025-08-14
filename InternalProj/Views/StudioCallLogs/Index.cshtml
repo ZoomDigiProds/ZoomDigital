@@ -7,7 +7,9 @@
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
 }
 
-<h1>Call Logs</h1>
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">Call Logs</h3>
 
 <p>
     <a asp-action="Create" class="btn btn-secondary">Create New</a>
@@ -91,6 +93,8 @@
             <button class="btn btn-outline-secondary btn-sm" onclick="loadPage(@(currentPage + 1))">&gt;</button>
         }
     </div>
+</div>
+</div>
 </div>
 
 @section Scripts {

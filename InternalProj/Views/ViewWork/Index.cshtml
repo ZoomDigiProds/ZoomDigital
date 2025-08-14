@@ -5,11 +5,9 @@
     var slno = (Model.CurrentPage - 1) * 10 + 1;
 }
 
-@* <link rel="stylesheet" href="~/css/ViewWork.css" asp-append-version="true" /> *@
-
-<div class="container d-flex justify-content-center align-items-center">
-    <div class="card shadow p-4 w-100">
-        <h3 class="text-center">Work Order Details</h3>
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">Work Order Details</h3>
         <div class="custom-form-wrapper">
             <form asp-action="Index" method="post" autocomplete="off" class="filter-form">
                 <div class="form-group">
@@ -48,8 +46,11 @@
                     </select>
                 </div>
                 <div class="button-cont" style="display: flex; gap: 20px; align-items: center;">
-                    <button type="submit">Search</button>
-                    <a href="@Url.Action("Index", "ViewWork")" class="btn-refresh">Refresh</a>
+                    <button type="submit"
+                            class="common-btn">
+                        Search
+                    </button>
+                    @* <a href="@Url.Action("Index", "ViewWork")" class="btn-refresh">Refresh</a> *@
                 </div>
             </form>
 
@@ -99,7 +100,7 @@
                             <input type="hidden" name="format" id="downloadFormat" value="" />
 
                             <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="button dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     Download
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
@@ -235,17 +236,6 @@
 </script>
 
 <style>
-    /* Global page styles */
-    body {
-        color: #333;
-        font: 13px;
-    }
-
-    h3 {
-        font-weight: 500;
-        margin-bottom: 10px;
-        color: #222;
-    }
 
     /* Form styling */
     .filter-form {
@@ -282,14 +272,14 @@
         input[type="text"]:focus,
         input[type="date"]:focus,
         select:focus {
-            border-color: #4a0357;
+            border-color: #2563eb;
             outline: none;
         }
 
     button {
         padding: 10px 20px;
         font-size: 14px;
-        background-color: #4a0357;
+        background-color: #1e3a8a;
         border: none;
         color: white;
         border-radius: 10px;
@@ -300,7 +290,7 @@
     }
 
         button:hover {
-            background-color: #9007a8;
+            /* background-color: #9007a8; */
         }
 
     /* Table styling */
@@ -320,7 +310,7 @@
         }
 
         .workorder-table thead {
-            background-color: #64126b;
+            background-color: #1e3a8a;
             color: white;
             font-weight: 600;
         }
@@ -345,7 +335,7 @@
         }
     }
 
-    .btn-refresh {
+    /* .btn-refresh {
         padding: 10px 20px;
         text-decoration: none;
         font-size: 14px;
@@ -362,8 +352,7 @@
         .btn-refresh:hover {
             background-color: #248c40;
             color: white;
-        }
-
+        } */
 
     .button-cont {
         display: flex;
@@ -391,20 +380,20 @@
     .pagination-btn {
         padding: 6px 16px;
         background-color: white;
-        border: 1px solid #64126b;
+        border: 1px solid #2563eb;
         border-radius: 20px;
-        color: #64126b;
+        color: #1e3a8a;
         cursor: pointer;
         transition: background-color 0.2s ease;
     }
 
         .pagination-btn:hover {
-            background-color: #64126b;
+            background-color: #1d4ed8;
             color: white;
         }
 
         .pagination-btn.active {
-            background-color: #64126b;
+            background-color: #2563eb;
             color: white;
             font-weight: bold;
         }
