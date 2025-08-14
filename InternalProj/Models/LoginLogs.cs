@@ -7,7 +7,7 @@ namespace InternalProj.Models
     {
         [Key]
         public int Id { get; set; }
-        public string StaffName { get; set; }
+        public string? StaffName { get; set; }
         public DateTime LoginTime { get; set; } = DateTime.UtcNow;
         public string? Local_IPAddres { get; set; } = null!;
         public string? Public_IPAddress { get; set; }
