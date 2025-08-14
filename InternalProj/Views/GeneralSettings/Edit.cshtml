@@ -1,0 +1,35 @@
+﻿@model InternalProj.Models.GeneralSettings
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Create Setting" : "Edit Setting";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="SettingType" class="control-label"></label>
+        <input asp-for="SettingType" class="form-control" />
+        <span asp-validation-for="SettingType" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Value" class="control-label"></label>
+        <input asp-for="Value" class="form-control" />
+        <span asp-validation-for="Value" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Save" class="btn btn-success" />
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

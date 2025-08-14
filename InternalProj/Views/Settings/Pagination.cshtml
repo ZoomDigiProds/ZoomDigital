@@ -1,4 +1,4 @@
-﻿<h2>Pagination Settings</h2>
+﻿@* <h2>Pagination Settings</h2>
 <label for="pagination-input">Enter pagination value:</label>
 <input type="number" id="pagination-input" style="margin-left: 0.5rem; padding: 0.3rem; background-color:cadetblue" min="1" max="50" />
 <button id="pagination-save-btn" class="btn btn-outline-primary" style="margin-left: 1rem; padding: 0.3rem 0.75rem;">Save</button>
@@ -22,5 +22,77 @@
         } else {
             alert("Pagination value saved: " + value);
         }
+    });
+</script> *@
+
+
+@{
+    ViewData["Title"] = "Pagination Settings";
+}
+
+<!-- Button to trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paginationModal">
+    Set Pagination
+</button>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="paginationModal" tabindex="-1" aria-labelledby="paginationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="pagination-form">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paginationModalLabel">Pagination Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="pagination-input">Enter pagination value:</label>
+                    <input type="number" id="pagination-input" class="form-control" min="1" max="50" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="pagination-save-btn" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Prevent invalid input like e, +, -
+    document.getElementById("pagination-input").addEventListener("keydown", function (e) {
+        if (["e", "E", "+", "-"].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    document.getElementById("pagination-save-btn").addEventListener("click", function () {
+        const value = parseInt(document.getElementById("pagination-input").value, 10);
+        const settingId = 1; // Replace with the actual Id of your Pagination setting
+
+        if (isNaN(value) || value < 1 || value > 50) {
+            alert("Please enter a value between 1 and 50.");
+            return;
+        }
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        fetch(`/GeneralSettings/Edit/${settingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+            },
+            body: JSON.stringify({ Id: settingId, Value: value })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Error saving pagination");
+            return response.text();
+        })
+        .then(() => {
+            alert("Pagination updated successfully!");
+            location.reload(); // refresh page to see new value
+        })
+        .catch(err => alert(err));
     });
 </script>

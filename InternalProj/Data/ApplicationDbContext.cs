@@ -58,6 +58,11 @@ namespace InternalProj.Data
         public DbSet<OutstandingAmount> OutstandingAmounts { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
         public DbSet<StudioCallLog> StudioCallLogs { get; set; }
+        //GeneralSettings and AuditLogs
+        public DbSet<GeneralSettings> GeneralSettings { get; set; }
+
+        public DbSet<GeneralSettingsAuditLog> GeneralSettingsAuditLog { get; set; }
+
 
         //settings
         public DbSet<Dictionary> Dictionary { get; set; }

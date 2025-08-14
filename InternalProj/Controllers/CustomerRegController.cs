@@ -4,22 +4,20 @@ using InternalProj.Models;
 using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 namespace InternalProj.Controllers
 {
     [DepartmentAuthorize()]
-    public class CustomerRegController : Controller
-    {
-        private readonly ApplicationDbContext _context;
+       public class CustomerRegController : Controller
+       {
 
+        private readonly ApplicationDbContext _context;
         public CustomerRegController(ApplicationDbContext context)
-        {
+        { 
             _context = context;
         }
-
         [HttpGet]
         public IActionResult Index()
-        {
+        {  
             var customers = _context.CustomerRegs
                 .Include(c => c.CustomerCategory)
                 .Include(c => c.Branch)
@@ -29,28 +27,26 @@ namespace InternalProj.Controllers
                 .Include(c => c.Contacts)
                 .Where(c => c.Active == "Y")
                 .ToList();
-
-            var addresses = _context.CustomerAddresses
+                 var addresses = _context.CustomerAddresses
                 .Include(a => a.State)
                 .Include(a => a.Region)
                 .Where(a => a.Active == "Y")
                 .ToList();
-
             var contacts = _context.CustomerContacts
                 .Include(c => c.PhoneType)
                 .Where(c => c.Active == "Y")
                 .ToList();
-
             var viewModel = new CustomerRegViewModel
             {
+
                 CustomerRegs = customers,
                 CustomerAddresses = addresses,
                 CustomerContacts = contacts
+
             };
-
             return View(viewModel);
-        }
 
+        }
         [HttpGet]
         public IActionResult Create()
         {
@@ -63,8 +59,7 @@ namespace InternalProj.Controllers
                 Branches = _context.Branches.Where(c => c.Active == "Y").ToList(),
                 RateTypes = _context.RateTypeMasters.Where(d => d.Active == "Y").ToList(),
                 StaffRegs = _context.StaffRegs.Where(e => e.Active == "Y").ToList(),
-            };
-
+            };            
             return View(model);
         }
 
@@ -75,34 +70,35 @@ namespace InternalProj.Controllers
         {
             if (ModelState.IsValid)
             {
-                var staffId = HttpContext.Session.GetInt32("StaffId");
-                var staffName = HttpContext.Session.GetString("UserName");
 
+                var staffId = HttpContext.Session.GetString("StaffId");
+                var staffName = HttpContext.Session.GetString("UserName");
                 if (staffId == null || string.IsNullOrEmpty(staffName))
                 {
+
                     TempData["ErrorMessage"] = "Staff session expired. Please log in again.";
                     return RedirectToAction("Login", "Account");
+
                 }
 
+                int parsedStaffId = int.Parse(staffId);
                 var istTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
-
                 var newCustomer = new CustomerReg
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     StudioName = model.Studio,
-                    Discount = model.Discount ?? 0,
+                   Discount = model.Discount ?? 0,
                     CreatedAt = DateTime.UtcNow,
                     Active = "Y",
                     CategoryId = model.CategoryId,
                     BranchId = model.BranchId,
                     RateTypeId = model.RateTypeId,
-                    StaffId = staffId.Value
+                    StaffId = parsedStaffId
                 };
 
                 _context.CustomerRegs.Add(newCustomer);
                 _context.SaveChanges();
-
                 _context.CustomerAddresses.Add(new CustomerAddress
                 {
                     CustomerId = newCustomer.Id,
@@ -125,7 +121,6 @@ namespace InternalProj.Controllers
                 });
 
                 _context.SaveChanges();
-
                 TempData["SuccessMessage"] = "Customer registration successful!";
                 return RedirectToAction("Create");
             }
@@ -141,7 +136,6 @@ namespace InternalProj.Controllers
                     return View(model);
                 }
             }
-
             // If validation fails, reload dropdowns
             model.StateMasterRegs = _context.StateMasters.Where(s => s.Active == "Y").ToList();
             model.RegionMasterRegs = _context.RegionMasters.Where(r => r.Active == "Y").ToList();
@@ -150,11 +144,9 @@ namespace InternalProj.Controllers
             model.Branches = _context.Branches.Where(q => q.Active == "Y").ToList();
             model.RateTypes = _context.RateTypeMasters.Where(e => e.Active == "Y").ToList();
             model.StaffRegs = _context.StaffRegs.Where(r => r.Active == "Y").ToList();
-
             TempData["ErrorMessage"] = "An error occurred while registering customer. Please check all fields.";
             return View(model);
         }
-
         [HttpGet]
         public IActionResult GetRegionsByState(int stateId)
         {
@@ -162,8 +154,7 @@ namespace InternalProj.Controllers
                 .Where(r => r.StateId == stateId && r.Active == "Y")
                 .Select(r => new { id = r.Id, name = r.Name })
                 .ToList();
-
             return Json(regions);
         }
-    }
+       }
 }

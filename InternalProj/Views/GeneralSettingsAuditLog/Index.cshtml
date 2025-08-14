@@ -1,0 +1,37 @@
+﻿@model IEnumerable<InternalProj.Models.GeneralSettingsAuditLog>
+
+@{
+    ViewData["Title"] = "General Settings Audit Log";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered ">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Setting Type</th>
+            <th>Old Value</th>
+            <th>New Value</th>
+            <th>Path</th>
+            <th>Modified Date</th>
+            <th>Staff ID</th>
+            <th>Staff Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.Id</td>
+                <td>@log.SettingType</td>
+                <td>@log.OldValue</td>
+                <td>@log.NewValue</td>
+                <td>@log.Path</td>
+                <td>@log.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@log.StaffId</td>
+                <td>@log.StaffName</td>
+            </tr>
+        }
+    </tbody>
+</table>
