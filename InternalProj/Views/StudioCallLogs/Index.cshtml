@@ -1,189 +1,137 @@
-﻿@* @model IEnumerable<InternalProj.Models.StudioCallLog>
+﻿@model IEnumerable<InternalProj.Models.StudioCallLog>
 
 @{
     ViewData["Title"] = "Call Logs";
     var today = DateTime.Today;
+    var currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
 }
 
-<h3 class="text-center text-2xl font-extrabold mb-8 text-gray-900">Call Logs</h3>
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">Call Logs</h3>
 
 <p>
-    <a asp-action="Create" class="inline-block px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition">
-        Create New
-    </a>
+    <a asp-action="Create" class="btn btn-secondary">Create New</a>
 </p>
 
-<div class="overflow-x-auto">
-    <table class="min-w-full border border-gray-300 rounded-lg mt-4" id="callLogTable">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().StudioName)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().Phone)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().Region)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().CallTime)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().Description)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    Updated Call Day
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+<table class="table table-bordered" id="callLogTable">
+    <thead class="thead-dark">
+        <tr>
+            <th>Studio Name</th>
+            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Phone)</th>
+            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Region)</th>
+            <th>Call Time</th>
+            <th>Comment</th>
+            <th>Next Scheduled Call</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
             {
-                bool isToday = item.UpdatedCallTime?.Date == today;
-                <tr data-callid="@item.CallId" class="@(isToday ? "bg-green-100" : "") hover:bg-gray-50 cursor-default">
-                    <td class="studio-cell px-4 py-2 border-b border-gray-200 text-indigo-700 font-medium cursor-pointer">
-                        @Html.DisplayFor(modelItem => item.StudioName)
+                @* bool isToday = item.UpdatedCallTime?.Date == today; *@
+                bool isTodayUpdatedCall = item.UpdatedCallTime.HasValue &&
+                item.UpdatedCallTime.Value.ToLocalTime().Date == today;
+
+                @* <tr data-callid="@item.CallId" class="@(isUpcomingToday ? "table-success" : "")"> *@
+                <tr data-callid="@item.CallId" class="@(isTodayUpdatedCall ? "table-success" : "")">
+
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.CallId">@item.StudioName</a>
                     </td>
-                    <td class="px-4 py-2 border-b border-gray-200">@Html.DisplayFor(modelItem => item.Phone)</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@Html.DisplayFor(modelItem => item.Region)</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@item.CallTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@Html.DisplayFor(modelItem => item.Description)</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@item.UpdatedCallTime?.ToLocalTime().ToString("yyyy-MM-dd")</td>
+                    <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Region)</td>
+                    <td>@item.CallTime.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</td>
+                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>@(item.UpdatedCallTime.HasValue ? item.UpdatedCallTime.Value.ToLocalTime().ToString("dd MMM yyyy") : "")</td>
                 </tr>
             }
-        </tbody>
-    </table>
-</div>
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center text-danger">No records found for this page.</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-<!-- Pagination -->
-<div class="pagination-container mt-6 flex justify-center">
-    <nav aria-label="Page navigation">
-        <ul class="inline-flex -space-x-px">
-            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
-            {
-                var active = i == (int)ViewBag.CurrentPage;
-                <li>
-                    <a href="@Url.Action("Index", new { page = i })"
-                       class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-200 transition first:rounded-l last:rounded-r @(active ? "bg-gray-600 text-white font-semibold" : "bg-white")">
-                        @i
-                    </a>
-                </li>
-            }
-        </ul>
-    </nav>
+<!-- Pagination Section -->
+<div class="pagination-container text-center mt-3">
+    <div class="pagination-buttons d-inline-flex flex-wrap justify-content-center gap-1">
+        @if (currentPage > 1)
+        {
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadPage(@(currentPage - 1))">&lt;</button>
+        }
+
+        <button class="btn btn-outline-primary btn-sm @(currentPage == 1 ? "active" : "")" onclick="loadPage(1)">1</button>
+
+        @if (currentPage > 3)
+        {
+            <span class="px-2">...</span>
+        }
+
+        @for (int i = Math.Max(2, currentPage - 1); i <= Math.Min(totalPages - 1, currentPage + 1); i++)
+        {
+            <button class="btn btn-outline-primary btn-sm @(i == currentPage ? "active" : "")" onclick="loadPage(@i)">@i</button>
+        }
+
+        @if (currentPage < totalPages - 2)
+        {
+            <span class="px-2">...</span>
+        }
+
+        @if (totalPages > 1)
+        {
+            <button class="btn btn-outline-primary btn-sm @(currentPage == totalPages ? "active" : "")" onclick="loadPage(@totalPages)">@totalPages</button>
+        }
+
+        @if (currentPage < totalPages)
+        {
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadPage(@(currentPage + 1))">&gt;</button>
+        }
+    </div>
+</div>
+</div>
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#callLogTable').on('dblclick', '.studio-cell', function () {
-                const callId = $(this).closest('tr').data('callid');
-                if (callId) {
-                    window.location.href = '/StudioCallLogs/Edit/' + callId;
-                }
-            });
-        });
+        function loadPage(pageNumber) {
+            window.location.href = '@Url.Action("Index", "StudioCallLogs")' + '?page=' + pageNumber;
+        }
     </script>
-} *@
-
-
-
-
-@model IEnumerable<InternalProj.Models.StudioCallLog>
-
-@{
-    ViewData["Title"] = "Call Logs";
-    var today = DateTime.Today;
 }
-
 <style>
-    .pagination-container nav ul li a {
-        min-width: 2.5rem;
+    .pagination-container button.active {
+        background-color: #64126b;
+        color: white;
+        font-weight: bold;
+    }
+
+    .pagination-container button:hover {
+        background-color: #64126b;
+        color: white;
+    }
+
+    .pagination-container .btn {
+        min-width: 36px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #64126b;
+        color: #64126b;
+        background-color: white;
+    }
+
+    .pagination-container {
         text-align: center;
+    }
+
+    .table-success {
+        background-color: #d4edda !important;
     }
 </style>
 
-<h3 class="page-heading">Call Logs</h3>
-
-<p>
-    <a asp-action="Create" class="inline-block px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition">
-        Create New
-    </a>
-</p>
-
-<div class="overflow-x-auto rounded-lg border border-gray-300">
-    <table class="min-w-full text-left text-gray-700" id="callLogTable">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().StudioName)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().Phone)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().Region)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().CallTime)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    @Html.DisplayNameFor(model => model.First().Description)
-                </th>
-                <th class="px-4 py-2 border-b border-gray-300 text-left text-gray-700 font-semibold">
-                    Updated Call Day
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                bool isToday = item.UpdatedCallTime?.Date == today;
-                <tr data-callid="@item.CallId" class="@(isToday ? "bg-green-100" : "") hover:bg-gray-50 cursor-default">
-                    <td class="studio-cell px-4 py-2 border-b border-gray-200 text-indigo-700 font-medium cursor-pointer">
-                        @Html.DisplayFor(modelItem => item.StudioName)
-                    </td>
-                    <td class="px-4 py-2 border-b border-gray-200">@Html.DisplayFor(modelItem => item.Phone)</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@Html.DisplayFor(modelItem => item.Region)</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@item.CallTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@Html.DisplayFor(modelItem => item.Description)</td>
-                    <td class="px-4 py-2 border-b border-gray-200">@item.UpdatedCallTime?.ToLocalTime().ToString("yyyy-MM-dd")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<!-- Pagination BELOW table, outside the overflow container -->
-@* <div class="pagination-container mt-40 flex justify-center max-w-full lg:max-w-7xl mx-auto px-2 lg:px-8">
-    <nav aria-label="Page navigation">
-        <ul class="inline-flex -space-x-px">
-            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
-            {
-                var active = i == (int)ViewBag.CurrentPage;
-                <li>
-                    <a href="@Url.Action("Index", new { page = i })"
-                       class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-200 transition first:rounded-l last:rounded-r @(active ? "bg-gray-600 text-white font-semibold" : "bg-white")">
-                        @i
-                    </a>
-                </li>
-            }
-        </ul>
-    </nav>
-</div> *@
-
-@section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('#callLogTable').on('dblclick', '.studio-cell', function () {
-                const callId = $(this).closest('tr').data('callid');
-                if (callId) {
-                    window.location.href = '/StudioCallLogs/Edit/' + callId;
-                }
-            });
-        });
-    </script>
-}

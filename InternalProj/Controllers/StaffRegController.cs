@@ -1,19 +1,23 @@
-﻿using InternalProj.Data;
+﻿using Humanizer;
+using InternalProj.Data;
 using InternalProj.Filters;
 using InternalProj.Helpers;
 using InternalProj.Models;
 using InternalProj.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ZoomColorLab.Controllers
 {
-    [DepartmentAuthorize()]
+    //[DepartmentAuthorize()]
     public class StaffRegController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -28,6 +32,7 @@ namespace ZoomColorLab.Controllers
         {
             var staffList = await _context.StaffRegs
                 .Include(s => s.StaffDepartments)
+                    .ThenInclude(sd => sd.Department)
                 .Include(s => s.StaffDesignations)
                 .Include(s => s.Addresses)
                 .Include(s => s.Contacts)
@@ -35,7 +40,7 @@ namespace ZoomColorLab.Controllers
                 .ToListAsync();
 
             var branches = await _context.Branches.Where(b => b.Active == "Y").ToListAsync();
-            var categories = await _context.CustomerCategories.Where(c => c.Active == "Y").ToListAsync();
+            //var categories = await _context.CustomerCategories.Where(c => c.Active == "Y").ToListAsync();
 
             var model = staffList.Select(s => new StaffRegViewModel
             {
@@ -51,7 +56,8 @@ namespace ZoomColorLab.Controllers
                 Whatsapp = EncryptionHelper.Decrypt(s.Contacts?.FirstOrDefault()?.Whatsapp),
                 Email = s.Contacts?.FirstOrDefault()?.Email,
                 UserName = s.Credentials?.FirstOrDefault()?.UserName,
-                Active = s.Active
+                Active = s.Active,
+                Departments = s.StaffDepartments.Select(sd => sd.Department).ToList()
 
             }).ToList();
 
@@ -455,6 +461,12 @@ namespace ZoomColorLab.Controllers
             if (staff == null)
             {
                 return NotFound();
+            }
+
+            if (staff.StaffDepartments.Any(sd => sd.Department.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["ErrorMessage"] = "Admin status cannot be changed.";
+                return RedirectToAction("Index");
             }
 
             staff.Active = status;
