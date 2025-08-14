@@ -1,0 +1,34 @@
+﻿@model IEnumerable<InternalProj.Models.WorkOrderMaster>
+@{
+    ViewData["Title"] = "Work Orders";
+}
+
+<h2>Work Orders</h2>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Work Order No</th>
+            <th>Date & Time</th>
+            <th>Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var wo in Model)
+        {
+            <tr>
+                <td>@wo.WorkOrderNo</td>
+                <td>@wo.Wdate.ToString()</td>
+                <td>@wo.Name</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@wo.WorkOrderId"
+                       class="btn btn-primary btn-sm">
+                        View Jobs
+                    </a>
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

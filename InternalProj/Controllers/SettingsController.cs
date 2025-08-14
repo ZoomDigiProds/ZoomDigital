@@ -56,35 +56,35 @@ namespace InternalProj.Controllers
             }
         }
 
-        public IActionResult GetStates()
+        public IActionResult GetStateMasterss()
         {
-            var states = _context.State.Select(s => new
+            var states = _context.StateMasters.Select(s => new
             {
                 s.Id,
                 s.Name,
-                s.StateValue
+               
             }).ToList();
 
             return Json(states);
         }
 
-        public IActionResult GetRegions()
+        public IActionResult GetRegionMasterss()
         {
-            var regions = _context.Region.Select(r => new
+            var regions = _context.RegionMasters.Select(r => new
             {
                 r.Id,
-                r.RegionName
+                r.StateId
             }).ToList();
 
             return Json(regions);
         }
 
-        public IActionResult GetSizes()
+        public IActionResult GetAlbumss()
         {
-            var sizes = _context.Size.Select(s => new
+            var sizes = _context.Albums.Select(s => new
             {
-                s.Id,
-                s.SizeName
+                s.Size,
+                s.SizeId
             }).ToList();
 
             return Json(sizes);

@@ -46,6 +46,21 @@
     <link rel="stylesheet" href="~/InternalProj.styles.css" asp-append-version="true" />
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+    <!-- CSS files -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <!-- Load jQuery first so $ is available in all partials -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS (if using Bootstrap 4 or lower) -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Optional: site-wide JS -->
+    <script src="~/js/site.js"></script>
+
     <style>
 
         body, html {
@@ -258,6 +273,7 @@
                 <a asp-controller="CustomerReg" asp-action="Create" class="px-2 py-2 rounded @isActive("CustomerReg", "Create")">Customer Registration</a>
                 <a asp-controller="StaffReg" asp-action="Index" class="px-2 py-2 rounded @isActive("StaffReg", "Index")">Staff Registration</a>
                 <a asp-controller="WorkOrder" asp-action="Create" class="px-2 py-2 rounded @isActive("WorkOrder", "Create")">Work Order</a>
+                <a class="nav-link" asp-controller="JobWorkflow" asp-action="Index">Job Workflows</a>
                 <a asp-controller="ViewWork" asp-action="Index" class="px-2 py-2 rounded @isActive("ViewWork", "Index")">Reports</a>
                 <a asp-controller="StudioCallLogs" asp-action="Index" class="px-2 py-2 rounded @isActive("StudioCallLogs", "Index")">CallLogs</a>
                 <a asp-controller="Invoice" asp-action="CreateInvoice" class="px-2 py-2 rounded @isActive("Invoice", "CreateInvoice" )">Invoice</a>
@@ -311,7 +327,15 @@
                 <a asp-controller="ViewWork" asp-action="Index" class="@isActive("ViewWork", "Index")">Reports</a>
                 <a asp-controller="StudioCallLogs" asp-action="Index" class="@isActive("StudioCallLogs", "Index")">CallLogs</a>
                 <a asp-controller="Invoice" asp-action="CreateInvoice" class="@isActive("Invoice", "CreateInvoice")">Invoice</a>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Job" asp-action="Index">
+                        Job Workflow
+                    </a>
+                </li>
+
             }
+
+
             @if (menuItems.Any(item => isAdmin || item.AllowedDepts.Any(dep => departments.Contains(dep))))
             {
                 <div id="deptTreeWrapper" class="mt-2">
@@ -450,7 +474,9 @@
             handleResize();
         });
     </script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </body>
 </html>

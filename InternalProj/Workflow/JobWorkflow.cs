@@ -1,8 +1,13 @@
-﻿using WorkflowCore.Interface;
+﻿using InternalProj.Workflow;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
-namespace InternalProj.Workflow
+namespace InternalProj.Workflows
 {
+    public class JobWorkflowData
+    {
+        public int JobId { get; set; }
+    }
 
     public class JobWorkflow : IWorkflow<JobWorkflowData>
     {
@@ -13,9 +18,11 @@ namespace InternalProj.Workflow
         {
             builder
                 .StartWith<InitializeJobStagesStep>()
+                    .Input(step => step.JobId, data => data.JobId)
                 .Then<UpdateJobStageStep>()
-                .Then<CompleteJobStep>();
+                    .Input(step => step.JobId, data => data.JobId)
+                .Then<CompleteJobStep>()
+                    .Input(step => step.JobId, data => data.JobId);
         }
     }
-
 }

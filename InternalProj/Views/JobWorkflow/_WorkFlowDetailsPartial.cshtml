@@ -1,0 +1,120 @@
+﻿@model InternalProj.ViewModel.JobDetailsViewModel
+
+<div id="stepper-container">
+    <div class="stepper d-flex align-items-center">
+        @for (int i = 0; i < Model.AllStages.Count; i++)
+        {
+            var stageName = Model.AllStages[i];
+            var isActive = stageName == Model.CurrentStage;
+            var isCompleted = Model.Stages.First(s => s.StageName == stageName).IsCompleted;
+
+            <div class="step @(isActive ? "active" : isCompleted ? "completed" : "")">
+                <span>@stageName</span>
+            </div>
+
+            @if (i < Model.AllStages.Count - 1)
+            {
+                <div class="step-line"></div>
+            }
+        }
+    </div>
+
+    <div class="mt-3">
+        @{
+            var currentStageEntity = Model.Stages.FirstOrDefault(s => s.InProgress)
+            ?? Model.Stages.Last(); // fallback to last stage if none in progress
+        }
+
+        @* Finish button: only visible if stage is in progress *@
+        @if (currentStageEntity != null && currentStageEntity.InProgress)
+        {
+            <button class="btn btn-success" onclick="advanceStage(@Model.JobId)">Finish</button>
+        }
+
+        @* Rollback button: visible for all stages except the first, even if completed *@
+        @if (currentStageEntity != null && currentStageEntity.Sequence != Model.Stages.Min(s => s.Sequence))
+        {
+            <button class="btn btn-danger" onclick="rollbackStage(@Model.JobId)">Rollback</button>
+        }
+    </div>
+
+</div>
+
+
+ <script>
+
+        function advanceStage(jobId) {
+        $.ajax({
+            url: '/Job/AdvanceStage',
+            type: 'POST',
+            data: { jobId: jobId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+            success: function (data) {
+                $('#stepper-container').html(data);
+            },
+            error: function (xhr, status, error) {
+                alert('Error advancing stage: ' + error);
+            }
+        });
+    }
+
+
+    function rollbackStage(jobId) {
+        $.ajax({
+            url: '/Job/RollbackStage',
+            type: 'POST',
+            data: { jobId: jobId },
+            success: function (data) {
+                $('#stepper-container').html(data); // reload partial
+            },
+            error: function (xhr, status, error) {
+                alert('Error rolling back stage: ' + error);
+            }
+        });
+    }
+
+    // Optional: reload stepper independently
+    function reloadStepper(jobId) {
+        $.ajax({
+            url: '/Job/GetStepper/' + jobId, // <-- new partial action
+            type: 'GET',
+            success: function (data) {
+                $('#stepper-container').html(data);
+            },
+            error: function (xhr, status, error) {
+                alert('Error loading stepper: ' + error);
+            }
+        });
+    }
+ </script>
+
+
+
+    <style>
+        .stepper {
+            display: flex;
+            align-items: center;
+        }
+
+        .step {
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+        }
+
+            .step.active {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .step.completed {
+                background-color: #28a745;
+                color: white;
+            }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background-color: #ccc;
+            margin: 0 5px;
+        }
+</style>

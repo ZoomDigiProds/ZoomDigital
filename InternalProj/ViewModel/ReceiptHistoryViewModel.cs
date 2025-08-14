@@ -1,12 +1,4 @@
-﻿//namespace InternalProj.ViewModel
-//{
-//    public class ReceiptHistoryViewModel
-//    {
-//    }
-//}
-
-
-using InternalProj.Models;
+﻿using InternalProj.Models;
 
 namespace InternalProj.ViewModel
 {

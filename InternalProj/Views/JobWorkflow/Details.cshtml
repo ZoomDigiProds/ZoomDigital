@@ -1,0 +1,19 @@
+﻿@model InternalProj.ViewModel.WorkOrderDetailsViewModel
+
+@{
+    ViewData["Title"] = "Work Order Details";
+}
+
+<h2>Work Order @Model.WorkOrder.WorkOrderId</h2>
+<hr />
+
+@foreach (var job in Model.Jobs)
+{
+    @Html.AntiForgeryToken()
+
+    <div class="mb-4 border p-3 rounded">
+        <h4>@job.JobName</h4>
+        <partial name="_WorkFlowDetailsPartial" model="job" />
+    </div>
+}
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

@@ -21,13 +21,16 @@ namespace InternalProj.Workflow
             _context.Jobs.Add(job);
             await _context.SaveChangesAsync();
 
-            var templates = await _context.JobStageTemplates.OrderBy(t => t.Sequence).ToListAsync();
+            var templates = await _context.JobStageTemplates
+                                          .OrderBy(t => t.Sequence)
+                                          .ToListAsync();
 
             var stages = templates.Select(t => new JobStage
             {
-                JobId = job.Id,
-                JobStageTemplateId = t.Id,
-                Status = t.Sequence == 1 // Set first stage active if Sequence = 0
+                JobId = job.JobId,
+                JobStageTemplateId = t.JobStageTemplateId,
+                InProgress = t.Sequence == 1, // first stage starts active
+                IsCompleted = false
             }).ToList();
 
             _context.JobStages.AddRange(stages);

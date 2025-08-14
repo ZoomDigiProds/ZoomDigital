@@ -1,17 +1,24 @@
-﻿namespace InternalProj.Models
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace InternalProj.Models
 {
     public class JobStage
     {
-        public int Id { get; set; }
+        [Key]
+        public int JobStageId { get; set; }
 
+        // FK to Job
         public int JobId { get; set; }
         public Job Job { get; set; }
 
+        // FK to JobStageTemplate
         public int JobStageTemplateId { get; set; }
         public JobStageTemplate JobStageTemplate { get; set; }
 
-        // Only one stage per job will have Status = true (current stage)
-        public bool Status { get; set; }
+        public bool InProgress { get; set; }
+       
+        public bool IsCompleted { get; set; }
     }
-
 }

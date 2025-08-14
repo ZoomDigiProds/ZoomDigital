@@ -65,11 +65,9 @@ namespace InternalProj.Data
         public DbSet<JobStageTemplate> JobStageTemplates { get; set; }
         public DbSet<DeptStageTemplate> DeptStageTemplates { get; set; }
 
-        //settings
+        // Settings
         public DbSet<Dictionary> Dictionary { get; set; }
-        public DbSet<Models.Region> Region { get; set; }
-        public DbSet<Models.Size> Size { get; set; }
-        public DbSet<Models.State> State { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -235,6 +233,8 @@ namespace InternalProj.Data
                 .HasForeignKey(c => c.SubHeadId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
+
             // Default values
             modelBuilder.Entity<StaffReg>()
                 .Property(s => s.Active)
@@ -252,10 +252,37 @@ namespace InternalProj.Data
                 .HasDefaultValue("Y")
                 .HasAnnotation("RegularExpression", "Y|N");
 
+            // Map the entity to the correct table name
+            modelBuilder.Entity<WorkOrderMaster>().ToTable("WorkOrders");
+
             // Unique Indexes
             modelBuilder.Entity<StaffReg>()
                 .HasIndex(s => s.StaffId)
                 .IsUnique();
+
+            // Job -> WorkOrderMaster
+
+            modelBuilder.Entity<Job>()
+                .HasOne(j => j.WorkOrder)
+                .WithMany(wo => wo.Jobs)
+                .HasForeignKey(j => j.WorkOrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // JobStage -> Job
+            modelBuilder.Entity<JobStage>()
+                .HasOne(js => js.Job)
+                .WithMany(j => j.JobStages)
+                .HasForeignKey(js => js.JobId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // JobStage -> JobStageTemplate
+            modelBuilder.Entity<JobStage>()
+                .HasOne(js => js.JobStageTemplate)
+                .WithMany(jst => jst.JobStages)
+                .HasForeignKey(js => js.JobStageTemplateId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
         }
     }
 }

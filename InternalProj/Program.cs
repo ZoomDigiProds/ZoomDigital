@@ -2,6 +2,7 @@
 using InternalProj.Models;
 using InternalProj.Service;
 using InternalProj.Workflow;
+using InternalProj.Workflows;
 using Microsoft.EntityFrameworkCore;
 using WorkflowCore.Interface;
 
@@ -14,6 +15,8 @@ namespace InternalProj
             var builder = WebApplication.CreateBuilder(args);
 
             // Workflow 
+            builder.Services.AddWorkflow(); // This is what adds IWorkflowHost to DI
+            builder.Services.AddTransient<JobWorkflow>(); // Your workflow definition
 
             // Register the workflow
             builder.Services.AddTransient<JobWorkflow>();

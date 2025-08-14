@@ -200,6 +200,33 @@ namespace InternalProj.Controllers
 
                     _context.WorkOrders.Add(model.WorkOrder);
                     await _context.SaveChangesAsync();
+
+                    // Create a job for this work order
+                    var newJob = new Job
+                    {
+                        WorkOrderId = model.WorkOrder.WorkOrderId,
+                        JobStages = new List<JobStage>()
+                    };
+
+                    // Auto-populate job stages from JobStageTemplate
+                    var templates = _context.JobStageTemplates
+                        .OrderBy(t => t.Sequence)
+                        .ToList();
+
+                    foreach (var template in templates)
+                    {
+                        newJob.JobStages.Add(new JobStage
+                        {
+                            JobStageTemplateId = template.JobStageTemplateId,
+                            InProgress = (template.JobStageTemplateId == 1), // ✅ Keep true for ID=1
+                            IsCompleted = false
+                        });
+                    }
+
+                    // Attach job to the WorkOrder navigation property
+                    model.WorkOrder.Jobs = new List<Job> { newJob };
+                    await _context.SaveChangesAsync();
+
                 }
 
                 if (model.WorkDetailsList == null || !model.WorkDetailsList.Any())
