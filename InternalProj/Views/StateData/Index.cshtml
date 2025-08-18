@@ -1,0 +1,313 @@
+﻿@{
+    ViewBag.Title = "State Management";
+    var activeStates = ViewBag.ActiveStates as List<InternalProj.Models.StateMaster>;
+    var inactiveStates = ViewBag.InactiveStates as List<InternalProj.Models.StateMaster>;
+}
+
+<h2 style="text-align: center;">State Management</h2>
+
+<div class="container">
+    <!-- Inactive States -->
+    <div class="box" id="inactiveBox">
+        <h3 style="color: red;"><span style="font-size: 24px;">🔴</span> Inactive States</h3>
+        <ul id="inactiveStatesList">
+            @foreach (var state in inactiveStates)
+            {
+                <li class="state-item" onclick="selectState(this)" data-id="@state.Id" data-active="N">
+                    <span class="state-name">@state.Name</span>
+                    <span class="edit-icon" onclick="event.stopPropagation(); enableEdit(this)">✏️</span>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Arrow Buttons -->
+    <div class="arrow-buttons">
+        <button onclick="moveSelected()">⇄</button>
+    </div>
+
+    <!-- Active States -->
+    <div class="box" id="activeBox">
+        <h3 style="color: green;"><span style="font-size: 24px;">🟢</span> Active States</h3>
+        <ul id="activeStatesList">
+            @foreach (var state in activeStates)
+            {
+                <li class="state-item" onclick="selectState(this)" data-id="@state.Id" data-active="Y">
+                    <span class="state-name">@state.Name</span>
+                    <span class="edit-icon" onclick="event.stopPropagation(); enableEdit(this)">✏️</span>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<hr />
+
+<!-- Add New State Section -->
+<div style="text-align: center; margin-top: 40px;">
+    <h3>Add New State</h3>
+    <form id="addStateForm" style="display: inline-block;">
+        <input type="text" id="stateName" name="stateName" placeholder="Enter state name" required style="padding: 5px; margin-bottom: 10px;" />
+        <div style="margin: 10px 0;">
+            <input type="hidden" id="Active" name="Active" value="Y" />
+        </div>
+        <button type="submit" style="background-color: blue; color: white; padding: 7px 15px; border: none; cursor: pointer;">Add</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let selectedStates = [];
+
+    function selectState(element) {
+        const $el = $(element);
+        if ($el.hasClass("selected")) {
+            $el.removeClass("selected");
+            selectedStates = selectedStates.filter(item => item !== element);
+        } else {
+            $el.addClass("selected");
+            selectedStates.push(element);
+        }
+    }
+
+    function moveSelected() {
+        if (selectedStates.length === 0) {
+            alert("Please select one or more states to move.");
+            return;
+        }
+
+        const ids = selectedStates.map(el => $(el).data("id"));
+
+        $.ajax({
+            url: '/StateData/ToggleStates',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(ids),
+            success: function (response) {
+                if (response.success) {
+                    selectedStates.forEach(function (el) {
+                        const $el = $(el);
+                        const isActive = $el.data("active") === "Y";
+                        $el.removeClass("selected").fadeOut(200, function () {
+                            $el.data("active", isActive ? "N" : "Y");
+                            const newList = isActive ? "#inactiveStatesList" : "#activeStatesList";
+                            $(newList).append($el);
+                            $el.fadeIn(200);
+                        });
+                    });
+
+                    selectedStates = [];
+                } else {
+                    alert("Something went wrong.");
+                }
+            }
+        });
+    }
+
+    function enableEdit(editBtn) {
+        const li = $(editBtn).closest("li");
+        const stateId = li.data("id");
+        const currentName = li.find(".state-name").text();
+
+        li.find(".edit-icon").remove();
+        li.find(".state-name").replaceWith(`<input type="text" class="edit-input" value="${currentName}" />`);
+        const input = li.find(".edit-input");
+        input.focus();
+
+        input.on("blur", function () {
+            saveStateEdit(li, stateId, currentName, $(this).val().trim());
+        });
+
+        input.on("keypress", function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                input.blur();
+            }
+        });
+    }
+
+    function saveStateEdit(li, stateId, oldName, newName) {
+        if (!newName || newName === oldName) {
+            li.find(".edit-input").replaceWith(`<span class="state-name">${oldName}</span>`);
+            li.append(`<span class="edit-icon" onclick="event.stopPropagation(); enableEdit(this)">✏️</span>`);
+            return;
+        }
+
+        $.ajax({
+            url: '/StateData/EditState',
+            method: 'POST',
+            data: { id: stateId, newName: newName },
+            success: function (response) {
+                if (response.success) {
+                    li.find(".edit-input").replaceWith(`<span class="state-name">${newName}</span>`);
+                } else {
+                    alert(response.message || "Failed to update state.");
+                    li.find(".edit-input").replaceWith(`<span class="state-name">${oldName}</span>`);
+                }
+                li.append(`<span class="edit-icon" onclick="event.stopPropagation(); enableEdit(this)">✏️</span>`);
+            },
+            error: function () {
+                alert("Error updating state.");
+                li.find(".edit-input").replaceWith(`<span class="state-name">${oldName}</span>`);
+                li.append(`<span class="edit-icon" onclick="event.stopPropagation(); enableEdit(this)">✏️</span>`);
+            }
+        });
+    }
+
+    $('#addStateForm').submit(function (e) {
+        e.preventDefault();
+        const stateName = $('#stateName').val().trim();
+        const isActive = "Y";
+
+        if (!stateName) {
+            alert("Please enter a state name.");
+            return;
+        }
+
+        $.ajax({
+            url: '/StateData/AddState',
+            method: 'POST',
+            data: { stateName: stateName, Active: isActive },
+            success: function (response) {
+                if (response.success) {
+                    const newItem = $('<li></li>')
+                        .addClass('state-item')
+                        .attr('data-id', response.stateId)
+                        .attr('data-active', isActive)
+                        .html(`<span class="state-name">${stateName}</span>
+                               <span class="edit-icon" onclick="event.stopPropagation(); enableEdit(this)">✏️</span>`)
+                        .click(function () { selectState(this); });
+
+                    $('#activeStatesList').append(newItem);
+                    $('#stateName').val('');
+                } else {
+                    alert(response.message || "Failed to add state.");
+                }
+            },
+            error: function () {
+                alert("Something went wrong while adding the state.");
+            }
+        });
+    });
+</script>
+
+
+<style>
+    .edit-icon {
+        cursor: pointer;
+        margin-left: 8px;
+        font-size: 14px;
+        color: #555;
+    }
+
+        .edit-icon:hover {
+            color: #000;
+        }
+
+    .edit-input {
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        width: 70%;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f8f8;
+        margin: 20px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 28px;
+        color: #333;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+    }
+
+    .box {
+        background-color: #fff;
+        padding: 20px;
+        width: 300px;
+        height: 450px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-top: 5px solid #007bff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #activeBox {
+        border-top-color: green;
+    }
+
+    #inactiveBox {
+        border-top-color: red;
+    }
+
+    .box h3 {
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 20px;
+    }
+
+    #activeStatesList, #inactiveStatesList {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .state-item {
+        padding: 10px 12px;
+        margin: 8px 0;
+        border-radius: 5px;
+        background-color: #f1f1f1;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+        border-left: 4px solid transparent;
+    }
+
+        .state-item:hover {
+            background-color: #e2e2e2;
+            transform: scale(1.01);
+        }
+
+    .selected {
+        background-color: #007bff;
+        color: white;
+        border-left-color: #0056b3;
+    }
+
+    .arrow-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+        .arrow-buttons button {
+            padding: 10px 15px;
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            transition: 0.3s;
+        }
+
+            .arrow-buttons button:hover {
+                background-color: #555;
+            }
+</style>
