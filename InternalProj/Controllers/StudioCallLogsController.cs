@@ -65,9 +65,21 @@ namespace InternalProj.Controllers
 
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.CustomerRegs, "Id", "StudioName");
+            var branchIdStr = HttpContext.Session.GetString("BranchId");
+            if (string.IsNullOrEmpty(branchIdStr) || !int.TryParse(branchIdStr, out int branchId))
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            var customers = _context.CustomerRegs
+                .Where(c => c.BranchId == branchId) // Assuming CustomerRegs has BranchId
+                .Select(c => new { c.Id, c.StudioName })
+                .ToList();
+
+            ViewData["CustomerId"] = new SelectList(customers, "Id", "StudioName");
             return View();
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
