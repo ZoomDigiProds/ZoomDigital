@@ -17,52 +17,54 @@ function formatHeaderName(str) {
 }
 
 // Attach click events to .child-link elements inside a container
-function bindChildLinks(container = document) {
-    container.querySelectorAll('.child-link').forEach(link => {
-        link.onclick = function () {
-            const type = this.dataset.type;
+function bindChildLinks() {
+    document.querySelectorAll('.child-link').forEach(link => {
+        link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const type = link.getAttribute('data-type');
             const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `<p class="text-gray-500">Loading ${type}...</p>`;
 
-            contentArea.innerHTML = `<h2>${type}</h2><p>Loading...</p>`;
+            // ✅ Fix pluralization
+            let endpoint = '';
+            if (type === "Dictionary") {
+                endpoint = "/Settings/GetDictionaries";  // correct plural
+            } else if (type === "GeneralSetting") {
+                endpoint = "/Settings/GetGeneralSettings";
+            } else {
+                endpoint = `/Settings/Get${type}s`; // fallback
+            }
 
-            fetch(`/Settings/Get${type}s`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    if (!Array.isArray(data) || data.length === 0) {
-                        contentArea.innerHTML = `<h2>${type}</h2><p>No data found.</p>`;
-                        return;
-                    }
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
 
-                    let table = `<h2>${type}</h2><table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">`;
-
-                    const columns = Object.keys(data[0]);
-                    table += "<thead><tr>";
-                    columns.forEach(col => {
-                        //console.log("Original:", col, "→ Formatted:", formatHeaderName(col));
-                        const formattedCol = formatHeaderName(col);
-                        table += `<th style="background:#f2f2f2;">${formattedCol}</th>`;
-                    });
-                    table += "</tr></thead>";
-
-                    table += "<tbody>";
-                    data.forEach(row => {
-                        table += "<tr>";
-                        columns.forEach(col => {
-                            table += `<td>${row[col]}</td>`;
-                        });
-                        table += "</tr>";
-                    });
-                    table += "</tbody></table>";
-
-                    contentArea.innerHTML = table;
-                })
-                .catch(err => {
-                    contentArea.innerHTML = `<h2>${type}</h2><div style="color:red;">Error: ${err.message}</div>`;
-                });
-        };
+                if (data && data.length > 0) {
+                    let tableHtml = `
+                        <table class="table-auto border-collapse border border-gray-300 w-full mt-4">
+                            <thead>
+                                <tr>
+                                    ${Object.keys(data[0]).map(key => `<th class="border border-gray-300 px-4 py-2">${formatHeaderName(key)}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map(row => `
+                                    <tr>
+                                        ${Object.values(row).map(val => `<td class="border border-gray-300 px-4 py-2">${val}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    contentArea.innerHTML = tableHtml;
+                } else {
+                    contentArea.innerHTML = `<p class="text-gray-500">No data found for ${type}.</p>`;
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                contentArea.innerHTML = `<p class="text-red-500">Failed to load ${type}.</p>`;
+            }
+        });
     });
 }
 

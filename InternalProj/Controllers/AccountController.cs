@@ -30,9 +30,10 @@ namespace InternalProj.Controllers
         //for invalid user who tries to accesspage without authorization
 
         [HttpGet]
-        public IActionResult LoginLogList() {
-            var logs= _context.LoginLogs.ToList();
-            return View(logs);
+        public IActionResult LoginLogList()
+        {
+            var logs = _context.LoginLogs.ToList();
+            return PartialView(logs);
         }
 
         public IActionResult AccessDenied()

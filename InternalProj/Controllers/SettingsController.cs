@@ -58,11 +58,11 @@ namespace InternalProj.Controllers
 
         public IActionResult GetStates()
         {
-            var states = _context.State.Select(s => new
+            var states = _context.StateMasters.Select(s => new
             {
                 s.Id,
                 s.Name,
-                s.StateValue
+                s.Active,
             }).ToList();
 
             return Json(states);
@@ -70,10 +70,11 @@ namespace InternalProj.Controllers
 
         public IActionResult GetRegions()
         {
-            var regions = _context.Region.Select(r => new
+            var regions = _context.RegionMasters.Select(r => new
             {
                 r.Id,
-                r.RegionName
+                r.Name,
+                r.Active,
             }).ToList();
 
             return Json(regions);
@@ -81,10 +82,10 @@ namespace InternalProj.Controllers
 
         public IActionResult GetSizes()
         {
-            var sizes = _context.Size.Select(s => new
+            var sizes = _context.Albums.Select(s => new
             {
-                s.Id,
-                s.SizeName
+                s.SizeId,
+                s.Size,
             }).ToList();
 
             return Json(sizes);
