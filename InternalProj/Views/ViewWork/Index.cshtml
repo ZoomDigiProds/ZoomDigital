@@ -112,12 +112,6 @@
                         </div>
                     </form>
                 </div>
-            }
-            else
-            {
-                <div class="vw-no-data">No records found.</div>
-            }
-        </div>
 
         @if (Model.TotalPages > 1)
         {
@@ -158,6 +152,12 @@
                 </form>
             </div>
         }
+            }
+            else
+            {
+                <div class="vw-no-data">No records found.</div>
+            }
+        </div>
     </div>
 </div>
 
