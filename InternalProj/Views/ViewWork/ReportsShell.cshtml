@@ -1,0 +1,207 @@
+﻿@{
+    ViewBag.Title = "Reports";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+
+    <!-- Global CSS (load once) -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        .vw-root {
+            display: flex;
+            min-height: 100vh;
+            background: #f3f6fa;
+            overflow-x: hidden;
+        }
+
+        .vw-sidenav {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            height: calc(100vh - 120px);
+            width: 210px;
+            background: #1e3a8a;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            z-index: 9;
+            box-shadow: 1px 0 6px rgba(30,58,138,0.1);
+            padding-top: 16px;
+        }
+
+        .vw-sidenav-brand {
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 10px 24px 18px;
+            letter-spacing: 1px;
+        }
+
+        .vw-sidenav-link {
+            width: 100%;
+            padding: 12px 24px;
+            color: #fff;
+            font-weight: 500;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s, border 0.2s;
+        }
+
+            .vw-sidenav-link.active,
+            .vw-sidenav-link:hover {
+                background: #2742b6;
+                color: #fff;
+            }
+
+        .vw-main {
+            margin-left: 210px;
+            width: 100%;
+            padding: 120px 25px 25px 25px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+            .vw-main.visible {
+                opacity: 1;
+            }
+    </style>
+</head>
+<body>
+    <div class="vw-root">
+        <aside class="vw-sidenav">
+            <div class="vw-sidenav-brand">Reports</div>
+            <a class="vw-sidenav-link active" data-url="@Url.Action("Index", "ViewWork", new { isPartial = true })">Work Order Reports</a>
+            <!-- Add other report links similarly with data-url -->
+        </aside>
+
+        <div class="vw-main" id="mainContent">
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Global JS (load once) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Re-initialize plugins after partial loads
+        function reinitializePlugins() {
+            $('.select2').each(function () {
+                if (!$(this).data('select2')) {
+                    $(this).select2({
+                        placeholder: "Search studio...",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+            });
+
+            $('.workorder-link').off('click').on('click', function (e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                $('#workOrderModal .modal-body').html('Loading...');
+                $.get('@Url.Action("GetWorkOrderDetails", "WorkOrder")', { id: id })
+                    .done(function (data) {
+                        $('#workOrderModal .modal-body').html(data);
+                        new bootstrap.Modal($('#workOrderModal')).show();
+                    })
+                    .fail(function () {
+                        $('#workOrderModal .modal-body').html('<p class="text-danger">Error loading details.</p>');
+                    });
+            });
+
+            $('.dropdown-item').off('click').on('click', function (e) {
+                e.preventDefault();
+                var format = $(this).data('format');
+                $('#downloadFormat').val(format);
+                if (format === 'pdf') {
+                    $('#downloadForm').attr('action', '@Url.Action("DownloadPdf", "ViewWork")');
+                } else if (format === 'excel') {
+                    $('#downloadForm').attr('action', '@Url.Action("DownloadExcel", "ViewWork")');
+                }
+                $('#downloadForm').submit();
+            });
+
+            $('#workOrderSearchForm').off('submit').on('submit', function (e) {
+                e.preventDefault();
+                var $form = $(this);
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: $form.attr('method'),
+                    data: $form.serialize() + '&isPartial=true',
+                    success: function (data) {
+                        $('#mainContent').removeClass('visible').html(data);
+                        reinitializePlugins();
+                        setTimeout(() => $('#mainContent').addClass('visible'), 100);
+                    },
+                    error: function () {
+                        alert('Error loading filtered results');
+                    }
+                });
+            });
+
+            $('.pagination-form').off('click', '.pagination-btn').on('click', '.pagination-btn', function (e) {
+                e.preventDefault();
+                var page = $(this).val();
+                var $form = $(this).closest('form');
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: $form.attr('method'),
+                    data: $form.serialize() + '&currentPage=' + page + '&isPartial=true',
+                    success: function (data) {
+                        $('#mainContent').removeClass('visible').html(data);
+                        reinitializePlugins();
+                        setTimeout(() => $('#mainContent').addClass('visible'), 100);
+                    },
+                    error: function () {
+                        alert('Error loading page');
+                    }
+                });
+            });
+        }
+
+        // Load partial content into mainContent with fade effect
+        function loadContent(url) {
+            $('#mainContent').removeClass('visible').css('opacity', '0');
+            $.get(url).done(function (data) {
+                $('#mainContent').html(data);
+                reinitializePlugins();
+                setTimeout(() => $('#mainContent').addClass('visible'), 100);
+            }).fail(function () {
+                $('#mainContent').html('<p class="text-danger">Error loading content.</p>').css('opacity', '1');
+            });
+        }
+
+        $(document).ready(function () {
+            var initialUrl = $('.vw-sidenav-link.active').data('url');
+            if (initialUrl) {
+                loadContent(initialUrl);
+            }
+
+            $('.vw-sidenav-link').click(function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('active')) return;
+                $('.vw-sidenav-link').removeClass('active');
+                $(this).addClass('active');
+                var url = $(this).data('url');
+                if (url) {
+                    loadContent(url);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

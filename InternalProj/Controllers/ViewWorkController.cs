@@ -26,7 +26,7 @@ namespace InternalProj.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(bool isPartial = false)
         {
             var branchIdStr = HttpContext.Session.GetString("BranchId");
             if (string.IsNullOrEmpty(branchIdStr) || !int.TryParse(branchIdStr, out int branchId))
@@ -48,11 +48,16 @@ namespace InternalProj.Controllers
                 TotalPages = 0
             };
 
+            if (isPartial)
+            {
+                return PartialView("_WorkOrderReportPartial", viewModel);
+            }
+
             return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult Index(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId, int currentPage = 1)
+        public IActionResult Index(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId, int currentPage = 1, bool isPartial = false)
         {
             var branchIdStr = HttpContext.Session.GetString("BranchId");
             if (string.IsNullOrEmpty(branchIdStr) || !int.TryParse(branchIdStr, out int branchId))
@@ -120,9 +125,14 @@ namespace InternalProj.Controllers
                 WorkTypeFilter = workTypeId
             };
 
+            if (isPartial)
+            {
+                return PartialView("_WorkOrderReportPartial", viewModel);
+            }
+
             return View(viewModel);
         }
-    
+
         [HttpPost]
         public IActionResult DownloadExcel(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId)
         {
