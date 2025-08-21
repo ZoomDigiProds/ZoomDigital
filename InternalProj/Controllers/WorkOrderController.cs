@@ -431,35 +431,81 @@ namespace InternalProj.Controllers
                 .ToList();
             return Json(childSubHeads);
         }
+        //public IActionResult GetWorkOrderDetails(int id)
+        //{
+        //    var workOrder = _context.WorkOrders
+        //        .Include(w => w.Customer)
+        //        .Include(w => w.WorkType)
+        //        .FirstOrDefault(w => w.WorkOrderId == id);
+        //    if (workOrder == null)
+        //        return NotFound();
+        //    var details = _context.WorkDetails
+        //        .Include(d => d.SubHead)
+        //        .Include(d => d.Size)
+        //        .Include(d => d.ChildSubHead)
+        //        .Where(d => d.WorkOrderId == id)
+        //        .ToList();
+        //    // Fetch total paid from Receipts
+        //    double totalPaid = _context.Receipts
+        //        .Where(r => r.WorkOrderId == id)
+        //        .Sum(r => (double?)r.CurrentAmount) ?? 0;
+        //    // Calculate balance
+        //    double advance = workOrder.Advance ?? 0;
+        //    double balance = Math.Max(0, workOrder.SubTotal - advance - totalPaid);
+        //    var viewModel = new WorkOrderViewModel
+        //    {
+        //        WorkOrder = workOrder,
+        //        WorkDetailsList = details,
+        //        Advance = advance,
+        //        Balance = balance,
+        //        SubTotal = workOrder.SubTotal
+        //    };
+        //    return PartialView("_WorkOrderDetailsPartial", viewModel);
+        //}
+
         public IActionResult GetWorkOrderDetails(int id)
         {
             var workOrder = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
                 .FirstOrDefault(w => w.WorkOrderId == id);
+
             if (workOrder == null)
                 return NotFound();
+
             var details = _context.WorkDetails
                 .Include(d => d.SubHead)
                 .Include(d => d.Size)
                 .Include(d => d.ChildSubHead)
                 .Where(d => d.WorkOrderId == id)
                 .ToList();
-            // Fetch total paid from Receipts
-            double totalPaid = _context.Receipts
+
+            // Fetch partial payments with dates
+            var partialPayments = _context.Receipts
                 .Where(r => r.WorkOrderId == id)
-                .Sum(r => (double?)r.CurrentAmount) ?? 0;
-            // Calculate balance
+                .OrderBy(r => r.ReceiptDate)
+                .Select(r => new PartialPaymentDto
+                {
+                    ReceiptDate = r.ReceiptDate,
+                    Amount = r.CurrentAmount
+                })
+                .ToList();
+
+            // Calculate totals
+            double totalPaid = partialPayments.Sum(p => p.Amount);
             double advance = workOrder.Advance ?? 0;
             double balance = Math.Max(0, workOrder.SubTotal - advance - totalPaid);
+
             var viewModel = new WorkOrderViewModel
             {
                 WorkOrder = workOrder,
                 WorkDetailsList = details,
                 Advance = advance,
                 Balance = balance,
-                SubTotal = workOrder.SubTotal
+                SubTotal = workOrder.SubTotal,
+                PartialPayments = partialPayments
             };
+
             return PartialView("_WorkOrderDetailsPartial", viewModel);
         }
 

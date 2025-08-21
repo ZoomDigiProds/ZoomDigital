@@ -44,7 +44,7 @@ namespace InternalProj.ViewModel
         public List<WorkOrderSummaryViewModel> ResultsSummary { get; set; } = new();
 
         public double TotalPaid { get; set; }
-
+        public List<PartialPaymentDto> PartialPayments { get; set; } = new();
     }
     public class CombinedSubHead
     {
