@@ -3,6 +3,7 @@ using InternalProj.Filters;
 using InternalProj.Models;
 using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.FlowAnalysis;
 using Microsoft.EntityFrameworkCore;
 using ClosedXML.Excel;
 using iText.Kernel.Pdf;
@@ -26,71 +27,36 @@ namespace InternalProj.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId, int currentPage = 1, bool isSearch = false)
         {
-            var branchIdStr = HttpContext.Session.GetString("BranchId");
-            if (string.IsNullOrEmpty(branchIdStr) || !int.TryParse(branchIdStr, out int branchId))
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-
-            var viewModel = new WorkOrderViewModel
-            {
-                StudioList = _context.CustomerRegs
-                    .Where(c => c.BranchId == branchId)
-                    .Select(c => c.StudioName)
-                    .Distinct()
-                    .ToList(),
-
-                WorkTypes = _context.WorkTypes.ToList(),
-                Results = new List<WorkOrderMaster>(),
-                CurrentPage = 1,
-                TotalPages = 0
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        public IActionResult Index(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId, int currentPage = 1)
-        {
-            var branchIdStr = HttpContext.Session.GetString("BranchId");
-            if (string.IsNullOrEmpty(branchIdStr) || !int.TryParse(branchIdStr, out int branchId))
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-
             const int pageSize = 10;
+
+            bool hasAnyFilter = !string.IsNullOrEmpty(studio) || fromDate.HasValue || toDate.HasValue || (workTypeId.HasValue && workTypeId.Value > 0);
+            bool shouldShowResults = isSearch || hasAnyFilter;
 
             var query = _context.WorkOrders
                 .Include(w => w.Customer)
                 .Include(w => w.WorkType)
-                .Where(w => w.Active == "Y" &&
-                            w.BranchId == branchId &&
-                            w.Customer != null &&
-                            w.Customer.BranchId == branchId);
+                .Include(w => w.AlbumSize)
+                .Where(w => w.Active == "Y");
 
-
-            if (!string.IsNullOrEmpty(studio))
+            if (shouldShowResults)
             {
-                query = query.Where(w => w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
+                if (!string.IsNullOrWhiteSpace(studio))
+                    query = query.Where(w => w.Customer.StudioName.Trim().ToLower() == studio.Trim().ToLower());
+
+                if (fromDate.HasValue)
+                    query = query.Where(w => w.Wdate >= DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc));
+
+                if (toDate.HasValue)
+                    query = query.Where(w => w.Wdate <= DateTime.SpecifyKind(toDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc));
+
+                if (workTypeId.HasValue && workTypeId.Value > 0)
+                    query = query.Where(w => w.WorkTypeId == workTypeId.Value);
             }
-
-            if (fromDate.HasValue)
+            else
             {
-                var fromUtc = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
-                query = query.Where(w => w.Wdate >= fromUtc);
-            }
-
-            if (toDate.HasValue)
-            {
-                var toUtc = DateTime.SpecifyKind(toDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-                query = query.Where(w => w.Wdate <= toUtc);
-            }
-
-            if (workTypeId.HasValue && workTypeId.Value > 0)
-            {
-                query = query.Where(w => w.WorkTypeId == workTypeId);
+                query = query.Where(w => false);
             }
 
             var totalItems = query.Count();
@@ -100,18 +66,42 @@ namespace InternalProj.Controllers
                 .OrderBy(w => w.Wdate)
                 .Skip((currentPage - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToList()
+                .Select(w =>
+                {
+                    var partialPayments = _context.Receipts
+                        .Where(r => r.WorkOrderId == w.WorkOrderId)
+                        .OrderBy(r => r.ReceiptDate)
+                        .Select(r => new PartialPaymentDto
+                        {
+                            ReceiptDate = r.ReceiptDate,
+                            Amount = r.CurrentAmount
+                        })
+                        .ToList();
+
+                    double totalPaid = partialPayments.Sum(p => p.Amount);
+
+                    return new WorkOrderSummaryViewModel
+                    {
+                        WorkOrderId = w.WorkOrderId,
+                        WorkOrderNo = w.WorkOrderNo,
+                        StudioName = w.Customer?.StudioName,
+                        Size = w.AlbumSize?.Size ?? "N/A",
+                        Advance = w.Advance ?? 0,
+                        SubTotal = w.SubTotal,
+                        TotalPaid = totalPaid,
+                        Balance = Math.Max(0, w.SubTotal - (w.Advance ?? 0) - totalPaid),
+                        WorkTypeName = w.WorkType?.TypeName,
+                        Wdate = w.Wdate,
+                        PartialPayments = partialPayments
+                    };
+                }).ToList();
 
             var viewModel = new WorkOrderViewModel
             {
-                StudioList = _context.CustomerRegs
-                    .Where(c => c.BranchId == branchId)
-                    .Select(c => c.StudioName)
-                    .Distinct()
-                    .ToList(),
-
+                StudioList = _context.CustomerRegs.Select(c => c.StudioName).Distinct().ToList(),
                 WorkTypes = _context.WorkTypes.ToList(),
-                Results = results,
+                ResultsSummary = results,
                 CurrentPage = currentPage,
                 TotalPages = totalPages,
                 StudioFilter = studio,
@@ -120,9 +110,29 @@ namespace InternalProj.Controllers
                 WorkTypeFilter = workTypeId
             };
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_WorkOrderResultsPartial", viewModel);
+            }
+
             return View(viewModel);
         }
-    
+
+
+        [HttpPost]
+        public IActionResult Search(string studio, DateTime? fromDate, DateTime? toDate, int? WorkTypeFilter, int currentPage = 1)
+        {
+            return RedirectToAction("Index", new
+            {
+                studio,
+                fromDate = fromDate?.ToString("yyyy-MM-dd"),
+                toDate = toDate?.ToString("yyyy-MM-dd"),
+                workTypeId = WorkTypeFilter,
+                currentPage,
+                isSearch = true,
+            });
+        }
+
         [HttpPost]
         public IActionResult DownloadExcel(string studio, DateTime? fromDate, DateTime? toDate, int? workTypeId)
         {
