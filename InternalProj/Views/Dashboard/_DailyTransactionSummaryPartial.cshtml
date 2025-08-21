@@ -50,16 +50,16 @@ else
         <table class="min-w-full border border-gray-300 divide-y divide-gray-200 table-auto">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
+                    <th class="px-2 py-1 text-center text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
                         Work Order No
                     </th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
+                    <th class="px-2 py-1 text-center text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
                         Studio
                     </th>
-                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
+                    <th class="px-2 py-1 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">
                         Amount
                     </th>
-                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 whitespace-nowrap">
+                    <th class="px-2 py-1 text-center text-sm font-semibold text-gray-700 whitespace-nowrap">
                         Time
                     </th>
                 </tr>
@@ -68,16 +68,16 @@ else
                 @foreach (var item in Model)
                 {
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-900 text-sm">
+                        <td class="px-2 py-1 border-r border-gray-300 whitespace-nowrap text-gray-900 text-sm">
                             @item.WorkOrderNo
                         </td>
-                        <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">
+                        <td class="px-2 py-1 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">
                             @item.StudioName
                         </td>
-                        <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">
+                        <td class="px-2 py-1 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">
                             ₹@item.BillAmount.ToString("0.00")
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm text-right">
+                        <td class="px-2 py-1 whitespace-nowrap text-gray-700 text-sm">
                             @item.LastTransactionDate.ToString("hh:mm tt")
                         </td>
                     </tr>

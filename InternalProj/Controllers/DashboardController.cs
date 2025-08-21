@@ -277,23 +277,23 @@ namespace InternalProj.Controllers
                     });
 
                 // Invoices
-                var invoiceData = _context.Invoices
-                    .Include(i => i.WorkOrder)
-                    .ThenInclude(w => w.Customer)
-                    .Where(i => i.BillDate >= startUtc && i.BillDate <= endUtc)
-                    .Select(i => new DailyTransactionViewModel
-                    {
-                        WorkOrderId = i.WorkOrderId,
-                        WorkOrderNo = i.WorkOrder.WorkOrderNo,
-                        StudioName = i.WorkOrder.Customer.StudioName,
-                        Amount = (decimal)(i.NetAmount ?? 0),
-                        TransactionDate = i.BillDate
-                    });
+                //var invoiceData = _context.Invoices
+                //    .Include(i => i.WorkOrder)
+                //    .ThenInclude(w => w.Customer)
+                //    .Where(i => i.BillDate >= startUtc && i.BillDate <= endUtc)
+                //    .Select(i => new DailyTransactionViewModel
+                //    {
+                //        WorkOrderId = i.WorkOrderId,
+                //        WorkOrderNo = i.WorkOrder.WorkOrderNo,
+                //        StudioName = i.WorkOrder.Customer.StudioName,
+                //        Amount = (decimal)(i.NetAmount ?? 0),
+                //        TransactionDate = i.BillDate
+                //    });
 
                 // Combine all transactions
                 var allTransactions = advanceData
                     .Concat(receiptData)
-                    .Concat(invoiceData)
+                   // .Concat(invoiceData)
                     .ToList()
                     .GroupBy(t => t.WorkOrderId)
                     .Select(g =>

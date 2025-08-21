@@ -1042,23 +1042,6 @@
                     }
                 });
             });
-
-
-                function refreshWorkOrderSummary() {
-            $('#workOrderSummaryContainer').fadeOut(200, function () {
-                $.get('/Dashboard/GetWorkOrderSummary', function (html) {
-                    $('#workOrderSummaryContainer').html(html).fadeIn(200);
-                });
-            });
-        }
-
-        function loadPage(page) {
-            $.get('/Dashboard/GetBoxContent', { id: 1, page: page }, function (data) {
-                $('#modalContent').html(data);
-            });
-        }
-
         });
-
     </script>
 }

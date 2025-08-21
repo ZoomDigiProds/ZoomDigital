@@ -82,6 +82,14 @@ namespace InternalProj.Controllers
             {
                 decimal balance = (decimal)(workOrder.Balance ?? 0);
 
+                if (balance != 0)
+                {
+                    TempData["ErrorMessage"] = "Invoice can only be generated once the balance is fully cleared.";
+                    model.Customers = _context.CustomerRegs.ToList();
+                    model.PaymentModes = _context.ModeOfPayments.ToList();
+                    return View(model);
+                }
+
                 decimal discountPct = model.Invoice.Discount ?? 0;
                 decimal taxPct = model.Invoice.Tax ?? 0;
                 decimal cessPct = model.Invoice.Cess ?? 0;
@@ -109,8 +117,8 @@ namespace InternalProj.Controllers
 
                 _context.Invoices.Add(invoice);
 
-                workOrder.Balance = 0;
-                _context.WorkOrders.Update(workOrder);
+                //workOrder.Balance = 0;
+                //_context.WorkOrders.Update(workOrder);
 
                 _context.SaveChanges();
 
@@ -136,7 +144,9 @@ namespace InternalProj.Controllers
                 .FirstOrDefault(c => c.Id == customerId);
 
             var allWorkOrders = _context.WorkOrders
-                .Where(w => w.CustomerId == customerId)
+                //.Where(w => w.CustomerId == customerId)
+                .Where(w => w.CustomerId == customerId
+                    && !_context.Invoices.Any(i => i.WorkOrderId == w.WorkOrderId))
                 .OrderByDescending(w => w.WorkOrderId)
                 .Select(w => new {w.WorkOrderId, w.WorkOrderNo})
                 .ToList();
@@ -151,6 +161,10 @@ namespace InternalProj.Controllers
                 .Where(w => w.CustomerId == customerId)
                 .Sum(w => w.Advance ?? 0);
 
+            var outstanding = _context.WorkOrders
+                .Where(w => w.CustomerId == customerId)
+                .Sum(w => w.Balance ?? 0);
+
             return Json(new
             {
                 studio = customer.StudioName,
@@ -159,7 +173,7 @@ namespace InternalProj.Controllers
                 mobile = customer.Contacts.FirstOrDefault()?.Phone1,
                 latestWorkOrders,
                 allWorkOrders,
-                outstanding = total - advance
+                outstanding
             });
         }
 

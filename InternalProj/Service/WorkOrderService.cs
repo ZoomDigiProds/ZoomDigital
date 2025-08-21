@@ -20,14 +20,14 @@ namespace InternalProj.Service
                 .Where(r => r.WorkOrderId == workOrderId)
                 .SumAsync(r => (double?)r.CurrentAmount) ?? 0;
 
-            var totalInvoices = await _context.Invoices
-                .Where(i => i.WorkOrderId == workOrderId)
-                .SumAsync(i => (decimal?)i.NetAmount) ?? 0;
+            //var totalInvoices = await _context.Invoices
+            //    .Where(i => i.WorkOrderId == workOrderId)
+            //    .SumAsync(i => (decimal?)i.NetAmount) ?? 0;
 
             var advance = workOrder.Advance ?? 0;
             var subTotal = workOrder.SubTotal;
 
-            var newBalance = (decimal)subTotal - (decimal)advance - (decimal)totalReceipts - totalInvoices;
+            var newBalance = (decimal)subTotal - (decimal)advance - (decimal)totalReceipts; //- totalInvoices;
 
             if (Math.Abs(newBalance) < 0.00001m)
             {
