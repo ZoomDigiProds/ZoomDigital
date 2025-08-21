@@ -1,4 +1,9 @@
-﻿@{
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    var context = HttpContextAccessor.HttpContext;
+    int timeoutSeconds = (int)(context?.Items["SessionTimeoutSeconds"] ?? throw new InvalidOperationException("SessionTimeoutSeconds is not set"));
+
     var username = Context.Session.GetString("UserName");
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
@@ -361,6 +366,33 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (isAllowedPage)
+    {
+        <script>
+            (function() {
+                var sessionTimeout = @timeoutSeconds * 1000;
+
+                function logoutUser() {
+                    alert('Session expired. You will be logged out.');
+                    window.location.href = '/Account/Logout?reason=Session+Timeout';
+                }
+
+                var timeoutHandle = setTimeout(logoutUser, sessionTimeout);
+
+                function resetTimer() {
+                    clearTimeout(timeoutHandle);
+                    timeoutHandle = setTimeout(logoutUser, sessionTimeout);
+                }
+
+                window.onload = resetTimer;
+                document.onmousemove = resetTimer;
+                document.onkeypress = resetTimer;
+                document.onclick = resetTimer;
+                document.onscroll = resetTimer;
+            })();
+        </script>
+    }
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -12,6 +12,7 @@ namespace InternalProj
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -21,10 +22,20 @@ namespace InternalProj
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
             // ? Add session services
+            int timeoutValue = builder.Configuration.GetValue<int>("SessionSettings:TimeoutValue");
+            string timeoutUnit = builder.Configuration.GetValue<string>("SessionSettings:TimeoutUnit") ?? "Minutes";
+
+            TimeSpan idleTimeout = timeoutUnit.ToLower() switch
+            {
+                "seconds" => TimeSpan.FromSeconds(timeoutValue),
+                "minutes" => TimeSpan.FromMinutes(timeoutValue),
+                _ => TimeSpan.FromMinutes(timeoutValue)
+            };
+
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.IdleTimeout = idleTimeout;
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
@@ -42,7 +53,12 @@ namespace InternalProj
             }
 
             //builder.WebHost.UseUrls("http://192.168.1.62:5190");
-
+            int timeoutSeconds = (int)idleTimeout.TotalSeconds;
+            app.Use(async (context, next) =>
+            {
+                context.Items["SessionTimeoutSeconds"] = timeoutSeconds;
+                await next();
+            });
 
             app.UseStaticFiles();
 
