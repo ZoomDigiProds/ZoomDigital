@@ -28,12 +28,31 @@ namespace InternalProj.Controllers
             _emailSettings = emailSettings.Value;
         }
         //for invalid user who tries to accesspage without authorization
-
         [HttpGet]
-        public IActionResult LoginLogList()
+        public IActionResult LoginLogList(string searchString, int pageNumber = 1)
         {
-            var logs = _context.LoginLogs.ToList();
-            return PartialView(logs);
+            int pageSize = 10; 
+            var logs = _context.LoginLogs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                logs = logs.Where(l => !string.IsNullOrEmpty(l.StaffName) &&
+                                       l.StaffName.ToLower().Contains(searchString.ToLower()));
+                ViewData["CurrentFilter"] = searchString;
+            }
+
+            int totalRecords = logs.Count();
+
+            var pagedLogs = logs
+                            .OrderByDescending(l => l.LoginTime)
+                            .Skip((pageNumber - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+
+            ViewData["PageNumber"] = pageNumber;
+            ViewData["TotalPages"] = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            return PartialView(pagedLogs);
         }
 
         public IActionResult AccessDenied()

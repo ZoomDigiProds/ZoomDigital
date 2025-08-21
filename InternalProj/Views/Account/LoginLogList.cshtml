@@ -2,7 +2,8 @@
 
 @{
     ViewData["Title"] = "Login History";
-    // Layout = null;
+    int currentPage = ViewData["PageNumber"] != null ? (int)ViewData["PageNumber"] : 1;
+    int totalPages = ViewData["TotalPages"] != null ? (int)ViewData["TotalPages"] : 1;
 }
 
 <style>
@@ -21,11 +22,48 @@
         color: #111827;
         font-size: 14px;
     }
+
+    .pagination {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .pagination li {
+            margin: 0 4px;
+        }
+
+        .pagination a {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+            .pagination a.active {
+                background-color: #6b7280;
+                color: #fff;
+            }
+
+            .pagination a.disabled {
+                pointer-events: none;
+                opacity: 0.5;
+            }
 </style>
 
 <div class="common-pages-layout">
     <div class="common-inner-container">
         <h3 class="page-heading">Login History</h3>
+        <!-- ✅ Search Form -->
+        <form asp-action="LoginLogList" method="get" class="search-box">
+            <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                   class="search-input" placeholder="Search by Staff Name..." />
+            <button type="submit" class="search-btn">Search</button>
+            <a asp-action="LoginLogList" class="search-btn" style="background-color:#6b7280;">Clear</a>
+        </form>
         <div style="overflow-x: auto;">
             <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
                 <thead class="bg-gray-100">
@@ -40,20 +78,61 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach (var log in Model)
+                    @if (Model != null && Model.Any())
                     {
-                        <tr class="hover:bg-gray-50">
-                            <td class="table-content font-medium">@log.StaffName</td>
-                            <td class="table-content">@log.LoginTime.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td class="table-content">@log.Local_IPAddres</td>
-                            <td class="table-content">@log.Public_IPAddress</td>
-                            <td class="table-content">@log.Location</td>
-                            <td class="table-content">@(log.LogoutTime?.ToString("yyyy-MM-dd HH:mm"))</td>
-                            <td class="table-content">@log.Reason</td>
+                        foreach (var log in Model)
+                        {
+                            <tr class="hover:bg-gray-50">
+                                <td class="table-content font-medium">@log.StaffName</td>
+                                <td class="table-content">@log.LoginTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="table-content">@log.Local_IPAddres</td>
+                                <td class="table-content">@log.Public_IPAddress</td>
+                                <td class="table-content">@log.Location</td>
+                                <td class="table-content">@log.LogoutTime?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="table-content">@log.Reason</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="table-content text-center text-gray-500">
+                                No records found.
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+
+        @if (totalPages > 1)
+        {
+            <ul class="pagination">
+                <li>
+                    <a asp-action="LoginLogList"
+                       asp-route-pageNumber="@(currentPage - 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       class="@(currentPage == 1 ? "disabled" : "")">«</a>
+                </li>
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li>
+                        <a asp-action="LoginLogList"
+                           asp-route-pageNumber="@i"
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           class="@(i == currentPage ? "active" : "")">@i</a>
+                    </li>
+                }
+
+                <li>
+                    <a asp-action="LoginLogList"
+                       asp-route-pageNumber="@(currentPage + 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       class="@(currentPage == totalPages ? "disabled" : "")">»</a>
+                </li>
+            </ul>
+        }
+
     </div>
 </div>

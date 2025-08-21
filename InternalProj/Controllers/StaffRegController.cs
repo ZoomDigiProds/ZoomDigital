@@ -288,7 +288,7 @@ namespace ZoomColorLab.Controllers
                 //string Remarks,
                 DateTimeOffset? DOB, DateTimeOffset? DOJ,
                 string Active,
-                 string UserName, string Password)
+                 string UserName)
         {
             if (!ModelState.IsValid)
             {
@@ -397,11 +397,11 @@ namespace ZoomColorLab.Controllers
                 if (credentials != null)
                 {
                     credentials.UserName = UserName;
-                    if (!string.IsNullOrEmpty(Password))
-                    {
-                        var hasher = new PasswordHasher<StaffCredentials>();
-                        credentials.Password = hasher.HashPassword(credentials, Password);
-                    }
+                    //if (!string.IsNullOrEmpty(Password))
+                    //{
+                    //    var hasher = new PasswordHasher<StaffCredentials>();
+                    //    credentials.Password = hasher.HashPassword(credentials, Password);
+                    //}
                     _context.StaffCredentials.Update(credentials);
                 }
 
