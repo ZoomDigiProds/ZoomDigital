@@ -296,7 +296,7 @@
 
 @Html.ValidationSummary(true, "", new { @class = "text-red-600 mb-6" })
 
-@if (TempData["SuccessMessage"] != null)
+@* @if (TempData["SuccessMessage"] != null)
 {
     <div class="flex items-center gap-3 bg-green-100 border border-green-300 text-green-800 px-5 py-3 rounded-lg shadow mb-6" role="alert">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -314,7 +314,29 @@
         </svg>
         <span>@TempData["ErrorMessage"]</span>
     </div>
+} *@
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="success" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-center" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
 }
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="error" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<script>
+    setTimeout(() => {
+        document.getElementById('success')?.classList.add('hidden');
+        document.getElementById('error')?.classList.add('hidden');
+    }, 1500);
+</script>
 
 @* <h1 class="text-center text-4xl font-extrabold tracking-tight mb-10 text-blue-900">Invoice</h1> *@
 <div class="common-pages-layout">
