@@ -1,4 +1,4 @@
-﻿@* @model InternalProj.ViewModel.WorkOrderViewModel
+﻿﻿@* @model InternalProj.ViewModel.WorkOrderViewModel
 
 <table class="table table-bordered table-hover table-sm">
     <thead>
@@ -133,8 +133,10 @@
                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Studio</th>
                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Work Type</th>
                 <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Date</th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Size</th>
                 <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">SubTotal</th>
                 <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Advance</th>
+                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">Payments</th>
                 <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700 whitespace-nowrap">Balance</th>
             </tr>
         </thead>
@@ -150,9 +152,13 @@
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.StudioName</td>
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.WorkTypeName</td>
                     <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.Wdate?.ToString("dd MMM yyyy")</td>
-                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.SubTotal.ToString("N2")</td>
-                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">@order.Advance.ToString("N2")</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm text-right">@order.Balance.ToString("N2")</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm">@order.Size</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">₹@order.SubTotal.ToString("N2")</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">₹@order.Advance.ToString("N2")</td>
+                    <td class="px-4 py-3 border-r border-gray-300 whitespace-nowrap text-gray-700 text-sm text-right">
+                        ₹@(order.PartialPayments.Sum(p => p.Amount).ToString("N2"))
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm text-right">₹@order.Balance.ToString("N2")</td>
                 </tr>
             }
         </tbody>
@@ -182,7 +188,7 @@
     @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
     {
         <button class="min-w-[36px] px-3 py-1 rounded-full border text-sm font-semibold transition-colors
-                       @(i == Model.CurrentPage ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
+                           @(i == Model.CurrentPage ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
                 onclick="loadPage(@i)">
             @i
         </button>
@@ -196,7 +202,7 @@
     @if (Model.TotalPages > 1)
     {
         <button class="min-w-[36px] px-3 py-1 rounded-full border text-sm font-semibold transition-colors
-                       @(Model.CurrentPage == Model.TotalPages ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
+                           @(Model.CurrentPage == Model.TotalPages ? "bg-purple-800 text-white border-purple-800" : "border-purple-800 text-purple-800 hover:bg-purple-700 hover:text-white")"
                 onclick="loadPage(@Model.TotalPages)">
             @Model.TotalPages
         </button>
