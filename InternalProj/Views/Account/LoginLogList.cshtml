@@ -84,11 +84,11 @@
                         {
                             <tr class="hover:bg-gray-50">
                                 <td class="table-content font-medium">@log.StaffName</td>
-                                <td class="table-content">@log.LoginTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="table-content">@log.LoginTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm")</td>
                                 <td class="table-content">@log.Local_IPAddres</td>
                                 <td class="table-content">@log.Public_IPAddress</td>
                                 <td class="table-content">@log.Location</td>
-                                <td class="table-content">@log.LogoutTime?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="table-content">@log.LogoutTime?.ToLocalTime().ToString("dd-MM-yyyy HH:mm")</td>
                                 <td class="table-content">@log.Reason</td>
                             </tr>
                         }
