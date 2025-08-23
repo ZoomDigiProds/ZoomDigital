@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InternalProj.Controllers
 {
-    [DepartmentAuthorize("ADMIN")]
+    [DepartmentAuthorize()]
     public class InvoiceController : Controller
     {
         private readonly ApplicationDbContext _context;

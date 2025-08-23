@@ -1,12 +1,14 @@
-﻿using InternalProj.ViewModel;
+﻿using InternalProj.Data;
+using InternalProj.Filters;
+using InternalProj.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using InternalProj.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace InternalProj.Controllers
 {
+    [DepartmentAuthorize()]
     public class DailyTransactionController : Controller
     {
         private readonly ApplicationDbContext _context;

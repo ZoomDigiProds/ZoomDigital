@@ -16,7 +16,7 @@ using iText.Kernel.Font;
 
 namespace InternalProj.Controllers
 {
-    [DepartmentAuthorize("ADMIN")]
+    [DepartmentAuthorize()]
     public class ViewWorkController : Controller
     {
         private readonly ApplicationDbContext _context;

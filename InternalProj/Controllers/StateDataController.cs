@@ -1,9 +1,11 @@
 ﻿using InternalProj.Data;
+using InternalProj.Filters;
 using InternalProj.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternalProj.Controllers
 {
+    [DepartmentAuthorize()]
     public class StateDataController : Controller
     {
         private readonly ApplicationDbContext _context;

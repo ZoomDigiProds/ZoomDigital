@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InternalProj.Controllers
 {
-    [DepartmentAuthorize("ADMIN")]
+    [DepartmentAuthorize()]
     public class RegionController : Controller
     {
 

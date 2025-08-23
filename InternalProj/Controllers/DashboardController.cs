@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace InternalProj.Controllers
 {
-   //[DepartmentAuthorize()]
+   [DepartmentAuthorize()]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;

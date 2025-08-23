@@ -1,9 +1,11 @@
 ﻿using InternalProj.Data;
+using InternalProj.Filters;
 using InternalProj.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternalProj.Controllers
 {
+    [DepartmentAuthorize()]
     public class SettingsController : Controller
     {
         private readonly ApplicationDbContext _context;
