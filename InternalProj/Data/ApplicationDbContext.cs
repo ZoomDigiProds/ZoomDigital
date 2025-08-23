@@ -61,6 +61,8 @@ namespace InternalProj.Data
 
         //settings
         public DbSet<Dictionary> Dictionary { get; set; }
+        public DbSet<GeneralSettings> GeneralSettings { get; set; }
+        public DbSet<GeneralSettingsAuditLog> GeneralSettingsAuditLog { get; set; }
         public DbSet<Models.Region> Region { get; set; }
         public DbSet<Models.Size> Size { get; set; }
         public DbSet<Models.State> State { get; set; }
