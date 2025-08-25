@@ -9,7 +9,7 @@
 
     namespace InternalProj.Controllers
     {
-        [DepartmentAuthorize("ADMIN")]
+        [DepartmentAuthorize()]
         public class HeadMasterController : Controller
         {
             private readonly ApplicationDbContext _context;

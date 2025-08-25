@@ -10,28 +10,33 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead>
                 <tr class="bg-purple-800 text-white">
-                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Sl No</th>
+                    @* <th class="px-4 py-2 text-left text-xs font-bold uppercase">Sl No</th> *@
                     <th class="px-4 py-2 text-left text-xs font-bold uppercase">Work Order No</th>
                     <th class="px-4 py-2 text-left text-xs font-bold uppercase">Studio Name</th>
                     <th class="px-4 py-2 text-left text-xs font-bold uppercase">Work Type</th>
                     <th class="px-4 py-2 text-left text-xs font-bold uppercase">Date</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold uppercase">Size</th>
                     <th class="px-4 py-2 text-right text-xs font-bold uppercase">Amount</th>
                     <th class="px-4 py-2 text-right text-xs font-bold uppercase">Advance</th>
+                    <th class="px-4 py-2 text-right text-xs font-bold uppercase">Payments</th>
                     <th class="px-4 py-2 text-right text-xs font-bold uppercase">Balance</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
-                @{
-                    var slno = (Model.CurrentPage - 1) * 10 + 1;
-                    var counter = slno;
-                }
+                @* @{
+            var slno = (Model.CurrentPage - 1) * 10 + 1;
+            var counter = slno;
+            }
+            @{
+            var counter = 1;
+            } *@
                 @foreach (var item in Model.ResultsSummary)
                 {
                     <tr class="hover:bg-purple-50">
-                        <td class="px-4 py-2 whitespace-nowrap">@counter</td>
-                        @{
-                            counter++;
-                        }
+                        @* <td class="px-4 py-2 whitespace-nowrap">@counter</td>
+                @{
+                counter++;
+                } *@
                         <td class="px-4 py-2 whitespace-nowrap">
                             <a href="#" data-id="@item.WorkOrderId"
                                class="text-indigo-600 underline hover:text-indigo-900 cursor-pointer">
@@ -41,8 +46,12 @@
                         <td class="px-4 py-2 whitespace-nowrap">@item.StudioName</td>
                         <td class="px-4 py-2 whitespace-nowrap">@item.WorkTypeName</td>
                         <td class="px-4 py-2 whitespace-nowrap">@item.Wdate?.ToString("dd-MM-yyyy")</td>
+                        <td class="px-4 py-3 whitespace-nowrap">@item.Size</td>
                         <td class="px-4 py-2 text-right whitespace-nowrap">@item.SubTotal.ToString("N2")</td>
                         <td class="px-4 py-2 text-right whitespace-nowrap">@item.Advance.ToString("N2")</td>
+                        <td class="px-4 py-2 text-right whitespace-nowrap">
+                            @(item.PartialPayments.Sum(p => p.Amount).ToString("N2"))
+                        </td>
                         <td class="px-4 py-2 text-right whitespace-nowrap">@item.Balance.ToString("N2")</td>
                     </tr>
                 }

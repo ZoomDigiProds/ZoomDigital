@@ -1,28 +1,28 @@
 ﻿@model string
 
-<h3>SMS Content Settings</h3>
+<h3>Email Content Settings</h3>
 
 <div id="inner-content">
-    <form id="smsContentForm">
+    <form id="emailContentForm">
         <div class="form-group">
-            <label>SMS Content</label>
-            <textarea name="content" id="smsContent" class="form-control" rows="4">@Model</textarea>
+            <label>Email Content</label>
+            <textarea name="content" id="emailContent" class="form-control" rows="6">@Model</textarea>
         </div>
         <button type="submit" class="btn btn-primary mt-2">Save</button>
 
         <!-- ✅ Message span placed near Save button -->
-        <span id="smsMessage" class="ms-3"></span>
+        <span id="emailMessage" class="ms-3"></span>
     </form>
 </div>
 
 <script>
-    document.getElementById("smsContentForm").addEventListener("submit", function (e) {
+    document.getElementById("emailContentForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
-        const content = document.getElementById("smsContent").value;
-        const messageSpan = document.getElementById("smsMessage");
+        const content = document.getElementById("emailContent").value;
+        const messageSpan = document.getElementById("emailMessage");
 
-        fetch("/Settings/UpdateSMSContent", {
+        fetch("/Settings/UpdateEmailContent", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({ content })
@@ -30,17 +30,17 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // ✅ Show success message
-                messageSpan.innerHTML = `<span class="text-success">SMS content has been successfully saved.</span>`;
+                // ✅ FIXED: wrap as string
+                messageSpan.innerHTML = `<span class="text-success">Email content has been successfully saved.</span>`;
 
                 // Reload only the textarea value
-                fetch("/Settings/SMSContent")
+                fetch("/Settings/EmailContent")
                     .then(response => response.text())
                     .then(html => {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, "text/html");
-                        const newTextarea = doc.querySelector("#smsContent");
-                        document.querySelector("#smsContent").value = newTextarea.value;
+                        const newTextarea = doc.querySelector("#emailContent");
+                        document.querySelector("#emailContent").value = newTextarea.value;
                     });
 
             } else {
@@ -51,7 +51,7 @@
             setTimeout(() => { messageSpan.innerHTML = ""; }, 5000);
         })
         .catch(err => {
-            messageSpan.innerHTML = `<span class="text-danger">Error saving SMS content.</span>`;
+            messageSpan.innerHTML = `<span class="text-danger">Error saving email content.</span>`;
             console.error("Error:", err);
             setTimeout(() => { messageSpan.innerHTML = ""; }, 5000);
         });

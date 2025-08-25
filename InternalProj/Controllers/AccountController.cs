@@ -29,7 +29,8 @@ namespace InternalProj.Controllers
             _context = context;
             _emailSettings = emailSettings.Value;
         }
-        //for invalid user who tries to accesspage without authorization
+
+        [DepartmentAuthorize()]
         [HttpGet]
         public IActionResult LoginLogList(string searchString, int pageNumber = 1)
         {

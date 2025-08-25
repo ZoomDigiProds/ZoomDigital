@@ -1,521 +1,360 @@
-﻿@model InternalProj.ViewModel.WorkOrderViewModel
+﻿@* @model InternalProj.ViewModel.WorkOrderViewModel
 
 @{
     ViewBag.Title = "View Work Orders";
     var slno = (Model.CurrentPage - 1) * 10 + 1;
+    var counter = slno;
 }
-<div class="vw-root">
-    <!-- Sidebar -->
-    <aside class="vw-sidenav">
-        <div class="vw-sidenav-brand">Reports</div>
-        <a class="vw-sidenav-link active" asp-controller="ViewWork" asp-action="Index">
-            <span>Work Order Reports</span>
-        </a>
-        <!-- Additional nav items if needed -->
-    </aside>
 
-    <div class="vw-main">
-        <div class="vw-content-card">
-            <h2 class="vw-title">Work Order Details</h2>
-            <form asp-action="Index" method="post" autocomplete="off" class="vw-form">
-                <div class="vw-form-row">
-                    <div class="vw-form-group">
-                        <label for="studio">Studio</label>
-                        <select id="studio" name="studio" class="select2">
-                            <option value="">-- Select Studio --</option>
-                            @foreach (var studio in Model.StudioList)
-                            {
-                                if (studio == Model.StudioFilter)
-                                {
-                                    <option value="@studio" selected>@studio</option>
-                                }
-                                else
-                                {
-                                    <option value="@studio">@studio</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="vw-form-group">
-                        <label for="fromDate">From Date</label>
-                        <input type="date" id="fromDate" name="fromDate" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
-                    </div>
-                    <div class="vw-form-group">
-                        <label for="toDate">To Date</label>
-                        <input type="date" id="toDate" name="toDate" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
-                    </div>
-                    <div class="vw-form-group">
-                        <label for="workTypeId">Work Type</label>
-                        <select asp-for="WorkTypeFilter" asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))" name="workTypeId">
-                            <option value="">-- Select Work Type --</option>
-                        </select>
-                    </div>
-                    <div class="vw-form-group vw-form-group-btn">
-                        <button type="submit" class="vw-btn">Search</button>
-                    </div>
-                </div>
-            </form>
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">View Work Order</h3>
 
-            @if (Model.Results != null && Model.Results.Any())
-            {
-                <div class="vw-table-scroll">
-                    <table class="vw-table">
-                        <thead>
-                            <tr>
-                                <th>Work Order No</th>
-                                <th>Studio Name</th>
-                                <th>Work Type</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Advance</th>
-                                <th>Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.Results)
-                            {
-                                <tr>
-                                    <td>
-                                        <a href="#" class="workorder-link" data-id="@item.WorkOrderId">
-                                            @item.WorkOrderNo
-                                        </a>
-                                    </td>
-                                    <td>@item.Customer?.StudioName</td>
-                                    <td>@item.WorkType?.TypeName</td>
-                                    <td>@item.Wdate?.ToString("dd-MM-yyyy")</td>
-                                    <td>@item.SubTotal.ToString("N2")</td>
-                                    <td>@item.Advance?.ToString("N2")</td>
-                                    <td>@((item.SubTotal - (item.Advance ?? 0)).ToString("N2"))</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Download Dropdown -->
-                <div class="export-dropdown" style="display: flex; justify-content: flex-end; margin-top: 16px;">
-                    <form method="post" asp-controller="ViewWork" target="_blank" id="downloadForm">
-                        <input type="hidden" name="studio" value="@Model.StudioFilter" />
-                        <input type="hidden" name="fromDate" value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))" />
-                        <input type="hidden" name="toDate" value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))" />
-                        <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
-                        <input type="hidden" name="format" id="downloadFormat" value="" />
-
-                        <div class="dropdown">
-                            <button class="vw-btn dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                Download
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="downloadDropdown">
-                                <li><a class="dropdown-item" href="#" data-format="pdf">Download PDF</a></li>
-                                <li><a class="dropdown-item" href="#" data-format="excel">Download Excel</a></li>
-                            </ul>
-                        </div>
-                    </form>
-                </div>
-
-        @if (Model.TotalPages > 1)
-        {
-            <div class="pagination-container">
-                <form asp-action="Index" method="post" class="pagination-form">
-                    <input type="hidden" name="studio" value="@Context.Request.Form["studio"]" />
-                    <input type="hidden" name="fromDate" value="@Context.Request.Form["fromDate"]" />
-                    <input type="hidden" name="toDate" value="@Context.Request.Form["toDate"]" />
-                    <input type="hidden" name="workTypeId" value="@Context.Request.Form["workTypeId"]" />
-
-                    <div class="pagination-buttons">
-                        @if (Model.CurrentPage > 1)
-                        {
-                            <button name="currentPage" value="@(Model.CurrentPage - 1)" class="pagination-btn">&lt;</button>
-                        }
-                        <button name="currentPage" value="1" class="pagination-btn @(Model.CurrentPage == 1 ? "active" : "")">1</button>
-                        @if (Model.CurrentPage > 3)
-                        {
-                            <span class="dots">...</span>
-                        }
-                        @for (int i = Math.Max(2, Model.CurrentPage - 1); i <= Math.Min(Model.TotalPages - 1, Model.CurrentPage + 1); i++)
-                        {
-                            <button name="currentPage" value="@i" class="pagination-btn @(i == Model.CurrentPage ? "active" : "")">@i</button>
-                        }
-                        @if (Model.CurrentPage < Model.TotalPages - 2)
-                        {
-                            <span class="dots">...</span>
-                        }
-                        @if (Model.TotalPages > 1)
-                        {
-                            <button name="currentPage" value="@Model.TotalPages" class="pagination-btn @(Model.CurrentPage == Model.TotalPages ? "active" : "")">@Model.TotalPages</button>
-                        }
-                        @if (Model.CurrentPage < Model.TotalPages)
-                        {
-                            <button name="currentPage" value="@(Model.CurrentPage + 1)" class="pagination-btn">&gt;</button>
-                        }
-                    </div>
-                </form>
+        <form asp-action="Search" method="post" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 items-end">
+            <div>
+                <label for="studio" class="block text-gray-700 text-sm font-medium mb-1">Studio</label>
+                <select id="studio" name="studio"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">-- Select Studio --</option>
+                    @foreach (var studio in Model.StudioList)
+                    {
+                        var isSelected = studio == Model.StudioFilter ? "selected" : "";
+                        @Html.Raw($"<option value=\"{studio}\" {isSelected}>{studio}</option>")
+                    }
+                </select>
             </div>
-        }
-            }
-            else
-            {
-                <div class="vw-no-data">No records found.</div>
-            }
+            <div>
+                <label for="fromDate" class="block text-gray-700 text-sm font-medium mb-1">From Date</label>
+                <input type="date" id="fromDate" name="fromDate"
+                       value="@(Model.FromDateFilter?.ToString("yyyy-MM-dd"))"
+                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" />
+            </div>
+            <div>
+                <label for="toDate" class="block text-gray-700 text-sm font-medium mb-1">To Date</label>
+                <input type="date" id="toDate" name="toDate"
+                       value="@(Model.ToDateFilter?.ToString("yyyy-MM-dd"))"
+                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" />
+            </div>
+            <div>
+                <label for="workTypeId" class="block text-gray-700 text-sm font-medium mb-1">Work Type</label>
+                <select asp-for="WorkTypeFilter"
+                        asp-items="@(new SelectList(Model.WorkTypes, "WorkTypeId", "TypeName"))"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+            <div class="flex space-x-2">
+                <button type="submit"
+                        class="common-btn">
+                    Search
+                </button>
+                <a href="@Url.Action("Index", "ViewWork")"
+                   class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition text-center">
+                    Refresh
+                </a> 
+            </div>
+        </form>
+
+        <!-- WRAP RESULTS & PAGINATION FOR AJAX UPDATES -->
+        <div id="resultsTableContainer">
+            @* Initially render the results using the partial view for consistency 
+            @await Html.PartialAsync("_WorkOrderResultsPartial", Model)
+        </div> <!-- END resultsTableContainer -->
+
+    </div>
+
+    <div id="workOrderModal"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-gray-800 bg-opacity-50 overflow-auto">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-6xl mx-auto relative my-16">
+            <div class="flex items-center justify-between border-b px-6 py-4">
+                <h5 class="text-xl font-semibold">Work Orders</h5>
+                <button type="button"
+                        class="text-gray-600 hover:text-gray-900 text-2xl font-bold"
+                        id="modalCloseBtn">
+                    &times;
+                </button>
+            </div>
+            <div id="workOrderModalContent" class="p-6 min-h-[300px] text-gray-700">
+                Loading...
+            </div>
         </div>
     </div>
-</div>
+</div> *@
 
-<!-- Modal -->
-<div id="workOrderModal" class="modal fade" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Work Order Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body"></div>
-        </div>
-    </div>
-</div>
-
-<!-- jQuery, Select2, scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        $('.workorder-link').on('click', function (e) {
-            e.preventDefault();
-            const id = $(this).data('id');
-            $('#workOrderModal .modal-body').html('Loading...');
-            $.get('@Url.Action("GetWorkOrderDetails", "WorkOrder")', { id: id })
-                .done(function (data) {
-                    $('#workOrderModal .modal-body').html(data);
-                    new bootstrap.Modal($('#workOrderModal')).show();
-                })
-                .fail(function () {
-                    $('#workOrderModal .modal-body').html('<p class="text-danger">Error loading details.</p>');
-                });
-        });
 
-        $('.select2').select2({
-            placeholder: "Search studio...",
-            allowClear: true,
-            width: '100%'
-        });
+        var pageCache = {};
 
-        $('.dropdown-item').on('click', function (e) {
-            e.preventDefault();
-            var format = $(this).data('format');
-            $('#downloadFormat').val(format);
-            if (format === 'pdf') {
-                $('#downloadForm').attr('action', '@Url.Action("DownloadPdf", "ViewWork")');
-            } else if (format === 'excel') {
-                $('#downloadForm').attr('action', '@Url.Action("DownloadExcel", "ViewWork")');
+        function loadPage(page) {
+            if (pageCache[page]) {
+                $('#resultsTableContainer').html(pageCache[page]);
+                attachLinkAndPaginationHandlers();
+            } else {
+                $('#resultsTableContainer').html('<p class="text-center py-6 text-gray-500">Loading...</p>');
+
+                var data = {
+                    studio: $('select[name="studio"]').val(),
+                    fromDate: $('input[name="fromDate"]').val(),
+                    toDate: $('input[name="toDate"]').val(),
+                    workTypeId: $('select[name="workTypeId"]').val(),
+                    isSearch: true,
+                    currentPage: page
+                };
+
+                $.get('@Url.Action("Index", "ViewWork")', data)
+                    .done(function (html) {
+                        pageCache[page] = html;
+                        $('#resultsTableContainer').html(html);
+                        attachLinkAndPaginationHandlers();
+                    })
+                    .fail(function () {
+                        $('#resultsTableContainer').html('<p class="text-red-500 text-center py-6">Error loading page data.</p>');
+                    });
             }
-            $('#downloadForm').submit();
+        }
+
+        function attachLinkAndPaginationHandlers() {
+            $('#resultsTableContainer').find('button.ajaxPageBtn').off('click').on('click', function (e) {
+                e.preventDefault();
+                var page = $(this).val();
+                loadPage(page);
+            });
+
+            $('#resultsTableContainer').find('a[data-id]').off('click').on('click', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                $('#workOrderModalContent').html('Loading...');
+                $('#workOrderModal').removeClass('hidden').addClass('flex');
+                $.get('@Url.Action("GetWorkOrderDetails", "WorkOrder")', { id: id })
+                    .done(function (data) {
+                        $('#workOrderModalContent').html(data);
+                    })
+                    .fail(function () {
+                        $('#workOrderModalContent').html('<p class="text-red-500">Error loading details.</p>');
+                    });
+            });
+        }
+
+        attachLinkAndPaginationHandlers();
+
+        $('#modalCloseBtn, #workOrderModal').on('click', function (e) {
+            if (e.target === this) {
+                $('#workOrderModal').addClass('hidden').removeClass('flex');
+            }
+        });
+
+        $('form[asp-action="Search"]').on('submit', function () {
+            pageCache = {}; // clear cache on new search
         });
     });
-</script>
+</script> *@
 
-<style>
-    .vw-root {
-        display: flex;
-        min-height: 100vh;
-        background: #f3f6fa;
-        overflow-x: hidden;
-    }
 
-    /* SIDENAV */
-    .vw-sidenav {
-        position: fixed;
-        top: 120px;
-        left: 0;
-        height: calc(100vh - 120px);
-        width: 210px;
-        background: #1e3a8a;
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        z-index: 9;
-        box-shadow: 1px 0 6px rgba(30,58,138,0.1);
-        padding-top: 16px;
-    }
+@model InternalProj.ViewModel.WorkOrderViewModel
 
-    .vw-sidenav-brand {
-        font-size: 1rem;
-        font-weight: bold;
-        padding: 10px 24px 18px;
-        letter-spacing: 1px;
-    }
+@{
+    ViewBag.Title = "View Work Orders";
+    var slno = (Model.CurrentPage - 1) * 10 + 1;
+    var counter = slno;
+}
 
-    .vw-sidenav-link {
-        width: 100%;
-        padding: 12px 24px;
-        color: #fff;
-        font-weight: 500;
-        text-decoration: none;
-        border-left: 4px solid transparent;
-        transition: background 0.2s, border 0.2s;
-        margin-bottom: 4px;
-        display: flex;
-        align-items: center;
-    }
+<div class="common-pages-layout">
+    <div class="common-inner-container">
+        <h3 class="page-heading">View Work Order</h3>
 
-        .vw-sidenav-link.active,
-        .vw-sidenav-link:hover {
-            background: #2742b6;
-            color: #fff;
-        }
+        <!-- 🔹 SEARCH FORM -->
+        <form asp-action="Search" method="get" id="searchForm">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <!-- Studio -->
+                <div>
+                    <label for="studioSelect" class="block text-gray-700 font-medium mb-1">Studio</label>
+                    <select id="studioSelect" name="studio"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All</option>
+                        @foreach (var studio in Model.StudioList)
+                        {
+                            <option value="@studio" selected="@(Model.StudioFilter == studio ? "selected" : null)">
+                                @studio
+                            </option>
+                        }
+                    </select>
 
-    /* MAIN CONTENT */
-    .vw-main {
-        margin-left: 210px;
-        width: 100%;
-        padding: 120px 25px 25px 25px;
-        box-sizing: border-box;
-    }
+                </div>
 
-    .vw-content-card {
-        background: #fff;
-        max-width: 910px;
-        margin: 0 auto;
-        border-radius: 18px;
-        box-shadow: 0 4px 16px rgba(30,58,138,0.10);
-        padding: 38px 38px 32px 38px;
-        box-sizing: border-box;
-        min-height: 300px;
-    }
+                <!-- From Date -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">From Date</label>
+                    <input type="date" name="fromDate"
+                           class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           value="@Model.FromDateFilter?.ToString("yyyy-MM-dd")" />
+                </div>
 
-    .vw-title {
-        margin-bottom: 26px;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #22264b;
-        letter-spacing: 0.5px;
-    }
+                <!-- To Date -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">To Date</label>
+                    <input type="date" name="toDate"
+                           class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           value="@Model.ToDateFilter?.ToString("yyyy-MM-dd")" />
+                </div>
 
-    /* FORM */
-    .vw-form {
-        margin-bottom: 25px;
-    }
+                <!-- Work Type -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">Work Type</label>
+                    <select name="workTypeId"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">--Select--</option>
+                        @foreach (var wt in Model.WorkTypes)
+                        {
+                            <option value="@wt.WorkTypeId" selected="@(Model.WorkTypeFilter == wt.WorkTypeId ? "selected" : null)">
+                                @wt.TypeName
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
 
-    .vw-form-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 32px 20px;
-    }
+            <div class="flex justify-end">
+                <button type="submit" class="common-btn bg-blue-600 hover:bg-blue-700">Search</button>
+            </div>
+        </form>
 
-    .vw-form-group {
-        display: flex;
-        flex-direction: column;
-        min-width: 160px;
-        max-width: 220px;
-        flex: 1 1 140px;
-    }
+        <!-- DOWNLOAD BUTTONS -->
+        <div id="downloadSection" class="flex justify-end mb-6 hidden">
+            <div class="relative inline-block text-left">
+                <button type="button"
+                        class="common-btn bg-indigo-600 hover:bg-indigo-700 flex items-center"
+                        id="downloadMenuButton">
+                    Download
+                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
-        .vw-form-group label {
-            margin-bottom: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #3a3a3a;
-        }
+                <!-- Dropdown -->
+                <div id="downloadDropdown"
+                     class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <form asp-action="DownloadExcel" method="post" class="block">
+                        <input type="hidden" name="studio" value="@Model.StudioFilter" />
+                        <input type="hidden" name="fromDate" value="@Model.FromDateFilter?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="toDate" value="@Model.ToDateFilter?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
+                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                        @* <input type="hidden" name="pageSize" value="@Model.PageSize" /> *@
+                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            📊 Excel
+                        </button>
+                    </form>
+                    <form asp-action="DownloadPdf" method="post" class="block">
+                        <input type="hidden" name="studio" value="@Model.StudioFilter" />
+                        <input type="hidden" name="fromDate" value="@Model.FromDateFilter?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="toDate" value="@Model.ToDateFilter?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="workTypeId" value="@Model.WorkTypeFilter" />
+                        <input type="hidden" name="currentPage" value="@Model.CurrentPage" />
+                        <input type="hidden" name="pageSize" value="10" />
+                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            📄 PDF
+                        </button>
+                    </form>
 
-        .vw-form-group input,
-        .vw-form-group select {
-            border: 1px solid #b6cafc;
-            border-radius: 6px;
-            padding: 8px 10px;
-            font-size: 14px;
-            box-sizing: border-box;
-            margin-bottom: 0;
-        }
+                </div>
+            </div>
+        </div>
 
-            .vw-form-group input:focus,
-            .vw-form-group select:focus {
-                border-color: #2563eb;
-                outline: none;
+        <!-- RESULTS TABLE -->
+        <div id="resultsTableContainer">
+            @await Html.PartialAsync("_WorkOrderResultsPartial", Model)
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+            var pageCache = {};
+
+            function showDownloadSection() {
+                $('#downloadSection').removeClass('hidden');
             }
 
-    .vw-form-group-btn {
-        align-self: flex-end;
-        margin-top: 22px;
-        min-width: 100px;
-    }
-
-    .vw-btn {
-        padding: 10px 20px;
-        background: #1756be;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
-        transition: background 0.25s;
-        cursor: pointer;
-    }
-
-        .vw-btn:hover {
-            background: #003ba9;
-        }
-
-    /* TABLE */
-    .vw-table-scroll {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .vw-table {
-        width: 100%;
-        min-width: 740px;
-        border-collapse: collapse;
-        background: #fff;
-        font-size: 13px;
-    }
-
-        .vw-table th,
-        .vw-table td {
-            border: 1px solid #e6eafd;
-            padding: 10px 12px;
-            text-align: left;
-        }
-
-        .vw-table thead tr {
-            background: #1e3a8a;
-            color: #fff;
-        }
-
-        .vw-table tbody tr:hover td {
-            background-color: #f1f7ff;
-        }
-
-    .vw-no-data {
-        text-align: center;
-        font-size: 1.1rem;
-        padding: 38px 0 16px;
-        color: #888;
-    }
-
-    /* PAGINATION */
-    .pagination-container {
-        margin-top: 24px;
-        display: flex;
-        justify-content: center;
-        margin-bottom: 24px;
-    }
-
-    .pagination-form {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .pagination-buttons {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        padding: 4px 10px;
-    }
-
-    .pagination-btn {
-        padding: 8px 16px;
-        background-color: white;
-        border: 1.5px solid #2563eb;
-        border-radius: 20px;
-        color: #1e3a8a;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 14px;
-        letter-spacing: 0.3px;
-        transition: background-color 0.25s ease, color 0.25s ease;
-    }
-
-        .pagination-btn:hover {
-            background-color: #1d4ed8;
-            color: white;
-        }
-
-        .pagination-btn.active {
-            background-color: #2563eb;
-            color: white;
-            font-weight: 700;
-            cursor: default;
-        }
-
-    .dots {
-        padding: 8px 12px;
-        font-weight: 700;
-        color: #999;
-    }
-
-    /* RESPONSIVE */
-    @@media (max-width: 1100px) {
-        .vw-content-card {
-            max-width: 96vw;
-        }
-    }
-
-    @@media (max-width: 900px) {
-        .vw-main {
-            padding: 32px 6vw;
-        }
-
-        .vw-content-card {
-            padding: 24px 7vw;
-        }
-
-        .vw-form-row {
-            gap: 24px 12px;
-        }
-    }
-
-    @@media (max-width: 700px) {
-        .vw-root {
-            flex-direction: column;
-        }
-
-        .vw-sidenav {
-            position: static;
-            width: 100vw;
-            height: auto;
-            flex-direction: row;
-            align-items: stretch;
-            padding-top: 0;
-            box-shadow: none;
-            top: 0;
-        }
-
-        .vw-sidenav-brand {
-            display: none;
-        }
-
-        .vw-sidenav-link {
-            border-left: none;
-            border-bottom: 2px solid transparent;
-            flex: 1;
-            text-align: center;
-        }
-
-            .vw-sidenav-link.active,
-            .vw-sidenav-link:hover {
-                border-left: none;
-                border-bottom: 2px solid #fff;
+            function loadPage(page) {
+                var data = $('#searchForm').serialize() + "&page=" + page;
+                $.get('@Url.Action("Index", "ViewWork")', data)
+                    .done(function (html) {
+                        pageCache[page] = html;
+                        $('#resultsTableContainer').html(html);
+                        attachHandlers();
+                        showDownloadSection(); 
+                    });
             }
 
-        .vw-main {
-            margin-left: 0;
-            padding: 14px 2vw;
-        }
+            function attachHandlers() {
+                // pagination
+                $('#resultsTableContainer').find('.pagination a').off('click').on('click', function (e) {
+                    e.preventDefault();
+                    var page = $(this).data('page');
+                    loadPage(page);
+                });
+            }
 
-        .vw-content-card {
-            border-radius: 12px;
-            padding: 12px 3vw 14px 3vw;
-        }
+            // search submit
+            $('#searchForm').on('submit', function (e) {
+                e.preventDefault();
+                pageCache = {};
+                $('#downloadSection').addClass('hidden');
+                loadPage(1);
+            });
 
-        .vw-form-row {
-            flex-direction: column;
-            gap: 10px;
-        }
+            // toggle download dropdown
+            $('#downloadMenuButton').on('click', function (e) {
+                e.stopPropagation();
+                $('#downloadDropdown').toggleClass('hidden');
+            });
 
-        .vw-table {
-            min-width: 420px;
-        }
-    }
-</style>
+            // hide dropdown if clicked outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#downloadSection').length) {
+                    $('#downloadDropdown').addClass('hidden');
+                }
+            });
+
+            // auto-close dropdown when option clicked
+            $('#downloadDropdown form button').on('click', function () {
+                $('#downloadDropdown').addClass('hidden');
+            });
+
+            // Initialize Select2
+            $('#studioSelect').select2({
+                placeholder: "Search Studio",
+                allowClear: true,
+                width: '100%' 
+            });
+
+        $('#downloadSection form').on('submit', function () {
+            var searchData = $('#searchForm').serializeArray();
+
+            searchData.forEach(function (item) {
+                if ($(this).find('input[name="' + item.name + '"]').length) {
+                    $(this).find('input[name="' + item.name + '"]').val(item.value);
+                } else {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: item.name,
+                        value: item.value
+                    }).appendTo(this);
+                }
+            }, this);
+        });
+
+
+    </script>
+}

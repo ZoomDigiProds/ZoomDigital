@@ -1,14 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using InternalProj.Data;
+using InternalProj.Filters;
+using InternalProj.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using InternalProj.Data;
-using InternalProj.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace InternalProj.Controllers
 {
+    [DepartmentAuthorize()]
     public class StudioCallLogsController : Controller
     {
         private readonly ApplicationDbContext _context;

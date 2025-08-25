@@ -22,7 +22,7 @@ namespace InternalProj.ViewModel
         public IEnumerable<SubHeadDetails> SubHeads { get; set; } = new List<SubHeadDetails>();
         public IEnumerable<AlbumSizeDetails> Albums { get; set; } = new List<AlbumSizeDetails>();
         public IEnumerable<ChildSubHead> ChildSubHeads { get; set; } = new List<ChildSubHead>();
-        public List<CombinedSubHead> CombinedSubHeadList { get; set; } = new List<CombinedSubHead>();
+        //public List<CombinedSubHead> CombinedSubHeadList { get; set; } = new List<CombinedSubHead>();
         [BindNever]
         public IEnumerable<RateMaster> RateMasterList { get; set; } = new List<RateMaster>();
         public List<WorkOrderMaster> Results { get; set; } = new List<WorkOrderMaster>();
@@ -44,12 +44,12 @@ namespace InternalProj.ViewModel
         public List<WorkOrderSummaryViewModel> ResultsSummary { get; set; } = new();
 
         public double TotalPaid { get; set; }
-
+        public List<PartialPaymentDto> PartialPayments { get; set; } = new();
     }
-    public class CombinedSubHead
-    {
-        public string DisplayName { get; set; }
-        public double Rate { get; set; }
-    }
+    //public class CombinedSubHead
+    //{
+    //    public string DisplayName { get; set; }
+    //    public double Rate { get; set; }
+    //}
 
 }

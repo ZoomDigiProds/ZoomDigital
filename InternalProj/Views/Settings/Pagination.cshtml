@@ -1,10 +1,26 @@
-﻿<h2>Pagination Settings</h2>
+﻿@model string
+
+<h2>Pagination Settings</h2>
+
 <label for="pagination-input">Enter pagination value:</label>
-<input type="number" id="pagination-input" style="margin-left: 0.5rem; padding: 0.3rem; background-color:cadetblue" min="1" max="50" />
-<button id="pagination-save-btn" class="btn btn-outline-primary" style="margin-left: 1rem; padding: 0.3rem 0.75rem;">Save</button>
+<input type="number"
+       id="pagination-input"
+       value="@Model"
+       style="margin-left: 0.5rem; padding: 0.3rem; background-color:cadetblue"
+       min="1" max="50" />
+
+<button id="pagination-save-btn"
+        class="btn btn-outline-primary"
+        style="margin-left: 1rem; padding: 0.3rem 0.75rem;">
+    Save
+</button>
+
+<!-- ✅ Place for messages -->
+<div id="pagination-message" style="margin-top:1rem; font-weight:bold;"></div>
 
 <script>
     const input = document.getElementById("pagination-input");
+    const messageDiv = document.getElementById("pagination-message");
 
     input.addEventListener("keydown", function (e) {
         if (["e", "E", "+", "-"].includes(e.key)) {
@@ -16,11 +32,34 @@
         const value = parseInt(input.value, 10);
 
         if (isNaN(value)) {
-            alert("Please enter a number.");
+            messageDiv.style.color = "red";
+            messageDiv.innerText = "❌ Please enter a number.";
         } else if (value < 1 || value > 50) {
-            alert("Please enter a value between 1 and 50.");
+            messageDiv.style.color = "red";
+            messageDiv.innerText = "❌ Please enter a value between 1 and 50.";
         } else {
-            alert("Pagination value saved: " + value);
+            // ✅ AJAX call to controller
+            fetch('@Url.Action("UpdatePagination", "Settings")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: "value=" + value
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageDiv.style.color = "green";
+                    messageDiv.innerText = "✅ " + data.message;
+                } else {
+                    messageDiv.style.color = "red";
+                    messageDiv.innerText = "❌ " + data.message;
+                }
+            })
+            .catch(err => {
+                messageDiv.style.color = "red";
+                messageDiv.innerText = "⚠ Unexpected error: " + err;
+            });
         }
     });
 </script>

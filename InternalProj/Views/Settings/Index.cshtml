@@ -63,7 +63,8 @@
                     <li><a href="#" class="setting-link" data-url="/Settings/Pagination">Pagination</a></li>
                     <li><a href="#" class="setting-link" data-url="/Settings/Scheduler">Scheduler Settings</a></li>
                     <li><a href="#" class="setting-link" data-url="/Settings/PasswordPolicy">Password Policy</a></li>
-                    <li><a href="#" class="setting-link" data-url="/Settings/SmsContent">SMS Content</a></li>
+                    <li><a href="#" class="setting-link" data-url="/Settings/EmailContent">Email Content</a></li>
+                    <li><a href="#" class="setting-link" data-url="/Settings/SMSContent">SMS Content</a></li>
                 </ul>
             </li>
 
@@ -77,7 +78,13 @@
 
             <!-- Logs -->
             <li>
-                <a href="#" class="setting-link" data-url="/Account/LoginLogList">Logs</a>
+                <a href="#" class="expand-toggle">Logs</a>
+                <ul class="submenu">
+                    <li><a href="#" class="setting-link" data-url="/Settings/GeneralSettingsAuditLog">AuditLogs</a></li>
+                    <li>
+                        <a href="#" class="setting-link" data-url="/Account/LoginLogList">Logs</a>
+                    </li>
+                </ul>
             </li>
         </ul>
     </div>

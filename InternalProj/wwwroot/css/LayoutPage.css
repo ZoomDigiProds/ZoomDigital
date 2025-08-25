@@ -12,7 +12,8 @@
 }
 
     .common-btn:hover {
-        background-color: #1d4ed8; 
+        background-color: #1d4ed8;
+        color: #fff;
     }
 
     .common-btn:focus {
@@ -81,5 +82,9 @@
         background: #fee2e2;
         color: #991b1b;
     }
+
+  a {
+      text-decoration:none;
+  }
 
 
