@@ -13,6 +13,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Net;                   
+using System.Net.Sockets;           
 
 namespace InternalProj.Controllers
 {
@@ -31,7 +33,7 @@ namespace InternalProj.Controllers
         [HttpGet]
         public IActionResult LoginLogList(string searchString, int pageNumber = 1)
         {
-            int pageSize = 10; 
+            int pageSize = 10;
             var logs = _context.LoginLogs.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -101,7 +103,7 @@ namespace InternalProj.Controllers
                 var result = hasher.VerifyHashedPassword(user, user.Password, password);
                 if (result == PasswordVerificationResult.Success)
                 {
-                    string localIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                    string localIp = GetLocalIPv4Address();
 
                     string publicIp = await GetPublicIpAddressAsync();
                     string location = await GetLocationFromIpAsync(publicIp);
@@ -125,10 +127,8 @@ namespace InternalProj.Controllers
                         HttpOnly = true
                     });
 
-
                     HttpContext.Session.SetString("UserName", user.UserName);
                     HttpContext.Session.SetString("StaffId", user.StaffId.ToString());
-
                     //gettting current staff related departments
                     var userDepartments = _context.StaffDepartments
                         .Where(sd => sd.StaffId == user.StaffId)
@@ -142,8 +142,6 @@ namespace InternalProj.Controllers
                         .Select(sd => sd.BranchId.ToString())
                         .FirstOrDefault();
                     HttpContext.Session.SetString("BranchId", userBranch.ToString());
-                    
-                    
                     TempData["SuccessMessage"] = "Login successful!";
 
                     if (user.IsFirstLogin == true)
@@ -390,6 +388,21 @@ namespace InternalProj.Controllers
             {
                 return "Unknown Location";
             }
+        }
+
+        // ✅ Local IPv4 Address method (No need to touch Program.cs)
+        private string GetLocalIPv4Address()
+        {
+            string localIP = "Unknown";
+            foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    break;
+                }
+            }
+            return localIP;
         }
     }
 }
